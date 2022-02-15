@@ -1,10 +1,10 @@
 import { call, put, takeLatest } from "redux-saga/effects";
 
-function* fetchUser({ uid }) {
-    if (uid === 'tugan') {
-        yield put({ type: "FETCH_USER_SUCCESS", user: { uid } });
-    } else {
-        yield put({ type: "FETCH_USER_FAILED", err: `User ${uid} not found` });
+function* fetchUser({ username }) {
+    if (username === 'tugan') {
+        yield put({ type: "FETCH_USER_SUCCESS", username, user: { uid: 12345 } });
+    } else if (username === 'foo') {
+        yield put({ type: "FETCH_USER_SUCCESS", username, user: { uid: 67890 } });
     }
 }
 

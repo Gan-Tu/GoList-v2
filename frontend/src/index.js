@@ -2,7 +2,7 @@ import React, { Fragment, useEffect } from "react";
 import ReactDOM from 'react-dom';
 import './index.css';
 import { Provider } from "react-redux";
-import ExampleUserInfo from './components/ExampleUserInfo';
+import App from './App';
 import store from './state/store';
 import * as serviceWorker from "./serviceWorker";
 import reportWebVitals from './reportWebVitals';
@@ -16,7 +16,7 @@ const Root = () => {
   return (
     <Fragment>
       <Provider store={store}>
-        <ExampleUserInfo />
+        <App />
       </Provider>
     </Fragment>
   );
