@@ -1,13 +1,21 @@
-import { call, put, takeLatest } from "redux-saga/effects";
+import { call, put, takeEvery } from "redux-saga/effects";
 
 function* fetchUser({ username }) {
-    if (username === 'tugan') {
-        yield put({ type: "FETCH_USER_SUCCESS", username, user: { uid: 12345 } });
-    } else if (username === 'foo') {
-        yield put({ type: "FETCH_USER_SUCCESS", username, user: { uid: 67890 } });
+    const resp = yield call(
+        fetch,
+        `http://localhost:8080/users?username=${username}&_limit=1`,
+
+    );
+    if (!resp.ok) {
+        console.error(resp.statusText);
+        return;
+    }
+    const data = yield resp.json();
+    if (!!data && data.length > 0) {
+        yield put({ type: "FETCH_USER_SUCCESS", username, user: data[0] });
     }
 }
 
 export function* watchUsersApp() {
-    yield takeLatest("FETCH_USER", fetchUser);
+    yield takeEvery("FETCH_USER", fetchUser);
 }
