@@ -1,4 +1,4 @@
-import useUserId from '../../hooks/userId';
+import { useUserId } from '../../hooks/users';
 
 function ExampleUserInfo({ username }) {
   const [uid, name] = useUserId(username);

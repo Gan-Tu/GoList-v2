@@ -12,4 +12,4 @@ function useUserId(username) {
     return [uid, name];
 }
 
-export default useUserId;
+export { useUserId };
