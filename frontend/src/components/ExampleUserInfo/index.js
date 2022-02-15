@@ -1,7 +1,6 @@
-import './App.css';
-import useUserId from './hooks/userId';
+import useUserId from '../../hooks/userId';
 
-function App() {
+function ExampleUserInfo() {
   const [uid, err] = useUserId("tugan");
 
   return (
@@ -12,4 +11,4 @@ function App() {
   );
 }
 
-export default App;
+export default ExampleUserInfo;
