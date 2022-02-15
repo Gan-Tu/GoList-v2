@@ -1,11 +1,7 @@
 import { call, put, takeEvery } from "redux-saga/effects";
 
 function* fetchUser({ username }) {
-    const resp = yield call(
-        fetch,
-        `http://localhost:8080/users?username=${username}&_limit=1`,
-
-    );
+    const resp = yield call(fetch, `http://localhost:8080/users?username=${username}&_limit=1`);
     if (!resp.ok) {
         console.error(resp.statusText);
         return;
