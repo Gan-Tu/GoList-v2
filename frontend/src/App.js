@@ -1,19 +1,8 @@
 import './App.css';
-import React, { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import useUserId from './hooks/userId';
 
 function App() {
-  const dispatch = useDispatch();
-  const uid = useSelector((store) => store.UserReducer.user?.uid);
-  const err = useSelector((store) => store.UserReducer.err);
-  useEffect(() => {
-    if (!uid && !err) {
-      console.log("Fetching user: tugan");
-      dispatch({ type: "FETCH_USER", uid: "tugan" });
-    } else if (!!uid) {
-      console.log("Found user: tugan");
-    }
-  }, [dispatch, uid, err]);
+  const [uid, err] = useUserId("tugan");
 
   return (
     <div >
