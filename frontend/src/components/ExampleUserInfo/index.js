@@ -2,21 +2,13 @@ import { useUserId } from '../../hooks/users';
 
 function ExampleUserInfo({ username }) {
   const [uid, name] = useUserId(username);
-  if (!!uid) {
-    return (
-      <ul >
-        <li>Username: {username}</li>
-        <li>Name: {name}</li>
-        <li>UID: {uid}</li>
-      </ul>
-    );
-  } else {
-    return (
-      <ul>
-        <li>Username `{username}` not found.</li>
-      </ul>
-    )
-  }
+  return (
+    <tr key={username}>
+      <td>{username ? username : 'N/A'}</td>
+      <td>{username ? name : 'N/A'}</td>
+      <td>{username ? uid : 'N/A'}</td>
+    </tr>
+  );
 }
 
 export default ExampleUserInfo;

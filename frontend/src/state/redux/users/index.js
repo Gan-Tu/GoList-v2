@@ -9,6 +9,8 @@ function* fetchUser({ username }) {
     const data = yield resp.json();
     if (!!data && data.length > 0) {
         yield put({ type: "FETCH_USER_SUCCESS", username, user: data[0] });
+    } else {
+        yield put({ type: "FETCH_USER_FAILED", username });
     }
 }
 

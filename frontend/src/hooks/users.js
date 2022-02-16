@@ -5,7 +5,8 @@ function useUserId(username) {
     const dispatch = useDispatch();
     const uid = useSelector((store) => store.UserReducer.users.get(username)?.id);
     const name = useSelector((store) => store.UserReducer.users.get(username)?.name);
-    if (!uid) {
+    const invalidUsernames = useSelector((store) => store.UserReducer.invalidUsernames);
+    if (!uid && !invalidUsernames.has(username)) {
         console.log(`User not fonud. Fetching user ${username}`);
         dispatch({ type: "FETCH_USER", username });
     }
