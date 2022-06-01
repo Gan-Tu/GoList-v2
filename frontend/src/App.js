@@ -11,7 +11,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/lists" element={<CollectionCover />} />
           {/* <Route path="/lists" element={<CollectionCover />} /> */}
-          <Route path="/lists/:name" element={<CollectionView />} />
+          <Route path="/lists/:id" element={<CollectionView />} />
         </Routes>
       </BrowserRouter>
     </div>

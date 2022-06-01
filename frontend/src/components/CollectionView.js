@@ -1,8 +1,10 @@
 import { Link, useParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
 function CollectionView() {
-  let { name } = useParams();
-  // return <p>Hi {name || "there"}!</p>;
+  let dispatch = useDispatch();
+  let { id } = useParams();
+  dispatch({ type: "FETCH_COLLECTION", id });
 
   return (
     <div className="p-4 max-w-xl bg-white rounded-lg border shadow-md sm:p-8 dark:bg-gray-800 dark:border-gray-700">
@@ -30,71 +32,71 @@ function CollectionView() {
           <li className="py-3 sm:py-4 border rounded-lg p-4 hover:shadow-md">
             <div className="flex items-center space-x-4">
               <div className="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-900 truncate dark:text-white">
+                <p className="text-sm font-medium text-gray-900 truncate dark:text-white">
                   New Icon for App
                 </p>
-                <p class="text-sm text-gray-500 line-clamp-2 dark:text-gray-400 w-80">
+                <p className="text-sm text-gray-500 line-clamp-2 dark:text-gray-400 w-80">
                   Building in trend is difficult enough, especially when you are
                   not well resourced to keep up with the styles all the time.
                 </p>
               </div>
-              <div class="flex-shrink-0 m-2">
+              <div className="flex-shrink-0 m-2">
                 <img
-                  class="w-12 h-12 rounded"
+                  className="w-12 h-12 rounded"
                   src="https://flowbite.com/docs/images/people/profile-picture-1.jpg"
                   alt="Neil image"
                 />
               </div>
             </div>
-            <span class="inline-flex items-center text-xs font-normal text-gray-600">
+            <span className="inline-flex items-center text-xs font-normal text-gray-600">
               {/* Created by Gan @ August 24, 2021 */}
               http://localhost:3000/lists/demo
             </span>
           </li>
-          <li class="py-3 sm:py-4 border rounded-lg p-4 hover:shadow-md">
-            <div class="flex items-center space-x-4">
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-900 truncate dark:text-white">
+          <li className="py-3 sm:py-4 border rounded-lg p-4 hover:shadow-md">
+            <div className="flex items-center space-x-4">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate dark:text-white">
                   Figma is Adobe Killer
                 </p>
-                <p class="text-sm text-gray-500 line-clamp-2 dark:text-gray-400 w-80">
+                <p className="text-sm text-gray-500 line-clamp-2 dark:text-gray-400 w-80">
                   Lorem ipsum dolor sit amet consectetur, adipisicing elit. Vel,
                   omnis earum amet sunt tenetur.
                 </p>
               </div>
-              <div class="flex-shrink-0 m-2">
+              <div className="flex-shrink-0 m-2">
                 <img
-                  class="w-12 h-12 rounded"
+                  className="w-12 h-12 rounded"
                   src="https://flowbite.com/docs/images/people/profile-picture-2.jpg"
                   alt="Neil image"
                 />
               </div>
             </div>
-            <span class="inline-flex items-center text-xs font-normal text-gray-600">
+            <span className="inline-flex items-center text-xs font-normal text-gray-600">
               {/* Created by Adam @ Sept 10, 2020 */}
               http://localhost:3000/lists/demo
             </span>
           </li>
-          <li class="py-3 sm:py-4 border rounded-lg p-4 hover:shadow-md">
-            <div class="flex items-center space-x-4">
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-900 truncate dark:text-white">
+          <li className="py-3 sm:py-4 border rounded-lg p-4 hover:shadow-md">
+            <div className="flex items-center space-x-4">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate dark:text-white">
                   Reprehenderit, modi incidunt!
                 </p>
-                <p class="text-sm text-gray-500 line-clamp-2 dark:text-gray-400 w-80">
+                <p className="text-sm text-gray-500 line-clamp-2 dark:text-gray-400 w-80">
                   voluptatum quasi illum corporis repudiandae voluptatem velit
                   quos provident impedit beatae mollitia autem!
                 </p>
               </div>
-              <div class="flex-shrink-0 m-2">
+              <div className="flex-shrink-0 m-2">
                 <img
-                  class="w-12 h-12 rounded"
+                  className="w-12 h-12 rounded"
                   src="https://flowbite.com/docs/images/people/profile-picture-3.jpg"
                   alt="Neil image"
                 />
               </div>
             </div>
-            <span class="inline-flex items-center text-xs font-normal text-gray-600">
+            <span className="inline-flex items-center text-xs font-normal text-gray-600">
               {/* Created by Ben @ Feb 02, 2022 */}
               http://localhost:3000/lists/demo
             </span>

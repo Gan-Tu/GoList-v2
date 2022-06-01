@@ -1,8 +1,6 @@
 import { all } from "redux-saga/effects";
-import { watchUsersApp } from "./redux/users";
+import { watchCollectionsApp } from "./redux/collections";
 
 export default function* rootSagas() {
-    yield all([watchUsersApp()]);
+  yield all([watchCollectionsApp()]);
 }
-
-
