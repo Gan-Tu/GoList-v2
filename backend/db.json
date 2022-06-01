@@ -2,13 +2,98 @@
     "collections": [
         {
             "id": "demo",
-            "name": "Oakley Frank",
-            "username": "tugan"
+            "title": "Web & Mobile Industry",
+            "subtitle": "5 Web Links",
+            "profile_pics": [
+                "https://flowbite.com/docs/images/people/profile-picture-5.jpg",
+                "https://flowbite.com/docs/images/people/profile-picture-2.jpg",
+                "https://flowbite.com/docs/images/people/profile-picture-3.jpg",
+                "https://flowbite.com/docs/images/people/profile-picture-4.jpg"
+            ],
+            "status": "Favorited by 4 friends",
+            "item_ids": [
+                1,
+                2,
+                3,
+                4,
+                5
+            ]
         },
         {
             "id": "test",
-            "name": "Ryan Tucker",
-            "username": "foo"
+            "title": "Test Demo",
+            "subtitle": "2 Web Links",
+            "profile_pics": [
+                "https://flowbite.com/docs/images/people/profile-picture-2.jpg",
+                "https://flowbite.com/docs/images/people/profile-picture-3.jpg"
+            ],
+            "status": "Favorited by 2 friends",
+            "item_ids": [
+                2,
+                5
+            ]
+        }
+    ],
+    "items": [
+        {
+            "id": 1,
+            "list_ids": [
+                "demo",
+                "test"
+            ],
+            "title": "New Icon for App",
+            "snippet": "Building in trend is difficult enough, especially when you are not well resourced to keep up with the styles all the time.",
+            "status": "Created by Gan @ August 24, 2021",
+            "image_url": "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
+            "target_url": "http://localhost:3000/lists/1"
+        },
+        {
+            "id": 2,
+            "list_ids": [
+                "demo",
+                "test"
+            ],
+            "title": "Figma is Adobe Killer",
+            "snippet": "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Vel, omnis earum amet sunt tenetur.",
+            "status": "Created by Adam @ Sept 10, 2020",
+            "image_url": "https://flowbite.com/docs/images/people/profile-picture-2.jpg",
+            "target_url": "http://localhost:3000/lists/2"
+        },
+        {
+            "id": 3,
+            "list_ids": [
+                "demo",
+                "test"
+            ],
+            "title": "Reprehenderit, modi incidunt!",
+            "snippet": "Voluptatum quasi illum corporis repudiandae voluptatem velit quos provident impedit beatae mollitia autem!",
+            "status": "Created by Ben @ Feb 02, 2022",
+            "image_url": "https://flowbite.com/docs/images/people/profile-picture-3.jpg",
+            "target_url": "http://localhost:3000/lists/3"
+        },
+        {
+            "id": 4,
+            "list_ids": [
+                "demo",
+                "test"
+            ],
+            "title": "Consectetur adipiscing elit pellentesque",
+            "snippet": "Purus non enim praesent elementum facilisis leo. Amet justo donec enim diam vulputate ut pharetra. Id faucibus nisl tincidunt eget nullam non.",
+            "status": "Created by Jennifer @ December",
+            "image_url": "https://flowbite.com/docs/images/people/profile-picture-4.jpg",
+            "target_url": "http://localhost:3000/lists/4"
+        },
+        {
+            "id": 5,
+            "list_ids": [
+                "demo",
+                "test"
+            ],
+            "title": "Tempus iaculis urna id volutpat",
+            "snippet": "Adipiscing enim eu turpis egestas pretium aenean pharetra. Imperdiet massa tincidunt nunc pulvinar sapien et ligula.",
+            "status": "Created by Jacob @ May 13, 2019",
+            "image_url": "https://flowbite.com/docs/images/people/profile-picture-5.jpg",
+            "target_url": "http://localhost:3000/lists/5"
         }
     ]
 }

@@ -9,9 +9,10 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/lists" element={<CollectionCover />} />
-          {/* <Route path="/lists" element={<CollectionCover />} /> */}
+          <Route path="/:id" element={<CollectionCover />} />
+          <Route path="/lists" element={<Home />} />
           <Route path="/lists/:id" element={<CollectionView />} />
+          <Route path="/*" element={<Home />} />
         </Routes>
       </BrowserRouter>
     </div>
