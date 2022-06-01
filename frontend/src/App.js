@@ -1,45 +1,19 @@
-import { Table } from '@mantine/core';
-import ExampleUserInfo from './components/ExampleUserInfo';
-import { TextInput, Button } from '@mantine/core';
-import { useForm } from '@mantine/hooks';
-import { useState } from 'react';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import CollectionCover from "./components/CollectionCover";
+import Home from "./components/Home";
+import CollectionView from "./components/CollectionView";
 
 function App() {
-  const [usernames, setUsernames] = useState(['foo']);
-  const form = useForm({
-    initialValues: { username: [] },
-  });
-
   return (
-    <div style={{ margin: "50px" }}>
-      <Table>
-        <thead>
-          <tr>
-            <th>Username</th>
-            <th>Name</th>
-            <th>UID</th>
-          </tr>
-        </thead>
-        <tbody>
-          {
-            usernames.map((name) => (<ExampleUserInfo key={name} username={name} />))
-          }
-        </tbody>
-      </Table>
-
-      <form onSubmit={form.onSubmit((values) => {
-        if (!usernames.includes(values.username)) {
-          setUsernames(usernames.concat(values.username));
-        }
-        form.reset();
-      })}>
-        <TextInput
-          required
-          placeholder="New username"
-          {...form.getInputProps('username')}
-        />
-        <Button type="submit" style={{ margin: "10px" }}>Add username</Button>
-      </form>
+    <div className="grid place-items-center h-screen">
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/lists" element={<CollectionCover />} />
+          {/* <Route path="/lists" element={<CollectionCover />} /> */}
+          <Route path="/lists/:name" element={<CollectionView />} />
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 }
