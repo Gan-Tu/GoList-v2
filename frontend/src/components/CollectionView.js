@@ -3,6 +3,7 @@ import { useCollectionItems } from "../hooks/collections";
 import { useEffect, useState } from "react";
 import ItemView from "./ItemView";
 import { useDispatch } from "react-redux";
+import { motion } from "framer-motion";
 
 function CollectionView() {
   const dispatch = useDispatch();
@@ -20,7 +21,8 @@ function CollectionView() {
         <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white">
           Web &amp; Mobile Industry
         </h5>
-        <button
+        <motion.button
+          whileHover={{ scale: 1.1 }}
           onClick={() => toggleEditMode(!editMode)}
           className="text-sm font-medium text-black"
         >
@@ -42,7 +44,7 @@ function CollectionView() {
               />
             </svg>
           )}
-        </button>
+        </motion.button>
       </div>
       <div>
         <ul
