@@ -12,8 +12,8 @@ function useItemImage(id) {
   return useSelector((store) => store.ItemsReducer.data.get(id)?.image_url);
 }
 
-function useItemStatus(id) {
-  return useSelector((store) => store.ItemsReducer.data.get(id)?.status);
+function useItemLinkTarget(id) {
+  return useSelector((store) => store.ItemsReducer.data.get(id)?.link_target);
 }
 
-export { useItemTitle, useItemSnippet, useItemImage, useItemStatus };
+export { useItemTitle, useItemSnippet, useItemImage, useItemLinkTarget };

@@ -42,7 +42,7 @@ function CollectionCover() {
               : null}
           </div>
           <span className="pt-2.5 pl-3 text-sm leading-tight text-zinc-300">
-            {data?.status || "No Status Yet"}
+            {data?.status || ""}
           </span>
         </div>
         <Link

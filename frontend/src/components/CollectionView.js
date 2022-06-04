@@ -58,7 +58,7 @@ function CollectionView() {
                 <motion.li
                   layout
                   key={`item=${id}`}
-                  className="sm:py-4 border rounded-lg p-4 hover:shadow-md"
+                  className="sm:py-4 border rounded-lg p-4 hover:shadow-lg"
                 >
                   <ItemView id={id} editMode={editMode} />
                 </motion.li>

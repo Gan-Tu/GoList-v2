@@ -3,7 +3,7 @@ import {
   useItemTitle,
   useItemSnippet,
   useItemImage,
-  useItemStatus,
+  useItemLinkTarget,
 } from "../hooks/items";
 import { useDispatch } from "react-redux";
 
@@ -11,7 +11,7 @@ function ItemView({ id, editMode }) {
   const title = useItemTitle(id);
   const snippet = useItemSnippet(id);
   const image = useItemImage(id);
-  const status = useItemStatus(id);
+  const link_target = useItemLinkTarget(id);
 
   const dispatch = useDispatch();
   useEffect(() => {
@@ -19,7 +19,7 @@ function ItemView({ id, editMode }) {
   }, [dispatch, id]);
 
   return (
-    <Fragment>
+    <a href={link_target || "#"} target="_blank" rel="noreferrer">
       <div className="flex items-center space-x-4 ">
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-gray-900 truncate dark:text-white">
@@ -34,7 +34,7 @@ function ItemView({ id, editMode }) {
         </div>
       </div>
       <span className="inline-flex justify-between text-xs font-normal text-gray-600">
-        {status}
+        {link_target}
       </span>
       {editMode ? (
         <div className="pt-2 space-x-4">
@@ -74,7 +74,7 @@ function ItemView({ id, editMode }) {
           </button>
         </div>
       ) : null}
-    </Fragment>
+    </a>
   );
 }
 

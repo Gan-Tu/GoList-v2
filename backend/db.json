@@ -44,9 +44,8 @@
             ],
             "title": "New Icon for App",
             "snippet": "Building in trend is difficult enough, especially when you are not well resourced to keep up with the styles all the time.",
-            "status": "Created by Gan @ August 24, 2021",
-            "image_url": "https://flowbite.com/docs/images/people/profile-picture-1.jpg",
-            "target_url": "http://localhost:3000/lists/1"
+            "link_target": "http://example.com/12345",
+            "image_url": "https://flowbite.com/docs/images/people/profile-picture-1.jpg"
         },
         {
             "id": 2,
@@ -56,9 +55,8 @@
             ],
             "title": "Figma is Adobe Killer",
             "snippet": "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Vel, omnis earum amet sunt tenetur.",
-            "status": "Created by Adam @ Sept 10, 2020",
-            "image_url": "https://flowbite.com/docs/images/people/profile-picture-2.jpg",
-            "target_url": "http://localhost:3000/lists/2"
+            "link_target": "http://example.com/12345",
+            "image_url": "https://flowbite.com/docs/images/people/profile-picture-2.jpg"
         },
         {
             "id": 3,
@@ -68,9 +66,8 @@
             ],
             "title": "Reprehenderit, modi incidunt!",
             "snippet": "Voluptatum quasi illum corporis repudiandae voluptatem velit quos provident impedit beatae mollitia autem!",
-            "status": "Created by Ben @ Feb 02, 2022",
-            "image_url": "https://flowbite.com/docs/images/people/profile-picture-3.jpg",
-            "target_url": "http://localhost:3000/lists/3"
+            "link_target": "http://example.com/12345",
+            "image_url": "https://flowbite.com/docs/images/people/profile-picture-3.jpg"
         },
         {
             "id": 4,
@@ -80,9 +77,8 @@
             ],
             "title": "Consectetur adipiscing elit pellentesque",
             "snippet": "Purus non enim praesent elementum facilisis leo. Amet justo donec enim diam vulputate ut pharetra. Id faucibus nisl tincidunt eget nullam non.",
-            "status": "Created by Jennifer @ December",
-            "image_url": "https://flowbite.com/docs/images/people/profile-picture-4.jpg",
-            "target_url": "http://localhost:3000/lists/4"
+            "link_target": "http://example.com/12345",
+            "image_url": "https://flowbite.com/docs/images/people/profile-picture-4.jpg"
         },
         {
             "id": 5,
@@ -92,9 +88,8 @@
             ],
             "title": "Tempus iaculis urna id volutpat",
             "snippet": "Adipiscing enim eu turpis egestas pretium aenean pharetra. Imperdiet massa tincidunt nunc pulvinar sapien et ligula.",
-            "status": "Created by Jacob @ May 13, 2019",
-            "image_url": "https://flowbite.com/docs/images/people/profile-picture-5.jpg",
-            "target_url": "http://localhost:3000/lists/5"
+            "link_target": "http://example.com/12345",
+            "image_url": "https://flowbite.com/docs/images/people/profile-picture-5.jpg"
         }
     ]
 }
