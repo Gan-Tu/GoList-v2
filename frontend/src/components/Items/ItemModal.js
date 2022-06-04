@@ -1,6 +1,11 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
-import { useItemTitle, useItemSnippet, useItemImage } from "../../hooks/items";
+import {
+  useItemTitle,
+  useItemSnippet,
+  useItemImage,
+  useItemLinkTarget,
+} from "../../hooks/items";
 import { motion } from "framer-motion";
 
 function ExitButton({ onExit }) {
@@ -50,7 +55,7 @@ function SaveButton() {
   return (
     <button
       type="button"
-      className="inline-flex justify-center text-center items-center rounded-md border border-transparent bg-green-100 px-4 py-2 text-sm font-medium text-green-900 hover:bg-green-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+      className="inline-flex justify-center text-center items-center rounded-md border border-transparent bg-green-100 pl-3 pr-4 py-2 text-sm font-medium text-green-900 hover:bg-green-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
       onClick={onSave}
     >
       <svg
@@ -76,6 +81,7 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
   const title = useItemTitle(itemId);
   const snippet = useItemSnippet(itemId);
   const image = useItemImage(itemId);
+  const link_target = useItemLinkTarget(itemId);
 
   return (
     <Fragment>
@@ -113,7 +119,7 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
                     <ExitButton onExit={onClose} />
                   </Dialog.Title>
 
-                  <div className="flex items-center space-x-4 mt-3">
+                  <div className="flex items-center space-x-4 mt-2">
                     <div className="flex-1 min-w-0 mt-2">
                       <p className="text-sm text-gray-500 line-clamp-2 dark:text-gray-400 w-80">
                         {snippet}
@@ -128,7 +134,11 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
                     </div>
                   </div>
 
-                  <div className="mt-4">
+                  <span className="inline-flex justify-between text-xs font-normal text-gray-600">
+                    {link_target}
+                  </span>
+
+                  <div className="mt-6">
                     <SaveButton />
                   </div>
                 </Dialog.Panel>
