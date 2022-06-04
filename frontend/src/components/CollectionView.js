@@ -55,12 +55,13 @@ function CollectionView() {
         >
           {items
             ? items.map((id) => (
-                <li
+                <motion.li
+                  layout
                   key={`item=${id}`}
                   className="sm:py-4 border rounded-lg p-4 hover:shadow-md"
                 >
                   <ItemView id={id} editMode={editMode} />
-                </li>
+                </motion.li>
               ))
             : null}
         </ul>
