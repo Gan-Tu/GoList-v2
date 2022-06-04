@@ -1,6 +1,6 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
-import { useItemTitle, useItemSnippet, useItemImage } from "../hooks/items";
+import { useItemTitle, useItemSnippet, useItemImage } from "../../hooks/items";
 import { motion } from "framer-motion";
 
 function ExitButton({ onExit }) {
