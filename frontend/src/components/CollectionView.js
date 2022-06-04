@@ -110,11 +110,7 @@ export default function CollectionView() {
         >
           {items
             ? items.map((id) => (
-                <motion.li
-                  layout
-                  key={`item=${id}`}
-                  className="sm:py-4 border rounded-lg p-4 hover:shadow-lg"
-                >
+                <motion.li layout key={`item=${id}`}>
                   <ItemView id={id} showControls={editMode} />
                 </motion.li>
               ))

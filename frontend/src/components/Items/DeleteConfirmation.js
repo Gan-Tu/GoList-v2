@@ -1,6 +1,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { motion } from "framer-motion";
+import ItemSnippet from "./ItemSnippet";
 
 function ExitButton({ onExit }) {
   return (
@@ -27,7 +28,7 @@ function ExitButton({ onExit }) {
   );
 }
 
-export default function DeleteConfirmation({ isOpen, onClose }) {
+export default function DeleteConfirmation({ itemId, isOpen, onClose }) {
   return (
     <Fragment>
       <Transition appear show={isOpen} as={Fragment}>
@@ -64,7 +65,11 @@ export default function DeleteConfirmation({ isOpen, onClose }) {
                     <ExitButton onExit={onClose} />
                   </Dialog.Title>
 
-                  <div className="flex-1 items-center mt-2 min-w-0 mt-4 text-sm text-gray-500 dark:text-gray-400 w-80">
+                  <div className="sm:py-4 border rounded-lg p-4 mt-4">
+                    <ItemSnippet id={itemId} />
+                  </div>
+
+                  <div className="flex-1 items-center mt-2 min-w-0 mt-4 text-sm font-medium text-red-500 dark:text-red-400 w-80">
                     <p>Once you delete, there is no going back.</p>
                     <p>Please be certain.</p>
                   </div>
@@ -73,7 +78,7 @@ export default function DeleteConfirmation({ isOpen, onClose }) {
                     <button
                       type="button"
                       className="inline-flex justify-center text-center items-center rounded-md border border-transparent bg-red-100 px-4 py-2 text-sm font-medium text-red-900 hover:bg-red-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
-                      // onClick={onSave}
+                      onClick={() => alert("Delete is Unimplemented!")}
                     >
                       <svg
                         className="w-4 h-4 mr-2"

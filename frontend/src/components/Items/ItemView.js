@@ -1,47 +1,31 @@
 import { useEffect } from "react";
-import {
-  useItemTitle,
-  useItemSnippet,
-  useItemImage,
-  useItemLinkTarget,
-} from "../../hooks/items";
 import { useDispatch } from "react-redux";
 import ItemSnippet from "./ItemSnippet";
 import ItemControls from "./ItemControls";
+import { useItemLinkTarget } from "../../hooks/items";
 
 export default function ItemView({ id, showControls }) {
-  const title = useItemTitle(id);
-  const snippet = useItemSnippet(id);
-  const image = useItemImage(id);
+  const dispatch = useDispatch();
   const link_target = useItemLinkTarget(id);
 
-  const dispatch = useDispatch();
   useEffect(() => {
     dispatch({ type: "FETCH_ITEM", id });
   }, [dispatch, id]);
 
   if (showControls) {
     return (
-      <>
-        <ItemSnippet
-          title={title}
-          snippet={snippet}
-          image={image}
-          link_target={link_target}
-        />
+      <div className="sm:py-4 border rounded-lg p-4 hover:shadow-lg">
+        <ItemSnippet id={id} />
         <ItemControls id={id} />
-      </>
+      </div>
     );
   } else {
     return (
-      <a href={link_target || "#"} target="_blank" rel="noreferrer">
-        <ItemSnippet
-          title={title}
-          snippet={snippet}
-          image={image}
-          link_target={link_target}
-        />
-      </a>
+      <div className="sm:py-4 border rounded-lg p-4 hover:shadow-lg">
+        <a href={link_target || "#"} target="_blank" rel="noreferrer">
+          <ItemSnippet id={id} />
+        </a>
+      </div>
     );
   }
 }

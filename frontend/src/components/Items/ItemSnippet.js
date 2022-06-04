@@ -1,4 +1,16 @@
-export default function ItemSnippet({ title, snippet, image, link_target }) {
+import {
+  useItemTitle,
+  useItemSnippet,
+  useItemImage,
+  useItemLinkTarget,
+} from "../../hooks/items";
+
+export default function ItemSnippet({ id }) {
+  const title = useItemTitle(id);
+  const snippet = useItemSnippet(id);
+  const image = useItemImage(id);
+  const link_target = useItemLinkTarget(id);
+
   return (
     <div>
       <div className="flex items-center space-x-4 ">
