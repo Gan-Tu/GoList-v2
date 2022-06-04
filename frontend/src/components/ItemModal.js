@@ -1,7 +1,82 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
+import { useItemTitle, useItemSnippet, useItemImage } from "../hooks/items";
+import { motion } from "framer-motion";
 
-export default function ItemModal({ isOpen, onClose }) {
+function ExitButton({ onExit }) {
+  return (
+    <motion.button
+      whileHover={{ scale: 1.1 }}
+      onClick={onExit}
+      className="text-sm font-medium text-black"
+    >
+      <svg
+        className="w-6 h-6"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M6 18L18 6M6 6l12 12"
+        />
+      </svg>
+    </motion.button>
+  );
+}
+
+function SaveButton() {
+  const [isSaved, setIsSaved] = useState(false);
+
+  const onSave = () => {
+    setIsSaved(true);
+  };
+
+  if (!isSaved) {
+    return (
+      <button
+        type="button"
+        className="inline-flex justify-center text-center items-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+        onClick={onSave}
+      >
+        Submit
+      </button>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      className="inline-flex justify-center text-center items-center rounded-md border border-transparent bg-green-100 px-4 py-2 text-sm font-medium text-green-900 hover:bg-green-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+      onClick={onSave}
+    >
+      <svg
+        className="w-6 h-6 mr-2"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+      Saved
+    </button>
+  );
+}
+
+export default function ItemModal({ itemId, isOpen, onClose }) {
+  const title = useItemTitle(itemId);
+  const snippet = useItemSnippet(itemId);
+  const image = useItemImage(itemId);
+
   return (
     <Fragment>
       <Transition appear show={isOpen} as={Fragment}>
@@ -15,7 +90,7 @@ export default function ItemModal({ isOpen, onClose }) {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black bg-opacity-25" />
+            <div className="fixed inset-0 bg-black bg-opacity-50" />
           </Transition.Child>
 
           <div className="fixed inset-0 overflow-y-auto">
@@ -32,25 +107,29 @@ export default function ItemModal({ isOpen, onClose }) {
                 <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                   <Dialog.Title
                     as="h3"
-                    className="text-lg font-medium leading-6 text-gray-900"
+                    className="flex justify-between text-lg font-medium leading-6 text-gray-900"
                   >
-                    Payment successful
+                    {title}
+                    <ExitButton onExit={onClose} />
                   </Dialog.Title>
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-500">
-                      Your payment has been successfully submitted. We’ve sent
-                      you an email with all of the details of your order.
-                    </p>
+
+                  <div className="flex items-center space-x-4 mt-3">
+                    <div className="flex-1 min-w-0 mt-2">
+                      <p className="text-sm text-gray-500 line-clamp-2 dark:text-gray-400 w-80">
+                        {snippet}
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0 m-2">
+                      <img
+                        className="w-12 h-12 rounded"
+                        src={image}
+                        alt="Preview"
+                      />
+                    </div>
                   </div>
 
                   <div className="mt-4">
-                    <button
-                      type="button"
-                      className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                      onClick={onClose}
-                    >
-                      Got it, thanks!
-                    </button>
+                    <SaveButton />
                   </div>
                 </Dialog.Panel>
               </Transition.Child>

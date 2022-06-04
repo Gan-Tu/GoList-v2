@@ -8,7 +8,7 @@ import {
 import { useDispatch } from "react-redux";
 import ItemModal from "./ItemModal";
 
-function ItemPreview({ title, snippet, image, id, link_target }) {
+function ItemPreview({ title, snippet, image, link_target }) {
   return (
     <div>
       <div className="flex items-center space-x-4 ">
@@ -21,7 +21,7 @@ function ItemPreview({ title, snippet, image, id, link_target }) {
           </p>
         </div>
         <div className="flex-shrink-0 m-2">
-          <img className="w-12 h-12 rounded" src={image} alt={`Item ${id}`} />
+          <img className="w-12 h-12 rounded" src={image} alt="Preview" />
         </div>
       </div>
       <span className="inline-flex justify-between text-xs font-normal text-gray-600">
@@ -94,11 +94,14 @@ function ItemView({ id, showEditGroup }) {
           title={title}
           snippet={snippet}
           image={image}
-          id={id}
           link_target={link_target}
         />
         <EditGroup editMode={editMode} setEditMode={setEditMode} />
-        <ItemModal isOpen={editMode} onClose={() => setEditMode(false)} />
+        <ItemModal
+          itemId={id}
+          isOpen={editMode}
+          onClose={() => setEditMode(false)}
+        />
       </Fragment>
     );
   } else {
@@ -108,7 +111,6 @@ function ItemView({ id, showEditGroup }) {
           title={title}
           snippet={snippet}
           image={image}
-          id={id}
           link_target={link_target}
         />
       </a>

@@ -115,6 +115,7 @@ function CollectionView() {
                   key={`item=${id}`}
                   className="sm:py-4 border rounded-lg p-4 hover:shadow-lg"
                 >
+                  {/* // change showEditGroup to editMode */}
                   <ItemView id={id} showEditGroup={editMode} />
                 </motion.li>
               ))
