@@ -1,4 +1,4 @@
-import { Fragment, useEffect } from "react";
+import { Fragment, useEffect, useState } from "react";
 import {
   useItemTitle,
   useItemSnippet,
@@ -6,6 +6,7 @@ import {
   useItemLinkTarget,
 } from "../hooks/items";
 import { useDispatch } from "react-redux";
+import ItemModal from "./ItemModal";
 
 function ItemPreview({ title, snippet, image, id, link_target }) {
   return (
@@ -30,10 +31,13 @@ function ItemPreview({ title, snippet, image, id, link_target }) {
   );
 }
 
-function EditGroup() {
+function EditGroup({ editMode, setEditMode }) {
   return (
     <div className="pt-2 space-x-4">
-      <button className="inline-flex items-center text-xs text-blue-500 font-normal hover:underline dark:text-gray-400">
+      <button
+        className="inline-flex items-center text-xs text-blue-500 font-normal hover:underline dark:text-gray-400"
+        onClick={() => setEditMode(!editMode)}
+      >
         <svg
           className="w-4 h-4"
           fill="none"
@@ -71,18 +75,19 @@ function EditGroup() {
   );
 }
 
-function ItemView({ id, editMode }) {
+function ItemView({ id, showEditGroup }) {
   const title = useItemTitle(id);
   const snippet = useItemSnippet(id);
   const image = useItemImage(id);
   const link_target = useItemLinkTarget(id);
+  const [editMode, setEditMode] = useState(false);
 
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch({ type: "FETCH_ITEM", id });
   }, [dispatch, id]);
 
-  if (editMode) {
+  if (showEditGroup) {
     return (
       <Fragment>
         <ItemPreview
@@ -92,7 +97,8 @@ function ItemView({ id, editMode }) {
           id={id}
           link_target={link_target}
         />
-        <EditGroup />
+        <EditGroup editMode={editMode} setEditMode={setEditMode} />
+        <ItemModal isOpen={editMode} onClose={() => setEditMode(false)} />
       </Fragment>
     );
   } else {
