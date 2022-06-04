@@ -4,8 +4,6 @@
   "homepage": "https://gan-tu.github.io/GoList-v2",
   "private": true,
   "dependencies": {
-    "@mantine/core": "^3.6.7",
-    "@mantine/hooks": "^3.6.7",
     "@tailwindcss/line-clamp": "^0.4.0",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
