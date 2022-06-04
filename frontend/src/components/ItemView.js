@@ -30,11 +30,7 @@ function ItemView({ id, editMode }) {
           </p>
         </div>
         <div className="flex-shrink-0 m-2">
-          <img
-            className="w-12 h-12 rounded"
-            src={image}
-            alt={`Image for item ${id}`}
-          />
+          <img className="w-12 h-12 rounded" src={image} alt={`Item ${id}`} />
         </div>
       </div>
       <span className="inline-flex justify-between text-xs font-normal text-gray-600">
@@ -42,10 +38,7 @@ function ItemView({ id, editMode }) {
       </span>
       {editMode ? (
         <div className="pt-2 space-x-4">
-          <a
-            href="#"
-            className="inline-flex items-center text-xs text-blue-500 font-normal hover:underline dark:text-gray-400"
-          >
+          <button className="inline-flex items-center text-xs text-blue-500 font-normal hover:underline dark:text-gray-400">
             <svg
               className="w-4 h-4"
               fill="none"
@@ -61,11 +54,8 @@ function ItemView({ id, editMode }) {
               />
             </svg>
             Edit
-          </a>
-          <a
-            href="#"
-            className="inline-flex items-center text-xs text-blue-500 font-normal hover:underline dark:text-gray-400"
-          >
+          </button>
+          <button className="inline-flex items-center text-xs text-blue-500 font-normal hover:underline dark:text-gray-400">
             <svg
               className="w-4 h-4"
               fill="none"
@@ -81,7 +71,7 @@ function ItemView({ id, editMode }) {
               />
             </svg>
             Delete
-          </a>
+          </button>
         </div>
       ) : null}
     </Fragment>

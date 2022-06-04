@@ -10,7 +10,7 @@ function CollectionCover() {
 
   useEffect(() => {
     dispatch({ type: "FETCH_COLLECTION", id });
-  }, [id]);
+  }, [dispatch, id]);
 
   return (
     <div className="max-w-sm mx-auto bg-slate-600 rounded-xl shadow-md hover:shadow-lg overflow-hidden md:max-w-l">
