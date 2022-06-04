@@ -3,8 +3,11 @@ import { useCollection } from "../hooks/collections";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
-function CollectionCover() {
-  const { id } = useParams();
+function CollectionCover(props) {
+  var { id } = useParams();
+  if (!!props.id) {
+    id = props.id;
+  }
   const dispatch = useDispatch();
   const data = useCollection(id);
 
@@ -17,8 +20,8 @@ function CollectionCover() {
       <div className="p-5">
         <img
           className="h-48 object-cover md:w-full rounded-lg"
-          src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2670&q=80"
-          alt="Man looking at item at a store"
+          src={data?.image_url}
+          alt="Cover"
         />
       </div>
       <div className="px-8 pb-4 my-auto">
@@ -46,7 +49,7 @@ function CollectionCover() {
           </span>
         </div>
         <Link
-          to={`/lists/${id}`}
+          to={`/${id}`}
           type="button"
           className="w-full text-center text-white bg-[#050708] hover:bg-[#050708]/90 focus:ring-4 focus:outline-none focus:ring-[#050708]/50 font-small rounded-lg text-sm px-5 py-2.5 dark:focus:ring-[#050708]/50 dark:hover:bg-[#050708]/30 mr-2 mb-2"
         >

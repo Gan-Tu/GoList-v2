@@ -1,8 +1,9 @@
 {
     "collections": [
         {
-            "id": "demo",
+            "id": "web-mobile",
             "title": "Web & Mobile Industry",
+            "image_url": "https://flowbite.com/docs/images/blog/image-1.jpg",
             "subtitle": "5 Web Links",
             "profile_pics": [
                 "https://flowbite.com/docs/images/people/profile-picture-5.jpg",
@@ -20,12 +21,13 @@
             ]
         },
         {
-            "id": "test",
-            "title": "Test Demo",
+            "id": "demo",
+            "title": "Simple Demo",
             "subtitle": "2 Web Links",
+            "image_url": "https://flowbite.com/docs/images/blog/image-2.jpg",
             "profile_pics": [
-                "https://flowbite.com/docs/images/people/profile-picture-2.jpg",
-                "https://flowbite.com/docs/images/people/profile-picture-3.jpg"
+                "https://flowbite.com/docs/images/people/profile-picture-5.jpg",
+                "https://flowbite.com/docs/images/people/profile-picture-1.jpg"
             ],
             "status": "Favorited by 2 friends",
             "item_ids": [
