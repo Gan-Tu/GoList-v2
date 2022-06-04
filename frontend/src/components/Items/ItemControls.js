@@ -1,8 +1,10 @@
 import { useState } from "react";
 import ItemModal from "./ItemModal";
+import DeleteConfirmation from "./DeleteConfirmation";
 
 export default function ItemControls({ id }) {
   const [editMode, setEditMode] = useState(false);
+  const [deleteMode, setDeleteMode] = useState(false);
 
   return (
     <>
@@ -10,6 +12,11 @@ export default function ItemControls({ id }) {
         itemId={id}
         isOpen={editMode}
         onClose={() => setEditMode(false)}
+      />
+      <DeleteConfirmation
+        itemId={id}
+        isOpen={deleteMode}
+        onClose={() => setDeleteMode(false)}
       />
       <div className="pt-2 space-x-4">
         <button
@@ -32,7 +39,10 @@ export default function ItemControls({ id }) {
           </svg>
           Edit
         </button>
-        <button className="inline-flex items-center text-xs text-blue-500 font-normal hover:underline dark:text-gray-400">
+        <button
+          className="inline-flex items-center text-xs text-blue-500 font-normal hover:underline dark:text-gray-400"
+          onClick={() => setDeleteMode(!deleteMode)}
+        >
           <svg
             className="w-4 h-4"
             fill="none"
