@@ -85,7 +85,7 @@ function CollectionView() {
   return (
     <div className="p-5 mt-10 min-w-m bg-white rounded-lg border shadow-md sm:p-8 dark:bg-gray-800 dark:border-gray-700">
       <BreadCrumb title={title} />
-      <div className="flex justify-between items-center text-center h-15 p-4 space-y-2">
+      <div className="flex justify-between items-center text-center h-15 pl-4 pr-4 pb-4 space-y-2">
         <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white">
           {title}
         </h5>
