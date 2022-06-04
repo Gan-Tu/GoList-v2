@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { useCollectionItems } from "../hooks/collections";
+import { useCollectionTitle, useCollectionItems } from "../hooks/collections";
 import { useEffect, useState } from "react";
 import ItemView from "./ItemView";
 import { useDispatch } from "react-redux";
@@ -75,8 +75,8 @@ function CollectionView() {
   const dispatch = useDispatch();
   const { id } = useParams();
   const [editMode, toggleEditMode] = useState(false);
+  const title = useCollectionTitle(id);
   const items = useCollectionItems(id);
-  const title = "Web & Mobile Industry";
 
   useEffect(() => {
     dispatch({ type: "FETCH_COLLECTION", id });
