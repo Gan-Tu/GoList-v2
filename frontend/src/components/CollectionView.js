@@ -56,9 +56,9 @@ function BreadCrumb({ title }) {
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                fill-rule="evenodd"
+                fillRule="evenodd"
                 d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                clip-rule="evenodd"
+                clipRule="evenodd"
               ></path>
             </svg>
             <span className="ml-1 text-sm font-medium text-gray-500 md:ml-2 dark:text-gray-400">
@@ -83,7 +83,10 @@ function CollectionView() {
   }, [dispatch, id]);
 
   return (
-    <motion.div layout className="p-5 mt-10 min-w-m bg-white rounded-lg border shadow-md sm:p-8 dark:bg-gray-800 dark:border-gray-700">
+    <motion.div
+      layout
+      className="p-5 mt-10 min-w-m bg-white rounded-lg border shadow-md sm:p-8 dark:bg-gray-800 dark:border-gray-700"
+    >
       <BreadCrumb title={title} />
       <div className="flex justify-between items-center text-center h-15 pl-4 pr-4 pb-4 space-y-2">
         <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white">
