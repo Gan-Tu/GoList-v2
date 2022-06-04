@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import { useCollection } from "../hooks/collections";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
+import { motion } from "framer-motion";
 
 function CollectionCover(props) {
   var { id } = useParams();
