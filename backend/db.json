@@ -12,13 +12,7 @@
         "https://flowbite.com/docs/images/people/profile-picture-4.jpg"
       ],
       "status": "Favorited by 4 friends",
-      "item_ids": [
-        1,
-        2,
-        3,
-        4,
-        5
-      ]
+      "item_ids": [1, 2, 3, 4, 5]
     },
     {
       "id": "demo",
@@ -30,20 +24,12 @@
         "https://flowbite.com/docs/images/people/profile-picture-1.jpg"
       ],
       "status": "Favorited by 2 friends",
-      "item_ids": [
-        2,
-        4,
-        5
-      ]
+      "item_ids": [2, 4, 5]
     }
   ],
   "items": [
     {
       "id": 1,
-      "list_ids": [
-        "demo",
-        "test"
-      ],
       "title": "New Icon for App",
       "snippet": "Building in trend is difficult enough, especially when you are not well resourced to keep up with the styles all the time.",
       "linkTarget": "http://example.com/12345",
@@ -51,10 +37,6 @@
     },
     {
       "id": 2,
-      "list_ids": [
-        "demo",
-        "test"
-      ],
       "title": "Figma is Adobe Killer",
       "snippet": "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Vel, omnis earum amet sunt tenetur.",
       "linkTarget": "http://example.com/14234",
@@ -62,10 +44,6 @@
     },
     {
       "id": 3,
-      "list_ids": [
-        "demo",
-        "test"
-      ],
       "title": "Reprehenderit, modi incidunt!",
       "snippet": "Voluptatum quasi illum corporis repudiandae voluptatem velit quos provident impedit beatae mollitia autem!",
       "linkTarget": "http://example.com/92843",
@@ -73,10 +51,6 @@
     },
     {
       "id": 4,
-      "list_ids": [
-        "demo",
-        "test"
-      ],
       "title": "Consectetur adipiscing elit pellentesque",
       "snippet": "Purus non enim praesent elementum facilisis leo. Amet justo donec enim diam vulputate ut pharetra. Id faucibus nisl tincidunt eget nullam non.",
       "linkTarget": "http://example.com/25463",
@@ -84,10 +58,6 @@
     },
     {
       "id": 5,
-      "list_ids": [
-        "demo",
-        "test"
-      ],
       "title": "Tempus iaculis urna id volutpat",
       "snippet": "Adipiscing enim eu turpis egestas pretium aenean pharetra. Imperdiet massa tincidunt nunc pulvinar sapien et ligula.",
       "linkTarget": "http://example.com/00374",
@@ -95,10 +65,6 @@
     },
     {
       "id": "123",
-      "list_ids": [
-        "demo",
-        "test"
-      ],
       "title": "New Icon for App",
       "snippet": "Building in trend is difficult enough, especially when you are not well resourced to keep up with the styles all the time.",
       "linkTarget": "http://example.com/12345",
