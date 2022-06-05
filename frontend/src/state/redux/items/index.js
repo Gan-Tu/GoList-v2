@@ -15,8 +15,23 @@
 import { call, put, select, takeEvery, takeLatest } from "redux-saga/effects";
 import toast from "react-hot-toast";
 
+async function fetchWithTimeout(resource, options = {}) {
+  const { timeout = 5000 } = options;
+  const abortController = new AbortController();
+  const id = setTimeout(() => abortController.abort(), timeout);
+  const response = await fetch(resource, {
+    ...options,
+    signal: abortController.signal,
+  });
+  clearTimeout(id);
+  return response;
+}
+
 function* fetchItem({ id }) {
-  const resp = yield call(fetch, `http://localhost:8080/items/${id}`);
+  const resp = yield call(
+    fetchWithTimeout,
+    `http://localhost:8080/items/${id}`
+  );
   if (!resp.ok) {
     console.error(resp.statusText);
     return;
@@ -45,11 +60,15 @@ function* updateItem({ id, data }) {
 
   // Post to the API the update
   const newData = { ...existingItemData, ...data };
-  const resp = yield call(fetch, `http://localhost:8080/items/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...newData }),
-  });
+  const resp = yield call(
+    fetchWithTimeout,
+    `http://localhost:8080/items/${id}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...newData }),
+    }
+  );
 
   // Clear any loading animations
   toast.dismiss(toastId);
