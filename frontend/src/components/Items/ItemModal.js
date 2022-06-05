@@ -186,16 +186,24 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
 
   const onSave = () => {
     setIsSaved(true);
-    dispatch({
-      type: "UPDATE_ITEM",
-      id: itemId,
-      data: {
-        title: newTitle,
-        snippet: newSnippet,
-        link_target: newImage,
-        image_url: newLinkTarget,
-      },
-    });
+    if (
+      title != newTitle ||
+      snippet != newSnippet ||
+      image != newImage ||
+      linkTarget != newLinkTarget
+    ) {
+      dispatch({
+        type: "UPDATE_ITEM",
+        id: itemId,
+        data: {
+          title: newTitle,
+          snippet: newSnippet,
+          image_url: newImage,
+          link_target: newLinkTarget,
+        },
+      });
+    }
+    // else add a notification
   };
 
   useEffect(() => {
