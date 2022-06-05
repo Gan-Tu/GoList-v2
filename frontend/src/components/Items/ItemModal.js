@@ -21,6 +21,15 @@ import TextInput from "../Utilities/TextInput";
 import Modal from "../Utilities/Modal";
 import { SaveIcon, EyeIcon, EyeOffIcon } from "../Utilities/SvgIcons";
 
+function needsUpdate(originalData, newData) {
+  return (
+    originalData.title !== newData?.title ||
+    originalData.snippet !== newData?.snippet ||
+    originalData.imageUrl !== newData?.imageUrl ||
+    originalData.linkTarget !== newData?.linkTarget
+  );
+}
+
 export default function ItemModal({ itemId, isOpen, onClose }) {
   const originalData = useItemData(itemId);
   const isLoading = useItemIsLoading(itemId);
@@ -29,12 +38,7 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
   const dispatch = useDispatch();
 
   const onSave = () => {
-    if (
-      originalData.title !== newData.title ||
-      originalData.snippet !== newData.snippet ||
-      originalData.imageUrl !== newData.imageUrl ||
-      originalData.linkTarget !== newData.linkTarget
-    ) {
+    if (needsUpdate(originalData, newData)) {
       dispatch({
         type: "UPDATE_ITEM",
         id: itemId,
