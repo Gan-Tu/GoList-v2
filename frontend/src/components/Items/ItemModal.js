@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import toast from "react-hot-toast";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { useItemData, useItemIsLoading } from "../../hooks/items";
 import { ItemSnippetView } from "./ItemSnippet";
 import { useDispatch } from "react-redux";
@@ -26,21 +26,7 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
   const isLoading = useItemIsLoading(itemId);
   const [newData, setNewData] = useState({ ...originalData });
   const [isPreview, setIsPreview] = useState(false);
-  const [updateInitiated, setUpdateInitiated] = useState(false);
   const dispatch = useDispatch();
-
-  const onExit = useCallback(() => {
-    setUpdateInitiated(false);
-    onClose();
-  }, [onClose]);
-
-  useEffect(() => {
-    if (updateInitiated) {
-      // Original data is updated, so no longer need this modal. Close after 1s.
-      const timer = setTimeout(onExit, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [originalData, updateInitiated, onExit]);
 
   const onSave = () => {
     if (
@@ -49,7 +35,6 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
       originalData.imageUrl !== newData.imageUrl ||
       originalData.linkTarget !== newData.linkTarget
     ) {
-      setUpdateInitiated(true);
       dispatch({
         type: "UPDATE_ITEM",
         id: itemId,
@@ -61,7 +46,7 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
   };
 
   return (
-    <Modal title="Edit Item Details" isOpen={isOpen} onClose={onExit}>
+    <Modal title="Edit Item Details" isOpen={isOpen} onClose={onClose}>
       <form className="mt-5">
         {isPreview ? (
           <div className="sm:py-4 border rounded-lg p-4 mt-4 hover:shadow-lg">
