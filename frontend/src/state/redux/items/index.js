@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// import fetch from "node-fetch";
 import { call, put, select, takeEvery, takeLatest } from "redux-saga/effects";
 
 function* fetchItem({ id }) {
