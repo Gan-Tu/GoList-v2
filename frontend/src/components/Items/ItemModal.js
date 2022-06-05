@@ -13,12 +13,7 @@
 // limitations under the License.
 
 import { useEffect, useState } from "react";
-import {
-  useItemTitle,
-  useItemSnippet,
-  useItemImage,
-  useItemLinkTarget,
-} from "../../hooks/items";
+import { useItemData } from "../../hooks/items";
 import { ItemSnippetView } from "./ItemSnippet";
 import { useDispatch } from "react-redux";
 import TextInput from "../Utilities/TextInput";
@@ -49,67 +44,33 @@ function SaveButton({ isSaved, onSave }) {
   );
 }
 
-function PreviewButton({ isPreview, setIsPreview }) {
-  return (
-    <button
-      type="button"
-      className="flex items-center border border-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center text-black"
-      onClick={() => setIsPreview(!isPreview)}
-    >
-      {isPreview ? (
-        <EyeOffIcon className="w-4 h-4 mr-2" />
-      ) : (
-        <EyeIcon className="w-4 h-4 mr-2" />
-      )}
-      {isPreview ? "Exit Preview" : "Preview"}
-    </button>
-  );
-}
-
 export default function ItemModal({ itemId, isOpen, onClose }) {
-  const title = useItemTitle(itemId);
-  const snippet = useItemSnippet(itemId);
-  const image = useItemImage(itemId);
-  const linkTarget = useItemLinkTarget(itemId);
-
-  const [newTitle, setNewTitle] = useState("");
-  const [newSnippet, setNewSnippet] = useState("");
-  const [newImage, setNewImage] = useState("");
-  const [newLinkTarget, setNewLinkTarget] = useState("");
-
+  const originalData = useItemData(itemId);
+  const [newData, setNewData] = useState({});
   const [isSaved, setIsSaved] = useState(false);
   const [isPreview, setIsPreview] = useState(false);
-
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    setNewData(originalData);
+  }, [originalData]);
 
   const onSave = () => {
     setIsSaved(true);
     if (
-      title !== newTitle ||
-      snippet !== newSnippet ||
-      image !== newImage ||
-      linkTarget !== newLinkTarget
+      originalData.title !== newData.title ||
+      originalData.snippet !== newData.snippet ||
+      originalData.imageUrl !== newData.imageUrl ||
+      originalData.linkTarget !== newData.linkTarget
     ) {
       dispatch({
         type: "UPDATE_ITEM",
         id: itemId,
-        data: {
-          title: newTitle,
-          snippet: newSnippet,
-          imageUrl: newImage,
-          linkTarget: newLinkTarget,
-        },
+        data: newData,
       });
     }
     // else add a notification
   };
-
-  useEffect(() => {
-    setNewTitle(title);
-    setNewSnippet(snippet);
-    setNewImage(image);
-    setNewLinkTarget(linkTarget);
-  }, [title, snippet, image, linkTarget]);
 
   useEffect(() => {
     if (isSaved) {
@@ -127,22 +88,21 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
       <form className="mt-5">
         {isPreview ? (
           <div className="sm:py-4 border rounded-lg p-4 mt-4 hover:shadow-lg">
-            <a href={newLinkTarget || "#"} target="_blank" rel="noreferrer">
-              <ItemSnippetView
-                title={newTitle}
-                snippet={newSnippet}
-                image={newImage}
-                linkTarget={newLinkTarget}
-              />
+            <a
+              href={newData.linkTarget || "#"}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <ItemSnippetView data={newData} />
             </a>
           </div>
         ) : (
           <div className="space-y-4">
-            {newImage && (
+            {newData.imageUrl && (
               <div className="flex flex-shrink-0 m-2 justify-center">
                 <img
                   className="w-24 h-24 rounded"
-                  src={newImage}
+                  src={newData.imageUrl}
                   alt="Thumbnail Preview"
                 />
               </div>
@@ -151,8 +111,8 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
             <TextInput
               inputId="imageUrl"
               labelText="Thumbnail Url"
-              value={newImage}
-              setValue={setNewImage}
+              value={newData.imageUrl}
+              setValue={(val) => setNewData({ ...newData, imageUrl: val })}
               isDisabled={isSaved}
               isRequired={true}
             />
@@ -160,8 +120,8 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
             <TextInput
               inputId="title"
               labelText="Item Title"
-              value={newTitle}
-              setValue={setNewTitle}
+              value={newData.title}
+              setValue={(val) => setNewData({ ...newData, title: val })}
               isDisabled={isSaved}
               isRequired={true}
               showCharacterCount={true}
@@ -171,8 +131,8 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
             <TextInput
               inputId="snippet"
               labelText="Item Snippet"
-              value={newSnippet}
-              setValue={setNewSnippet}
+              value={newData.snippet}
+              setValue={(val) => setNewData({ ...newData, snippet: val })}
               isDisabled={isSaved}
               isRequired={true}
               showCharacterCount={true}
@@ -184,8 +144,8 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
             <TextInput
               inputId="linkTarget"
               labelText="Item URL"
-              value={newLinkTarget}
-              setValue={setNewLinkTarget}
+              value={newData.linkTarget}
+              setValue={(val) => setNewData({ ...newData, linkTarget: val })}
               isDisabled={isSaved}
               isRequired={true}
             />

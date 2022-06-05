@@ -12,30 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  useItemTitle,
-  useItemSnippet,
-  useItemImage,
-  useItemLinkTarget,
-} from "../../hooks/items";
+import { useItemData } from "../../hooks/items";
 
-export function ItemSnippetView({ title, snippet, image, linkTarget }) {
+export function ItemSnippetView({ data }) {
   return (
     <div>
       <div className="flex items-center space-x-4">
         <div className="flex-1 min-w-0 w-60 lg:w-80 space-y-1">
           <p className="text-sm font-medium text-gray-900 line-clamp-1 text-ellipsis overflow-hidden dark:text-white">
-            {title}
+            {data?.title || ""}
           </p>
           <p className="text-sm text-gray-500 line-clamp-2 dark:text-gray-400">
-            {snippet}
+            {data?.snippet || ""}
           </p>
           <span className="inline-flex justify-between text-xs font-normal line-clamp-1 text-gray-600 text-ellipsis overflow-hidden">
-            {linkTarget}
+            {data?.linkTarget || ""}
           </span>
         </div>
         <div className="flex-shrink-0 m-2">
-          <img className="w-12 h-12 rounded" src={image} alt="Preview" />
+          <img
+            className="w-12 h-12 rounded"
+            src={data?.imageUrl || ""}
+            alt="Preview"
+          />
         </div>
       </div>
     </div>
@@ -43,17 +42,6 @@ export function ItemSnippetView({ title, snippet, image, linkTarget }) {
 }
 
 export default function ItemSnippet({ id }) {
-  const title = useItemTitle(id);
-  const snippet = useItemSnippet(id);
-  const image = useItemImage(id);
-  const linkTarget = useItemLinkTarget(id);
-
-  return (
-    <ItemSnippetView
-      title={title}
-      snippet={snippet}
-      image={image}
-      linkTarget={linkTarget}
-    />
-  );
+  const data = useItemData(id);
+  return <ItemSnippetView data={data} />;
 }

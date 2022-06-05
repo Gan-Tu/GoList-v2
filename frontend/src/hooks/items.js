@@ -14,20 +14,12 @@
 
 import { useSelector } from "react-redux";
 
-function useItemTitle(id) {
-  return useSelector((store) => store.ItemsReducer.data.get(id)?.title);
-}
-
-function useItemSnippet(id) {
-  return useSelector((store) => store.ItemsReducer.data.get(id)?.snippet);
-}
-
-function useItemImage(id) {
-  return useSelector((store) => store.ItemsReducer.data.get(id)?.imageUrl);
+function useItemData(id) {
+  return useSelector((store) => store.ItemsReducer.data.get(id));
 }
 
 function useItemLinkTarget(id) {
   return useSelector((store) => store.ItemsReducer.data.get(id)?.linkTarget);
 }
 
-export { useItemTitle, useItemSnippet, useItemImage, useItemLinkTarget };
+export { useItemData, useItemLinkTarget };
