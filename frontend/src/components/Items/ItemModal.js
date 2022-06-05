@@ -92,6 +92,31 @@ function SaveButton({ isSaved, setIsSaved }) {
   );
 }
 
+// function ImageUpload() {
+//   return (
+//     <div className="mb-6">
+//       <label
+//         className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+//         htmlFor="image_input"
+//       >
+//         Item Thumbnail
+//       </label>
+//       <input
+//         className="block w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 cursor-pointer dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+//         aria-describedby="image_input_help"
+//         id="image_input"
+//         type="file"
+//       />
+//       {/* <p
+//     className="mt-1 text-sm text-gray-500 dark:text-gray-300"
+//     id="image_input_help"
+//   >
+//     SVG, PNG, JPG or GIF (MAX. 800x400px).
+//   </p> */}
+//     </div>
+//   );
+// }
+
 export default function ItemModal({ itemId, isOpen, onClose }) {
   const title = useItemTitle(itemId);
   const snippet = useItemSnippet(itemId);
@@ -159,6 +184,34 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
                   </Dialog.Title>
 
                   <form className="mt-5">
+                    {newImage && (
+                      <div className="flex flex-shrink-0 m-2 justify-center">
+                        <img
+                          className="w-24 h-24 rounded"
+                          src={newImage}
+                          alt="Thumbnail Preview"
+                        />
+                      </div>
+                    )}
+
+                    <div className="mb-6">
+                      <label
+                        htmlFor="image_url"
+                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300 flex justify-between"
+                      >
+                        Item Thumbnail Url
+                      </label>
+                      <input
+                        disabled={isSaved}
+                        type="text"
+                        id="image_url"
+                        className="shadow-sm disabled:text-gray-500 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
+                        value={newImage}
+                        onChange={(e) => setNewImage(e.target.value)}
+                        required
+                      />
+                    </div>
+
                     <div className="mb-6">
                       <label
                         htmlFor="title"
@@ -185,6 +238,7 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
                         required
                       />
                     </div>
+
                     <div className="mb-6">
                       <label
                         htmlFor="snippet"
@@ -211,6 +265,7 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
                         required
                       />
                     </div>
+
                     <div className="mb-6">
                       <label
                         htmlFor="link_target"
