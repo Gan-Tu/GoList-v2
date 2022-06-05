@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import { call, put, select, takeEvery, takeLatest } from "redux-saga/effects";
+import toast from "react-hot-toast";
 
 function* fetchItem({ id }) {
   const resp = yield call(fetch, `http://localhost:8080/items/${id}`);
@@ -27,23 +28,45 @@ function* fetchItem({ id }) {
 }
 
 function* updateItem({ id, data }) {
-  const existingItemData = yield select((store) =>
-    store.ItemsReducer.data.get(id)
+  const existingItemData = yield select(
+    (store) => store.ItemsReducer.data.get(id) || {}
   );
-  if (existingItemData) {
-    const newData = { ...existingItemData, ...data };
 
-    const resp = yield call(fetch, `http://localhost:8080/items/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...newData }),
-    });
+  // Marks update as in progress & shows notification if 1 second passed.
+  yield put({
+    type: "SET_ITEM_LOADING_STATUS",
+    id: id,
+    isLoading: true,
+  });
+  let toastId;
+  const timer = setTimeout(() => {
+    toastId = toast.loading("Still saving the data...");
+  }, 1000);
 
-    if (resp.ok) {
-      yield put({ type: "SET_ITEM_WITH_DATA", id, data: newData });
-    } else {
-      console.error("Faield to POST", resp);
-    }
+  // Post to the API the update
+  const newData = { ...existingItemData, ...data };
+  const resp = yield call(fetch, `http://localhost:8080/items/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...newData }),
+  });
+
+  // Clear any loading animations
+  toast.dismiss(toastId);
+  clearTimeout(timer);
+  yield put({
+    type: "SET_ITEM_LOADING_STATUS",
+    id: id,
+    isLoading: false,
+  });
+
+  // Inform update status
+  if (resp.ok) {
+    yield put({ type: "SET_ITEM_WITH_DATA", id, data: newData });
+    toast.success("Updated item details successfully");
+  } else {
+    console.error("Failed to POST", resp);
+    toast.error(`Failed to update item: ${resp.statusText}`);
   }
 }
 

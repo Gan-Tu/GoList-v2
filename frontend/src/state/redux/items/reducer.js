@@ -14,6 +14,7 @@
 
 const initialState = {
   data: new Map(),
+  isLoading: new Map(),
 };
 
 export default function reducer(state = initialState, action) {
@@ -22,6 +23,11 @@ export default function reducer(state = initialState, action) {
       let newData = state.data;
       newData.set(action.id, action.data);
       return { ...state, data: newData };
+    }
+    case "SET_ITEM_LOADING_STATUS": {
+      let newLoadingStatus = state.isLoading;
+      newLoadingStatus.set(action.id, action.isLoading);
+      return { ...state, status: newLoadingStatus };
     }
     default:
       return { ...state };

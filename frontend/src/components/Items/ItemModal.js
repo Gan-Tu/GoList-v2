@@ -12,79 +12,56 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useState } from "react";
-import { useItemData } from "../../hooks/items";
+import toast from "react-hot-toast";
+import { useCallback, useEffect, useState } from "react";
+import { useItemData, useItemIsLoading } from "../../hooks/items";
 import { ItemSnippetView } from "./ItemSnippet";
 import { useDispatch } from "react-redux";
 import TextInput from "../Utilities/TextInput";
 import Modal from "../Utilities/Modal";
-import { OkIcon, SaveIcon, EyeIcon, EyeOffIcon } from "../Utilities/SvgIcons";
-
-function SaveButton({ isSaved, onSave }) {
-  if (!isSaved) {
-    return (
-      <button
-        type="button"
-        className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-        onClick={onSave}
-      >
-        <SaveIcon className="w-4 h-4 mr-2" /> Save
-      </button>
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      className="inline-flex justify-center text-center items-center rounded-md border border-transparent bg-green-100 pl-3 pr-4 py-2 text-sm font-medium text-green-900 hover:bg-green-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
-      disabled={true}
-    >
-      <OkIcon className="w-6 h-6 mr-2" /> Saved
-    </button>
-  );
-}
+import { SaveIcon, EyeIcon, EyeOffIcon } from "../Utilities/SvgIcons";
 
 export default function ItemModal({ itemId, isOpen, onClose }) {
   const originalData = useItemData(itemId);
-  const [newData, setNewData] = useState({});
-  const [isSaved, setIsSaved] = useState(false);
+  const isLoading = useItemIsLoading(itemId);
+  const [newData, setNewData] = useState({ ...originalData });
   const [isPreview, setIsPreview] = useState(false);
+  const [updateInitiated, setUpdateInitiated] = useState(false);
   const dispatch = useDispatch();
 
+  const onExit = useCallback(() => {
+    setUpdateInitiated(false);
+    onClose();
+  }, [onClose]);
+
   useEffect(() => {
-    setNewData(originalData);
-  }, [originalData]);
+    if (updateInitiated) {
+      // Original data is updated, so no longer need this modal. Close after 1s.
+      const timer = setTimeout(onExit, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [originalData, updateInitiated, onExit]);
 
   const onSave = () => {
-    setIsSaved(true);
     if (
       originalData.title !== newData.title ||
       originalData.snippet !== newData.snippet ||
       originalData.imageUrl !== newData.imageUrl ||
       originalData.linkTarget !== newData.linkTarget
     ) {
+      setUpdateInitiated(true);
       dispatch({
         type: "UPDATE_ITEM",
         id: itemId,
         data: newData,
       });
+    } else {
+      toast.success("Nothing to save. No updates made.");
     }
-    // else add a notification
   };
 
-  useEffect(() => {
-    if (isSaved) {
-      const timer = setTimeout(() => {
-        onClose();
-        setIsSaved(false);
-        setIsPreview(false);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [isSaved, onClose]);
-
   return (
-    <Modal title="Edit Item Details" isOpen={isOpen} onClose={onClose}>
+    <Modal title="Edit Item Details" isOpen={isOpen} onClose={onExit}>
       <form className="mt-5">
         {isPreview ? (
           <div className="sm:py-4 border rounded-lg p-4 mt-4 hover:shadow-lg">
@@ -113,7 +90,7 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
               labelText="Thumbnail Url"
               value={newData.imageUrl}
               setValue={(val) => setNewData({ ...newData, imageUrl: val })}
-              isDisabled={isSaved}
+              isDisabled={isLoading}
               isRequired={true}
             />
 
@@ -122,7 +99,7 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
               labelText="Item Title"
               value={newData.title}
               setValue={(val) => setNewData({ ...newData, title: val })}
-              isDisabled={isSaved}
+              isDisabled={isLoading}
               isRequired={true}
               showCharacterCount={true}
               characterLimit={40}
@@ -133,7 +110,7 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
               labelText="Item Snippet"
               value={newData.snippet}
               setValue={(val) => setNewData({ ...newData, snippet: val })}
-              isDisabled={isSaved}
+              isDisabled={isLoading}
               isRequired={true}
               showCharacterCount={true}
               characterLimit={100}
@@ -146,7 +123,7 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
               labelText="Item URL"
               value={newData.linkTarget}
               setValue={(val) => setNewData({ ...newData, linkTarget: val })}
-              isDisabled={isSaved}
+              isDisabled={isLoading}
               isRequired={true}
             />
           </div>
@@ -164,7 +141,15 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
             )}
             {isPreview ? "Exit Preview" : "Preview"}
           </button>
-          <SaveButton isSaved={isSaved} onSave={onSave} />
+
+          <button
+            type="button"
+            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex items-center"
+            disabled={isLoading}
+            onClick={onSave}
+          >
+            <SaveIcon className="w-4 h-4 mr-2" /> Save
+          </button>
         </div>
       </form>
     </Modal>

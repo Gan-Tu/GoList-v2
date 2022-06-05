@@ -18,8 +18,12 @@ function useItemData(id) {
   return useSelector((store) => store.ItemsReducer.data.get(id));
 }
 
+function useItemIsLoading(id) {
+  return useSelector((store) => store.ItemsReducer.isLoading.get(id));
+}
+
 function useItemLinkTarget(id) {
   return useSelector((store) => store.ItemsReducer.data.get(id)?.linkTarget);
 }
 
-export { useItemData, useItemLinkTarget };
+export { useItemData, useItemIsLoading, useItemLinkTarget };
