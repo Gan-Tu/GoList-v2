@@ -228,7 +228,7 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
   const title = useItemTitle(itemId);
   const snippet = useItemSnippet(itemId);
   const image = useItemImage(itemId);
-  const link_target = useItemLinkTarget(itemId);
+  const linkTarget = useItemLinkTarget(itemId);
 
   const [newTitle, setNewTitle] = useState("");
   const [newSnippet, setNewSnippet] = useState("");
@@ -242,8 +242,8 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
     setNewTitle(title);
     setNewSnippet(snippet);
     setNewImage(image);
-    setNewLinkTarget(link_target);
-  }, [title, snippet, image, link_target]);
+    setNewLinkTarget(linkTarget);
+  }, [title, snippet, image, linkTarget]);
 
   useEffect(() => {
     if (isSaved) {
@@ -263,7 +263,7 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
           title={newTitle}
           snippet={newSnippet}
           image={newImage}
-          link_target={newLinkTarget}
+          linkTarget={newLinkTarget}
         />
       </a>
     </div>
@@ -355,14 +355,14 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
 
       <div className="mb-6">
         <label
-          htmlFor="link_target"
+          htmlFor="linkTarget"
           className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300 flex justify-between"
         >
           Item URL
         </label>
         <input
           type="text"
-          id="link_target"
+          id="linkTarget"
           disabled={isSaved}
           className="shadow-sm disabled:text-gray-500 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
           value={newLinkTarget}

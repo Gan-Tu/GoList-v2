@@ -20,7 +20,7 @@ import { useItemLinkTarget } from "../../hooks/items";
 
 export default function ItemView({ id, showControls }) {
   const dispatch = useDispatch();
-  const link_target = useItemLinkTarget(id);
+  const linkTarget = useItemLinkTarget(id);
 
   useEffect(() => {
     dispatch({ type: "FETCH_ITEM", id });
@@ -36,7 +36,7 @@ export default function ItemView({ id, showControls }) {
   } else {
     return (
       <div className="sm:py-4 border rounded-lg p-4 hover:shadow-lg">
-        <a href={link_target || "#"} target="_blank" rel="noreferrer">
+        <a href={linkTarget || "#"} target="_blank" rel="noreferrer">
           <ItemSnippet id={id} />
         </a>
       </div>

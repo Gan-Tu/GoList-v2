@@ -19,7 +19,7 @@ import {
   useItemLinkTarget,
 } from "../../hooks/items";
 
-export function ItemSnippetView({ title, snippet, image, link_target }) {
+export function ItemSnippetView({ title, snippet, image, linkTarget }) {
   return (
     <div>
       <div className="flex items-center space-x-4 ">
@@ -36,7 +36,7 @@ export function ItemSnippetView({ title, snippet, image, link_target }) {
         </div>
       </div>
       <span className="inline-flex justify-between text-xs font-normal text-gray-600">
-        {link_target}
+        {linkTarget}
       </span>
     </div>
   );
@@ -46,14 +46,14 @@ export default function ItemSnippet({ id }) {
   const title = useItemTitle(id);
   const snippet = useItemSnippet(id);
   const image = useItemImage(id);
-  const link_target = useItemLinkTarget(id);
+  const linkTarget = useItemLinkTarget(id);
 
   return (
     <ItemSnippetView
       title={title}
       snippet={snippet}
       image={image}
-      link_target={link_target}
+      linkTarget={linkTarget}
     />
   );
 }
