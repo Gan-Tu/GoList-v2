@@ -24,6 +24,7 @@ import {
 } from "../../hooks/items";
 import { motion } from "framer-motion";
 import { ItemSnippetView } from "./ItemSnippet";
+import { useDispatch } from "react-redux";
 
 function ExitButton({ onExit }) {
   return (
@@ -50,13 +51,13 @@ function ExitButton({ onExit }) {
   );
 }
 
-function SaveButton({ isSaved, setIsSaved }) {
+function SaveButton({ isSaved, onSave }) {
   if (!isSaved) {
     return (
       <button
         type="button"
         className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-        onClick={() => setIsSaved(true)}
+        onClick={onSave}
       >
         <FontAwesomeIcon icon={faFloppyDisk} className="w-4 h-4 mr-2" />
         Save
@@ -140,63 +141,6 @@ function PreviewButton({ isPreview, setIsPreview }) {
       {isPreview ? "Exit Preview" : "Preview"}
     </button>
   );
-
-  // if (!isPreview) {
-  // return (
-  //   <button
-  //     type="button"
-  //     className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-  //     onClick={() => setIsPreview(true)}
-  //   >
-  //     <FontAwesomeIcon icon={faFloppyDisk} className="w-4 h-4 mr-2" />
-  //     Preview
-  //   </button>
-  // );
-  // }
-
-  // return (
-  //   <button
-  //     type="button"
-  //     className="inline-flex justify-center text-center items-center rounded-md border border-transparent bg-green-100 pl-3 pr-4 py-2 text-sm font-medium text-green-900 hover:bg-green-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
-  //     onClick={() => setIsPreview(false)}
-  //   >
-  //     {/* <svg
-  //       className="w-6 h-6 mr-2"
-  //       fill="none"
-  //       stroke="currentColor"
-  //       viewBox="0 0 24 24"
-  //       xmlns="http://www.w3.org/2000/svg"
-  //     >
-  //       <path
-  //         strokeLinecap="round"
-  //         strokeLinejoin="round"
-  //         strokeWidth={2}
-  //         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-  //       />
-  //     </svg> */}
-  //     <svg
-  //       className="w-6 h-6 mr-2"
-  //       fill="none"
-  //       stroke="currentColor"
-  //       viewBox="0 0 24 24"
-  //       xmlns="http://www.w3.org/2000/svg"
-  //     >
-  //       <path
-  //         strokeLinecap="round"
-  //         strokeLinejoin="round"
-  //         strokeWidth={2}
-  //         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-  //       />
-  //       <path
-  //         strokeLinecap="round"
-  //         strokeLinejoin="round"
-  //         strokeWidth={2}
-  //         d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-  //       />
-  //     </svg>
-  //     Exit Preview
-  //   </button>
-  // );
 }
 
 // function ImageUpload() {
@@ -237,6 +181,22 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
 
   const [isSaved, setIsSaved] = useState(false);
   const [isPreview, setIsPreview] = useState(false);
+
+  const dispatch = useDispatch();
+
+  const onSave = () => {
+    setIsSaved(true);
+    dispatch({
+      type: "UPDATE_ITEM",
+      id: itemId,
+      data: {
+        title: newTitle,
+        snippet: newSnippet,
+        link_target: newImage,
+        image_url: newLinkTarget,
+      },
+    });
+  };
 
   useEffect(() => {
     setNewTitle(title);
@@ -416,7 +376,7 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
                         isPreview={isPreview}
                         setIsPreview={setIsPreview}
                       />
-                      <SaveButton isSaved={isSaved} setIsSaved={setIsSaved} />
+                      <SaveButton isSaved={isSaved} onSave={onSave} />
                     </div>
                   </form>
                 </Dialog.Panel>

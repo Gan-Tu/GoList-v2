@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { call, put, takeEvery } from "redux-saga/effects";
+import { call, put, select, takeEvery, takeLatest } from "redux-saga/effects";
 
 function* fetchItem({ id }) {
   const resp = yield call(fetch, `http://localhost:8080/items/${id}`);
@@ -22,12 +22,22 @@ function* fetchItem({ id }) {
   }
   const data = yield resp.json();
   if (!!data) {
-    yield put({ type: "FETCH_ITEM_SUCCESS", id, data });
-  } else {
-    yield put({ type: "FETCH_ITEM_FAILED", id });
+    yield put({ type: "SET_ITEM_WITH_DATA", id, data });
+  }
+}
+
+function* updateItem({ id, data }) {
+  const existingItemData = yield select((store) =>
+    store.ItemsReducer.data.get(id)
+  );
+  if (existingItemData) {
+    const newData = { ...existingItemData, ...data };
+    console.log(id, newData);
+    yield put({ type: "SET_ITEM_WITH_DATA", id, data: newData });
   }
 }
 
 export function* watchItemApp() {
   yield takeEvery("FETCH_ITEM", fetchItem);
+  yield takeLatest("UPDATE_ITEM", updateItem);
 }
