@@ -3,7 +3,7 @@
         {
             "id": "web-mobile",
             "title": "Web & Mobile Industry",
-            "image_url": "https://flowbite.com/docs/images/blog/image-1.jpg",
+            "imageUrl": "https://flowbite.com/docs/images/blog/image-1.jpg",
             "subtitle": "5 Web Links",
             "profile_pics": [
                 "https://flowbite.com/docs/images/people/profile-picture-5.jpg",
@@ -24,7 +24,7 @@
             "id": "demo",
             "title": "Simple Demo",
             "subtitle": "2 Web Links",
-            "image_url": "https://flowbite.com/docs/images/blog/image-2.jpg",
+            "imageUrl": "https://flowbite.com/docs/images/blog/image-2.jpg",
             "profile_pics": [
                 "https://flowbite.com/docs/images/people/profile-picture-5.jpg",
                 "https://flowbite.com/docs/images/people/profile-picture-1.jpg"
@@ -46,8 +46,8 @@
             ],
             "title": "New Icon for App",
             "snippet": "Building in trend is difficult enough, especially when you are not well resourced to keep up with the styles all the time.",
-            "link_target": "http://example.com/12345",
-            "image_url": "https://flowbite.com/docs/images/people/profile-picture-1.jpg"
+            "linkTarget": "http://example.com/12345",
+            "imageUrl": "https://flowbite.com/docs/images/people/profile-picture-1.jpg"
         },
         {
             "id": 2,
@@ -57,8 +57,8 @@
             ],
             "title": "Figma is Adobe Killer",
             "snippet": "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Vel, omnis earum amet sunt tenetur.",
-            "link_target": "http://example.com/14234",
-            "image_url": "https://flowbite.com/docs/images/people/profile-picture-2.jpg"
+            "linkTarget": "http://example.com/14234",
+            "imageUrl": "https://flowbite.com/docs/images/people/profile-picture-2.jpg"
         },
         {
             "id": 3,
@@ -68,8 +68,8 @@
             ],
             "title": "Reprehenderit, modi incidunt!",
             "snippet": "Voluptatum quasi illum corporis repudiandae voluptatem velit quos provident impedit beatae mollitia autem!",
-            "link_target": "http://example.com/92843",
-            "image_url": "https://flowbite.com/docs/images/people/profile-picture-3.jpg"
+            "linkTarget": "http://example.com/92843",
+            "imageUrl": "https://flowbite.com/docs/images/people/profile-picture-3.jpg"
         },
         {
             "id": 4,
@@ -79,8 +79,8 @@
             ],
             "title": "Consectetur adipiscing elit pellentesque",
             "snippet": "Purus non enim praesent elementum facilisis leo. Amet justo donec enim diam vulputate ut pharetra. Id faucibus nisl tincidunt eget nullam non.",
-            "link_target": "http://example.com/25463",
-            "image_url": "https://flowbite.com/docs/images/people/profile-picture-4.jpg"
+            "linkTarget": "http://example.com/25463",
+            "imageUrl": "https://flowbite.com/docs/images/people/profile-picture-4.jpg"
         },
         {
             "id": 5,
@@ -90,8 +90,8 @@
             ],
             "title": "Tempus iaculis urna id volutpat",
             "snippet": "Adipiscing enim eu turpis egestas pretium aenean pharetra. Imperdiet massa tincidunt nunc pulvinar sapien et ligula.",
-            "link_target": "http://example.com/00374",
-            "image_url": "https://flowbite.com/docs/images/people/profile-picture-5.jpg"
+            "linkTarget": "http://example.com/00374",
+            "imageUrl": "https://flowbite.com/docs/images/people/profile-picture-5.jpg"
         }
     ]
 }

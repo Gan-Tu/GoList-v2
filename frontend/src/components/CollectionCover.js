@@ -34,7 +34,7 @@ function CollectionCover(props) {
       <div className="p-5">
         <img
           className="h-48 object-cover md:w-full rounded-lg"
-          src={data?.image_url}
+          src={data?.imageUrl}
           alt="Cover"
         />
       </div>

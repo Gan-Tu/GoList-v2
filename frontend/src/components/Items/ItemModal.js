@@ -198,8 +198,8 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
         data: {
           title: newTitle,
           snippet: newSnippet,
-          image_url: newImage,
-          link_target: newLinkTarget,
+          imageUrl: newImage,
+          linkTarget: newLinkTarget,
         },
       });
     }
@@ -251,7 +251,7 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
 
       <div className="mb-6">
         <label
-          htmlFor="image_url"
+          htmlFor="imageUrl"
           className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300 flex justify-between"
         >
           Item Thumbnail Url
@@ -259,7 +259,7 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
         <input
           disabled={isSaved}
           type="text"
-          id="image_url"
+          id="imageUrl"
           className="shadow-sm disabled:text-gray-500 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
           value={newImage}
           onChange={(e) => setNewImage(e.target.value)}

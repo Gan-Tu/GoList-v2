@@ -23,11 +23,11 @@ function useItemSnippet(id) {
 }
 
 function useItemImage(id) {
-  return useSelector((store) => store.ItemsReducer.data.get(id)?.image_url);
+  return useSelector((store) => store.ItemsReducer.data.get(id)?.imageUrl);
 }
 
 function useItemLinkTarget(id) {
-  return useSelector((store) => store.ItemsReducer.data.get(id)?.link_target);
+  return useSelector((store) => store.ItemsReducer.data.get(id)?.linkTarget);
 }
 
 export { useItemTitle, useItemSnippet, useItemImage, useItemLinkTarget };
