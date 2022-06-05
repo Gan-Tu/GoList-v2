@@ -22,22 +22,22 @@ import {
 export function ItemSnippetView({ title, snippet, image, linkTarget }) {
   return (
     <div>
-      <div className="flex items-center space-x-4 ">
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-900 line-clamp-1 truncate dark:text-white">
+      <div className="flex items-center space-x-4">
+        <div className="flex-1 min-w-0 w-60 lg:w-80 space-y-1">
+          <p className="text-sm font-medium text-gray-900 line-clamp-1 text-ellipsis overflow-hidden dark:text-white">
             {title}
           </p>
-          <p className="text-sm text-gray-500 line-clamp-2 dark:text-gray-400 w-80">
+          <p className="text-sm text-gray-500 line-clamp-2 dark:text-gray-400">
             {snippet}
           </p>
+          <span className="inline-flex justify-between text-xs font-normal line-clamp-1 text-gray-600 text-ellipsis overflow-hidden">
+            {linkTarget}
+          </span>
         </div>
         <div className="flex-shrink-0 m-2">
           <img className="w-12 h-12 rounded" src={image} alt="Preview" />
         </div>
       </div>
-      <span className="inline-flex justify-between text-xs font-normal text-gray-600">
-        {linkTarget}
-      </span>
     </div>
   );
 }
