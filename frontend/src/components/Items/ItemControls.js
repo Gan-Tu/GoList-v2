@@ -12,14 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ItemModal from "./ItemModal";
 import DeleteConfirmation from "./DeleteConfirmation";
 import { PencilEditIcon, TrashIcon } from "../Utilities/SvgIcons";
+import { useItemData } from "../../hooks/items";
 
 export default function ItemControls({ id }) {
   const [editMode, setEditMode] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
+  const itemData = useItemData(id);
+
+  // Whenever source item data is updated, close the edit modal.
+  useEffect(() => {
+    const timer = setTimeout(() => setEditMode(false), 1000);
+    return () => clearTimeout(timer);
+  }, [itemData]);
 
   return (
     <>
