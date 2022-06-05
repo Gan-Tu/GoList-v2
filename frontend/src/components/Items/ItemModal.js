@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -22,35 +21,10 @@ import {
   useItemImage,
   useItemLinkTarget,
 } from "../../hooks/items";
-import { motion } from "framer-motion";
 import { ItemSnippetView } from "./ItemSnippet";
 import { useDispatch } from "react-redux";
 import TextInput from "../Utilities/TextInput";
-
-function ExitButton({ onExit }) {
-  return (
-    <motion.button
-      whileHover={{ scale: 1.1 }}
-      onClick={onExit}
-      className="text-sm font-medium text-black"
-    >
-      <svg
-        className="w-6 h-6"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M6 18L18 6M6 6l12 12"
-        />
-      </svg>
-    </motion.button>
-  );
-}
+import Modal from "../Utilities/Modal";
 
 function SaveButton({ isSaved, onSave }) {
   if (!isSaved) {
@@ -200,127 +174,80 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
     }
   }, [isSaved, onClose]);
 
-  let newCardPreview = (
-    <div className="sm:py-4 border rounded-lg p-4 mt-4 hover:shadow-lg">
-      <a href={newLinkTarget || "#"} target="_blank" rel="noreferrer">
-        <ItemSnippetView
-          title={newTitle}
-          snippet={newSnippet}
-          image={newImage}
-          linkTarget={newLinkTarget}
-        />
-      </a>
-    </div>
-  );
-
-  let editForm = (
-    <div className="space-y-6">
-      {newImage && (
-        <div className="flex flex-shrink-0 m-2 justify-center">
-          <img
-            className="w-24 h-24 rounded"
-            src={newImage}
-            alt="Thumbnail Preview"
-          />
-        </div>
-      )}
-
-      <TextInput
-        inputId="imageUrl"
-        labelText="Thumbnail Url"
-        value={newImage}
-        setValue={setNewImage}
-        isDisabled={isSaved}
-        isRequired={true}
-      />
-
-      <TextInput
-        inputId="title"
-        labelText="Item Title"
-        value={newTitle}
-        setValue={setNewTitle}
-        isDisabled={isSaved}
-        isRequired={true}
-        showCharacterCount={true}
-        characterLimit={40}
-      />
-
-      <TextInput
-        inputId="snippet"
-        labelText="Item Snippet"
-        value={newSnippet}
-        setValue={setNewSnippet}
-        isDisabled={isSaved}
-        isRequired={true}
-        showCharacterCount={true}
-        characterLimit={100}
-        isTextArea={true}
-        rows={3}
-      />
-
-      <TextInput
-        inputId="linkTarget"
-        labelText="Item URL"
-        value={newLinkTarget}
-        setValue={setNewLinkTarget}
-        isDisabled={isSaved}
-        isRequired={true}
-      />
-    </div>
-  );
-
   return (
-    <Fragment>
-      <Transition appear show={isOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-10" onClose={onClose}>
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="fixed inset-0 bg-black bg-opacity-50" />
-          </Transition.Child>
-
-          <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4 text-center">
-              <Transition.Child
-                as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0 scale-95"
-                enterTo="opacity-100 scale-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95"
-              >
-                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                  <Dialog.Title
-                    as="h3"
-                    className="flex justify-between text-lg font-medium leading-6 text-gray-900"
-                  >
-                    Edit Item Details
-                    <ExitButton onExit={onClose} />
-                  </Dialog.Title>
-
-                  <form className="mt-5">
-                    {isPreview ? newCardPreview : editForm}
-                    <div className="flex space-x-4 mt-6">
-                      <PreviewButton
-                        isPreview={isPreview}
-                        setIsPreview={setIsPreview}
-                      />
-                      <SaveButton isSaved={isSaved} onSave={onSave} />
-                    </div>
-                  </form>
-                </Dialog.Panel>
-              </Transition.Child>
-            </div>
+    <Modal title="Edit Item Details" isOpen={isOpen} onClose={onClose}>
+      <form className="mt-5">
+        {isPreview ? (
+          <div className="sm:py-4 border rounded-lg p-4 mt-4 hover:shadow-lg">
+            <a href={newLinkTarget || "#"} target="_blank" rel="noreferrer">
+              <ItemSnippetView
+                title={newTitle}
+                snippet={newSnippet}
+                image={newImage}
+                linkTarget={newLinkTarget}
+              />
+            </a>
           </div>
-        </Dialog>
-      </Transition>
-    </Fragment>
+        ) : (
+          <div className="space-y-4">
+            {newImage && (
+              <div className="flex flex-shrink-0 m-2 justify-center">
+                <img
+                  className="w-24 h-24 rounded"
+                  src={newImage}
+                  alt="Thumbnail Preview"
+                />
+              </div>
+            )}
+
+            <TextInput
+              inputId="imageUrl"
+              labelText="Thumbnail Url"
+              value={newImage}
+              setValue={setNewImage}
+              isDisabled={isSaved}
+              isRequired={true}
+            />
+
+            <TextInput
+              inputId="title"
+              labelText="Item Title"
+              value={newTitle}
+              setValue={setNewTitle}
+              isDisabled={isSaved}
+              isRequired={true}
+              showCharacterCount={true}
+              characterLimit={40}
+            />
+
+            <TextInput
+              inputId="snippet"
+              labelText="Item Snippet"
+              value={newSnippet}
+              setValue={setNewSnippet}
+              isDisabled={isSaved}
+              isRequired={true}
+              showCharacterCount={true}
+              characterLimit={100}
+              isTextArea={true}
+              rows={3}
+            />
+
+            <TextInput
+              inputId="linkTarget"
+              labelText="Item URL"
+              value={newLinkTarget}
+              setValue={setNewLinkTarget}
+              isDisabled={isSaved}
+              isRequired={true}
+            />
+          </div>
+        )}
+        <div className="flex space-x-4 mt-6">
+          <PreviewButton isPreview={isPreview} setIsPreview={setIsPreview} />
+          <SaveButton isSaved={isSaved} onSave={onSave} />
+        </div>
+      </form>
+    </Modal>
   );
 }
