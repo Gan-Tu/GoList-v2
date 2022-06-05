@@ -25,6 +25,7 @@ import {
 import { motion } from "framer-motion";
 import { ItemSnippetView } from "./ItemSnippet";
 import { useDispatch } from "react-redux";
+import TextInput from "../Utilities/TextInput";
 
 function ExitButton({ onExit }) {
   return (
@@ -213,7 +214,7 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
   );
 
   let editForm = (
-    <>
+    <div className="space-y-6">
       {newImage && (
         <div className="flex flex-shrink-0 m-2 justify-center">
           <img
@@ -224,96 +225,48 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
         </div>
       )}
 
-      <div className="mb-6">
-        <label
-          htmlFor="imageUrl"
-          className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300 flex justify-between"
-        >
-          Item Thumbnail Url
-        </label>
-        <input
-          disabled={isSaved}
-          type="text"
-          id="imageUrl"
-          className="shadow-sm disabled:text-gray-500 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
-          value={newImage}
-          onChange={(e) => setNewImage(e.target.value)}
-          required
-        />
-      </div>
+      <TextInput
+        inputId="imageUrl"
+        labelText="Thumbnail Url"
+        value={newImage}
+        setValue={setNewImage}
+        isDisabled={isSaved}
+        isRequired={true}
+      />
 
-      <div className="mb-6">
-        <label
-          htmlFor="title"
-          className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300 flex justify-between"
-        >
-          Item Title{" "}
-          {newTitle?.length > 40 ? (
-            <span className="text-red-500 font-sm">
-              ({newTitle?.length || 0}/40 characters)
-            </span>
-          ) : (
-            <span className="text-gray-500 font-sm">
-              ({newTitle?.length || 0}/40 characters)
-            </span>
-          )}
-        </label>
-        <input
-          disabled={isSaved}
-          type="text"
-          id="title"
-          className="shadow-sm disabled:text-gray-500 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
-          value={newTitle}
-          onChange={(e) => setNewTitle(e.target.value)}
-          required
-        />
-      </div>
+      <TextInput
+        inputId="title"
+        labelText="Item Title"
+        value={newTitle}
+        setValue={setNewTitle}
+        isDisabled={isSaved}
+        isRequired={true}
+        showCharacterCount={true}
+        characterLimit={40}
+      />
 
-      <div className="mb-6">
-        <label
-          htmlFor="snippet"
-          className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300 flex justify-between"
-        >
-          Item Snippet{" "}
-          {newSnippet?.length > 100 ? (
-            <span className="text-red-500 font-sm">
-              ({newSnippet?.length || 0}/100 characters)
-            </span>
-          ) : (
-            <span className="text-gray-500 font-sm">
-              ({newSnippet?.length || 0}/100 characters)
-            </span>
-          )}
-        </label>
-        <textarea
-          id="snippet"
-          disabled={isSaved}
-          rows="3"
-          className="block disabled:text-gray-500 p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          value={newSnippet}
-          onChange={(e) => setNewSnippet(e.target.value)}
-          required
-        />
-      </div>
+      <TextInput
+        inputId="snippet"
+        labelText="Item Snippet"
+        value={newSnippet}
+        setValue={setNewSnippet}
+        isDisabled={isSaved}
+        isRequired={true}
+        showCharacterCount={true}
+        characterLimit={100}
+        isTextArea={true}
+        rows={3}
+      />
 
-      <div className="mb-6">
-        <label
-          htmlFor="linkTarget"
-          className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300 flex justify-between"
-        >
-          Item URL
-        </label>
-        <input
-          type="text"
-          id="linkTarget"
-          disabled={isSaved}
-          className="shadow-sm disabled:text-gray-500 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
-          value={newLinkTarget}
-          onChange={(e) => setNewLinkTarget(e.target.value)}
-          required
-        />
-      </div>
-    </>
+      <TextInput
+        inputId="linkTarget"
+        labelText="Item URL"
+        value={newLinkTarget}
+        setValue={setNewLinkTarget}
+        isDisabled={isSaved}
+        isRequired={true}
+      />
+    </div>
   );
 
   return (
