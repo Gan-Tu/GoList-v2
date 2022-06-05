@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// import fetch from "node-fetch";
 import { call, put, select, takeEvery, takeLatest } from "redux-saga/effects";
 
 function* fetchItem({ id }) {
@@ -32,8 +33,18 @@ function* updateItem({ id, data }) {
   );
   if (existingItemData) {
     const newData = { ...existingItemData, ...data };
-    console.log(id, newData);
-    yield put({ type: "SET_ITEM_WITH_DATA", id, data: newData });
+
+    const resp = yield call(fetch, `http://localhost:8080/items/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...newData }),
+    });
+
+    if (resp.ok) {
+      yield put({ type: "SET_ITEM_WITH_DATA", id, data: newData });
+    } else {
+      console.error("Faield to POST", resp);
+    }
   }
 }
 
