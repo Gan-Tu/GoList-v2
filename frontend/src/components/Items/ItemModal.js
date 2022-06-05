@@ -14,6 +14,8 @@
 
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faFloppyDisk } from '@fortawesome/free-solid-svg-icons';
 import {
   useItemTitle,
   useItemSnippet,
@@ -61,7 +63,8 @@ function SaveButton() {
         className="inline-flex justify-center text-center items-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
         onClick={onSave}
       >
-        Submit
+        <FontAwesomeIcon icon={faFloppyDisk} className="w-4 h-4 mr-2" />
+        Save
       </button>
     );
   }
