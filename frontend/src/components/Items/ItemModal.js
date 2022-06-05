@@ -187,10 +187,10 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
   const onSave = () => {
     setIsSaved(true);
     if (
-      title != newTitle ||
-      snippet != newSnippet ||
-      image != newImage ||
-      linkTarget != newLinkTarget
+      title !== newTitle ||
+      snippet !== newSnippet ||
+      image !== newImage ||
+      linkTarget !== newLinkTarget
     ) {
       dispatch({
         type: "UPDATE_ITEM",
