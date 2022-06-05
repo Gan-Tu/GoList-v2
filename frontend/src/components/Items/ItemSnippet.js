@@ -29,7 +29,7 @@ export default function ItemSnippet({ id }) {
     <div>
       <div className="flex items-center space-x-4 ">
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-900 truncate dark:text-white">
+          <p className="text-sm font-medium text-gray-900 line-clamp-1 truncate dark:text-white">
             {title}
           </p>
           <p className="text-sm text-gray-500 line-clamp-2 dark:text-gray-400 w-80">
