@@ -15,31 +15,7 @@
 import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { motion } from "framer-motion";
-
-function ExitButton({ onExit }) {
-  return (
-    <motion.button
-      whileHover={{ scale: 1.1 }}
-      onClick={onExit}
-      className="text-sm font-medium text-black"
-    >
-      <svg
-        className="w-6 h-6"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M6 18L18 6M6 6l12 12"
-        />
-      </svg>
-    </motion.button>
-  );
-}
+import { CloseIcon } from "./SvgIcons";
 
 export default function Modal({ title, isOpen, onClose, children }) {
   return (
@@ -74,7 +50,13 @@ export default function Modal({ title, isOpen, onClose, children }) {
                   className="flex justify-between text-lg font-medium leading-6 text-gray-900 truncate text-ellipsis overflow-hidden"
                 >
                   {title}
-                  <ExitButton onExit={onClose} />
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    onClick={onClose}
+                    className="text-sm font-medium text-black"
+                  >
+                    <CloseIcon className="w-6 h-6" />
+                  </motion.button>
                 </Dialog.Title>
                 {children}
               </Dialog.Panel>

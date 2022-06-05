@@ -13,8 +13,6 @@
 // limitations under the License.
 
 import { useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
 import {
   useItemTitle,
   useItemSnippet,
@@ -25,6 +23,7 @@ import { ItemSnippetView } from "./ItemSnippet";
 import { useDispatch } from "react-redux";
 import TextInput from "../Utilities/TextInput";
 import Modal from "../Utilities/Modal";
+import { OkIcon, SaveIcon, EyeIcon, EyeOffIcon } from "../Utilities/SvgIcons";
 
 function SaveButton({ isSaved, onSave }) {
   if (!isSaved) {
@@ -34,8 +33,7 @@ function SaveButton({ isSaved, onSave }) {
         className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
         onClick={onSave}
       >
-        <FontAwesomeIcon icon={faFloppyDisk} className="w-4 h-4 mr-2" />
-        Save
+        <SaveIcon className="w-4 h-4 mr-2" /> Save
       </button>
     );
   }
@@ -46,73 +44,23 @@ function SaveButton({ isSaved, onSave }) {
       className="inline-flex justify-center text-center items-center rounded-md border border-transparent bg-green-100 pl-3 pr-4 py-2 text-sm font-medium text-green-900 hover:bg-green-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
       disabled={true}
     >
-      <svg
-        className="w-6 h-6 mr-2"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-      Saved
+      <OkIcon className="w-6 h-6 mr-2" /> Saved
     </button>
   );
 }
 
 function PreviewButton({ isPreview, setIsPreview }) {
-  let eyeIcon = (
-    <svg
-      className="w-4 h-4 mr-2"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-      />
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-      />
-    </svg>
-  );
-
-  let eyeOffIcon = (
-    <svg
-      className="w-4 h-4 mr-2"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
-      />
-    </svg>
-  );
-
   return (
     <button
       type="button"
       className="flex items-center border border-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center text-black"
       onClick={() => setIsPreview(!isPreview)}
     >
-      {isPreview ? eyeOffIcon : eyeIcon}
+      {isPreview ? (
+        <EyeOffIcon className="w-4 h-4 mr-2" />
+      ) : (
+        <EyeIcon className="w-4 h-4 mr-2" />
+      )}
       {isPreview ? "Exit Preview" : "Preview"}
     </button>
   );
@@ -244,7 +192,18 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
           </div>
         )}
         <div className="flex space-x-4 mt-6">
-          <PreviewButton isPreview={isPreview} setIsPreview={setIsPreview} />
+          <button
+            type="button"
+            className="flex items-center border border-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center text-black"
+            onClick={() => setIsPreview(!isPreview)}
+          >
+            {isPreview ? (
+              <EyeOffIcon className="w-4 h-4 mr-2" />
+            ) : (
+              <EyeIcon className="w-4 h-4 mr-2" />
+            )}
+            {isPreview ? "Exit Preview" : "Preview"}
+          </button>
           <SaveButton isSaved={isSaved} onSave={onSave} />
         </div>
       </form>
