@@ -19,10 +19,7 @@ import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
 import ItemView from "./Items/ItemView";
 
-function EditButton({ editMode }) {
-  if (editMode) {
-    return <p className="w-6 h-6 text-green-600 font-bold">Done</p>;
-  }
+function EditButton() {
   return (
     <svg
       className="w-6 h-6"
@@ -36,6 +33,25 @@ function EditButton({ editMode }) {
         strokeLinejoin="round"
         strokeWidth={2}
         d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+      />
+    </svg>
+  );
+}
+
+function AddButton() {
+  return (
+    <svg
+      className="w-6 h-6"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
       />
     </svg>
   );
@@ -107,13 +123,33 @@ export default function CollectionView() {
         <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white">
           {title}
         </h5>
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          onClick={() => toggleEditMode(!editMode)}
-          className="text-sm font-medium text-black"
-        >
-          <EditButton editMode={editMode} />
-        </motion.button>
+        {editMode ? (
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            onClick={() => toggleEditMode(!editMode)}
+            className="text-sm font-medium text-black flex space-y-4 items-center"
+          >
+            <p className="w-6 h-6 font-bold">Done</p>
+          </motion.button>
+        ) : (
+          <div className="flex items-center space-x-4">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              onClick={() => toggleEditMode(!editMode)}
+              className="text-sm font-medium text-black flex space-y-4 items-center"
+            >
+              <EditButton />
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              // onClick={() => toggleEditMode(!editMode)}
+              onClick={() => alert("Add is unimplemented!")}
+              className="text-sm font-medium text-black flex space-y-4 -mr-4 items-center"
+            >
+              <AddButton />
+            </motion.button>
+          </div>
+        )}
       </div>
       <div>
         <ul
