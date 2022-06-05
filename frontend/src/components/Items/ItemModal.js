@@ -23,6 +23,7 @@ import {
   useItemLinkTarget,
 } from "../../hooks/items";
 import { motion } from "framer-motion";
+import { ItemSnippetView } from "./ItemSnippet";
 
 function ExitButton({ onExit }) {
   return (
@@ -50,16 +51,12 @@ function ExitButton({ onExit }) {
 }
 
 function SaveButton({ isSaved, setIsSaved }) {
-  const onSave = () => {
-    setIsSaved(true);
-  };
-
   if (!isSaved) {
     return (
       <button
         type="button"
         className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-        onClick={onSave}
+        onClick={() => setIsSaved(true)}
       >
         <FontAwesomeIcon icon={faFloppyDisk} className="w-4 h-4 mr-2" />
         Save
@@ -71,7 +68,7 @@ function SaveButton({ isSaved, setIsSaved }) {
     <button
       type="button"
       className="inline-flex justify-center text-center items-center rounded-md border border-transparent bg-green-100 pl-3 pr-4 py-2 text-sm font-medium text-green-900 hover:bg-green-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
-      onClick={onSave}
+      disabled={true}
     >
       <svg
         className="w-6 h-6 mr-2"
@@ -90,6 +87,116 @@ function SaveButton({ isSaved, setIsSaved }) {
       Saved
     </button>
   );
+}
+
+function PreviewButton({ isPreview, setIsPreview }) {
+  let eyeIcon = (
+    <svg
+      className="w-4 h-4 mr-2"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+      />
+    </svg>
+  );
+
+  let eyeOffIcon = (
+    <svg
+      className="w-4 h-4 mr-2"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+      />
+    </svg>
+  );
+
+  return (
+    <button
+      type="button"
+      className="flex items-center border border-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center text-black"
+      onClick={() => setIsPreview(!isPreview)}
+    >
+      {isPreview ? eyeOffIcon : eyeIcon}
+      {isPreview ? "Exit Preview" : "Preview"}
+    </button>
+  );
+
+  // if (!isPreview) {
+  // return (
+  //   <button
+  //     type="button"
+  //     className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+  //     onClick={() => setIsPreview(true)}
+  //   >
+  //     <FontAwesomeIcon icon={faFloppyDisk} className="w-4 h-4 mr-2" />
+  //     Preview
+  //   </button>
+  // );
+  // }
+
+  // return (
+  //   <button
+  //     type="button"
+  //     className="inline-flex justify-center text-center items-center rounded-md border border-transparent bg-green-100 pl-3 pr-4 py-2 text-sm font-medium text-green-900 hover:bg-green-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+  //     onClick={() => setIsPreview(false)}
+  //   >
+  //     {/* <svg
+  //       className="w-6 h-6 mr-2"
+  //       fill="none"
+  //       stroke="currentColor"
+  //       viewBox="0 0 24 24"
+  //       xmlns="http://www.w3.org/2000/svg"
+  //     >
+  //       <path
+  //         strokeLinecap="round"
+  //         strokeLinejoin="round"
+  //         strokeWidth={2}
+  //         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+  //       />
+  //     </svg> */}
+  //     <svg
+  //       className="w-6 h-6 mr-2"
+  //       fill="none"
+  //       stroke="currentColor"
+  //       viewBox="0 0 24 24"
+  //       xmlns="http://www.w3.org/2000/svg"
+  //     >
+  //       <path
+  //         strokeLinecap="round"
+  //         strokeLinejoin="round"
+  //         strokeWidth={2}
+  //         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+  //       />
+  //       <path
+  //         strokeLinecap="round"
+  //         strokeLinejoin="round"
+  //         strokeWidth={2}
+  //         d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+  //       />
+  //     </svg>
+  //     Exit Preview
+  //   </button>
+  // );
 }
 
 // function ImageUpload() {
@@ -129,6 +236,7 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
   const [newLinkTarget, setNewLinkTarget] = useState("");
 
   const [isSaved, setIsSaved] = useState(false);
+  const [isPreview, setIsPreview] = useState(false);
 
   useEffect(() => {
     setNewTitle(title);
@@ -142,10 +250,128 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
       const timer = setTimeout(() => {
         onClose();
         setIsSaved(false);
+        setIsPreview(false);
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [isSaved]);
+  }, [isSaved, onClose]);
+
+  let newCardPreview = (
+    <div className="sm:py-4 border rounded-lg p-4 mt-4 hover:shadow-lg">
+      <a href={newLinkTarget || "#"} target="_blank" rel="noreferrer">
+        <ItemSnippetView
+          title={newTitle}
+          snippet={newSnippet}
+          image={newImage}
+          link_target={newLinkTarget}
+        />
+      </a>
+    </div>
+  );
+
+  let editForm = (
+    <>
+      {newImage && (
+        <div className="flex flex-shrink-0 m-2 justify-center">
+          <img
+            className="w-24 h-24 rounded"
+            src={newImage}
+            alt="Thumbnail Preview"
+          />
+        </div>
+      )}
+
+      <div className="mb-6">
+        <label
+          htmlFor="image_url"
+          className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300 flex justify-between"
+        >
+          Item Thumbnail Url
+        </label>
+        <input
+          disabled={isSaved}
+          type="text"
+          id="image_url"
+          className="shadow-sm disabled:text-gray-500 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
+          value={newImage}
+          onChange={(e) => setNewImage(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="mb-6">
+        <label
+          htmlFor="title"
+          className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300 flex justify-between"
+        >
+          Item Title{" "}
+          {newTitle?.length > 40 ? (
+            <span className="text-red-500 font-sm">
+              ({newTitle?.length || 0}/40 characters)
+            </span>
+          ) : (
+            <span className="text-gray-500 font-sm">
+              ({newTitle?.length || 0}/40 characters)
+            </span>
+          )}
+        </label>
+        <input
+          disabled={isSaved}
+          type="text"
+          id="title"
+          className="shadow-sm disabled:text-gray-500 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
+          value={newTitle}
+          onChange={(e) => setNewTitle(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="mb-6">
+        <label
+          htmlFor="snippet"
+          className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300 flex justify-between"
+        >
+          Item Snippet{" "}
+          {newSnippet?.length > 100 ? (
+            <span className="text-red-500 font-sm">
+              ({newSnippet?.length || 0}/100 characters)
+            </span>
+          ) : (
+            <span className="text-gray-500 font-sm">
+              ({newSnippet?.length || 0}/100 characters)
+            </span>
+          )}
+        </label>
+        <textarea
+          id="snippet"
+          disabled={isSaved}
+          rows="3"
+          className="block disabled:text-gray-500 p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          value={newSnippet}
+          onChange={(e) => setNewSnippet(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="mb-6">
+        <label
+          htmlFor="link_target"
+          className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300 flex justify-between"
+        >
+          Item URL
+        </label>
+        <input
+          type="text"
+          id="link_target"
+          disabled={isSaved}
+          className="shadow-sm disabled:text-gray-500 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
+          value={newLinkTarget}
+          onChange={(e) => setNewLinkTarget(e.target.value)}
+          required
+        />
+      </div>
+    </>
+  );
 
   return (
     <Fragment>
@@ -184,106 +410,14 @@ export default function ItemModal({ itemId, isOpen, onClose }) {
                   </Dialog.Title>
 
                   <form className="mt-5">
-                    {newImage && (
-                      <div className="flex flex-shrink-0 m-2 justify-center">
-                        <img
-                          className="w-24 h-24 rounded"
-                          src={newImage}
-                          alt="Thumbnail Preview"
-                        />
-                      </div>
-                    )}
-
-                    <div className="mb-6">
-                      <label
-                        htmlFor="image_url"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300 flex justify-between"
-                      >
-                        Item Thumbnail Url
-                      </label>
-                      <input
-                        disabled={isSaved}
-                        type="text"
-                        id="image_url"
-                        className="shadow-sm disabled:text-gray-500 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
-                        value={newImage}
-                        onChange={(e) => setNewImage(e.target.value)}
-                        required
+                    {isPreview ? newCardPreview : editForm}
+                    <div className="flex space-x-4 mt-6">
+                      <PreviewButton
+                        isPreview={isPreview}
+                        setIsPreview={setIsPreview}
                       />
+                      <SaveButton isSaved={isSaved} setIsSaved={setIsSaved} />
                     </div>
-
-                    <div className="mb-6">
-                      <label
-                        htmlFor="title"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300 flex justify-between"
-                      >
-                        Item Title{" "}
-                        {newTitle?.length > 40 ? (
-                          <span className="text-red-500 font-sm">
-                            ({newTitle?.length || 0}/40 characters)
-                          </span>
-                        ) : (
-                          <span className="text-gray-500 font-sm">
-                            ({newTitle?.length || 0}/40 characters)
-                          </span>
-                        )}
-                      </label>
-                      <input
-                        disabled={isSaved}
-                        type="text"
-                        id="title"
-                        className="shadow-sm disabled:text-gray-500 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
-                        value={newTitle}
-                        onChange={(e) => setNewTitle(e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div className="mb-6">
-                      <label
-                        htmlFor="snippet"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300 flex justify-between"
-                      >
-                        Item Snippet{" "}
-                        {newSnippet?.length > 100 ? (
-                          <span className="text-red-500 font-sm">
-                            ({newSnippet?.length || 0}/100 characters)
-                          </span>
-                        ) : (
-                          <span className="text-gray-500 font-sm">
-                            ({newSnippet?.length || 0}/100 characters)
-                          </span>
-                        )}
-                      </label>
-                      <textarea
-                        id="snippet"
-                        disabled={isSaved}
-                        rows="3"
-                        className="block disabled:text-gray-500 p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        value={newSnippet}
-                        onChange={(e) => setNewSnippet(e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div className="mb-6">
-                      <label
-                        htmlFor="link_target"
-                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300 flex justify-between"
-                      >
-                        Item URL
-                      </label>
-                      <input
-                        type="text"
-                        id="link_target"
-                        disabled={isSaved}
-                        className="shadow-sm disabled:text-gray-500 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
-                        value={newLinkTarget}
-                        onChange={(e) => setNewLinkTarget(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <SaveButton isSaved={isSaved} setIsSaved={setIsSaved} />
                   </form>
                 </Dialog.Panel>
               </Transition.Child>

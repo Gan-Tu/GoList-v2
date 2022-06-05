@@ -124,7 +124,7 @@ export default function CollectionView() {
         >
           {items
             ? items.map((id) => (
-                <motion.li layout key={`item=${id}`}>
+                <motion.li layout key={`item-${id}`}>
                   <ItemView id={id} showControls={editMode} />
                 </motion.li>
               ))

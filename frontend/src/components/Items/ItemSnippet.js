@@ -19,12 +19,7 @@ import {
   useItemLinkTarget,
 } from "../../hooks/items";
 
-export default function ItemSnippet({ id }) {
-  const title = useItemTitle(id);
-  const snippet = useItemSnippet(id);
-  const image = useItemImage(id);
-  const link_target = useItemLinkTarget(id);
-
+export function ItemSnippetView({ title, snippet, image, link_target }) {
   return (
     <div>
       <div className="flex items-center space-x-4 ">
@@ -44,5 +39,21 @@ export default function ItemSnippet({ id }) {
         {link_target}
       </span>
     </div>
+  );
+}
+
+export default function ItemSnippet({ id }) {
+  const title = useItemTitle(id);
+  const snippet = useItemSnippet(id);
+  const image = useItemImage(id);
+  const link_target = useItemLinkTarget(id);
+
+  return (
+    <ItemSnippetView
+      title={title}
+      snippet={snippet}
+      image={image}
+      link_target={link_target}
+    />
   );
 }
