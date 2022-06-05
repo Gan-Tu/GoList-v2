@@ -14,6 +14,7 @@
 
 import ItemSnippet from "./ItemSnippet";
 import Modal from "../Utilities/Modal";
+import toast from 'react-hot-toast';
 
 export default function DeleteConfirmation({ itemId, isOpen, onClose }) {
   return (
@@ -35,7 +36,7 @@ export default function DeleteConfirmation({ itemId, isOpen, onClose }) {
         <button
           type="button"
           className="inline-flex justify-center text-center items-center rounded-md border border-transparent bg-red-100 px-4 py-2 text-sm font-medium text-red-900 hover:bg-red-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
-          onClick={() => alert("Delete is Unimplemented!")}
+          onClick={() => toast.error("Delete is Unimplemented!")}
         >
           <svg
             className="w-4 h-4 mr-2"

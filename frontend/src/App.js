@@ -13,8 +13,9 @@
 // limitations under the License.
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import CollectionCover from "./components/CollectionCover";
+import { Toaster } from "react-hot-toast";
 import Home from "./components/Home";
+import CollectionCover from "./components/CollectionCover";
 import CollectionView from "./components/CollectionView";
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
           <Route path="/*" element={<Home />} />
         </Routes>
       </BrowserRouter>
+      <Toaster position="top-right" />
     </div>
   );
 }

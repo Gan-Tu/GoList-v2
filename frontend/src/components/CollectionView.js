@@ -17,6 +17,7 @@ import { useCollectionTitle, useCollectionItems } from "../hooks/collections";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
+import toast from "react-hot-toast";
 import ItemView from "./Items/ItemView";
 
 function EditButton() {
@@ -142,8 +143,7 @@ export default function CollectionView() {
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.1 }}
-              // onClick={() => toggleEditMode(!editMode)}
-              onClick={() => alert("Add is unimplemented!")}
+              onClick={() => toast.error("Add is unimplemented!")}
               className="text-sm font-medium text-black flex space-y-4 -mr-4 items-center"
             >
               <AddButton />
