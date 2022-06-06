@@ -44,7 +44,7 @@ export default function CreateNewItemModal({ collectionId, isOpen, onClose }) {
       toast.error("URL and title are both required");
     } else {
       dispatch({
-        type: "CREATE_ITEM_IN_COLLECTION",
+        type: "CREATE_ITEM",
         collectionId,
         itemData: newData,
       });

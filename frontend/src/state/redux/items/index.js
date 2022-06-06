@@ -78,9 +78,9 @@ function* updateItem({ id, data }) {
     fetchWithTimeout,
     `http://localhost:8080/items/${id}`,
     {
-      method: "PUT",
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...newData }),
+      body: JSON.stringify(newData),
     }
   );
 
@@ -103,7 +103,34 @@ function* updateItem({ id, data }) {
   }
 }
 
+function* createItem({ collectionId, itemData }) {
+  const resp = yield call(fetchWithTimeout, "http://localhost:8080/items", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...itemData, collectionId }),
+  });
+  if (!resp.ok) {
+    console.error(resp.statusText);
+    toast.error(`Failed to create new item: ${resp.statusText}`);
+    return;
+  }
+  const data = yield resp.json();
+  if (!data?.id) {
+    console.error("Failed to find the ID for newly created item");
+    toast.error("Failed to create new item.");
+    return;
+  }
+  toast.success(`New item created with ID: ${data.id}`);
+  yield put({ type: "SET_ITEM_WITH_DATA", id: data.id, data });
+  yield put({
+    type: "ADD_ITEM_ID_FOR_COLLECTION",
+    id: collectionId,
+    itemId: data.id,
+  });
+}
+
 export function* watchItemApp() {
   yield takeEvery("FETCH_ITEMS", fetchItems);
   yield takeLatest("UPDATE_ITEM", updateItem);
+  yield takeLatest("CREATE_ITEM", createItem);
 }
