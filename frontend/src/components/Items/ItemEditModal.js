@@ -34,7 +34,7 @@ export default function ItemEditModal({ itemId, isOpen, onClose }) {
   const originalData = useItemData(itemId);
   const isLoading = useItemIsLoading(itemId);
   const [newData, setNewData] = useState({ ...originalData });
-  const [isPreview, setIsPreview] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
   const dispatch = useDispatch();
 
   const onSave = () => {
@@ -52,83 +52,79 @@ export default function ItemEditModal({ itemId, isOpen, onClose }) {
   return (
     <Modal title="Edit Item Details" isOpen={isOpen} onClose={onClose}>
       <form className="mt-5">
-        {isPreview ? (
-          <div className="sm:py-4 border rounded-lg p-4 mt-4 hover:shadow-lg">
-            <a
-              href={newData.linkTarget || null}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <ItemSnippetView data={newData} />
-            </a>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {newData.imageUrl && (
-              <div className="flex flex-shrink-0 m-2 justify-center">
-                <img
-                  className="w-24 h-24 rounded"
-                  src={newData.imageUrl}
-                  alt="Thumbnail Preview"
-                />
+        <div className="space-y-4">
+          {showPreview && (
+            <div>
+              <div className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300 flex justify-between">
+                Card Preview
               </div>
-            )}
+              <div className="sm:py-4 border rounded-lg p-4 mt-4 hover:shadow-lg">
+                <a
+                  href={newData.linkTarget || null}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <ItemSnippetView data={newData} />
+                </a>
+              </div>
+            </div>
+          )}
 
-            <TextInput
-              inputId="imageUrl"
-              labelText="Thumbnail Url"
-              value={newData.imageUrl}
-              setValue={(val) => setNewData({ ...newData, imageUrl: val })}
-              isDisabled={isLoading}
-              isRequired={true}
-            />
+          <TextInput
+            inputId="imageUrl"
+            labelText="Thumbnail Url"
+            value={newData.imageUrl}
+            setValue={(val) => setNewData({ ...newData, imageUrl: val })}
+            isDisabled={isLoading}
+            isRequired={true}
+          />
 
-            <TextInput
-              inputId="title"
-              labelText="Item Title"
-              value={newData.title}
-              setValue={(val) => setNewData({ ...newData, title: val })}
-              isDisabled={isLoading}
-              isRequired={true}
-              showCharacterCount={true}
-              characterLimit={40}
-            />
+          <TextInput
+            inputId="title"
+            labelText="Item Title"
+            value={newData.title}
+            setValue={(val) => setNewData({ ...newData, title: val })}
+            isDisabled={isLoading}
+            isRequired={true}
+            showCharacterCount={true}
+            characterLimit={40}
+          />
 
-            <TextInput
-              inputId="snippet"
-              labelText="Item Snippet"
-              value={newData.snippet}
-              setValue={(val) => setNewData({ ...newData, snippet: val })}
-              isDisabled={isLoading}
-              isRequired={true}
-              showCharacterCount={true}
-              characterLimit={100}
-              isTextArea={true}
-              rows={3}
-            />
+          <TextInput
+            inputId="snippet"
+            labelText="Item Snippet"
+            value={newData.snippet}
+            setValue={(val) => setNewData({ ...newData, snippet: val })}
+            isDisabled={isLoading}
+            isRequired={true}
+            showCharacterCount={true}
+            characterLimit={100}
+            isTextArea={true}
+            rows={3}
+          />
 
-            <TextInput
-              inputId="linkTarget"
-              labelText="Item URL"
-              value={newData.linkTarget}
-              setValue={(val) => setNewData({ ...newData, linkTarget: val })}
-              isDisabled={isLoading}
-              isRequired={true}
-            />
-          </div>
-        )}
+          <TextInput
+            inputId="linkTarget"
+            labelText="Item URL"
+            value={newData.linkTarget}
+            setValue={(val) => setNewData({ ...newData, linkTarget: val })}
+            isDisabled={isLoading}
+            isRequired={true}
+          />
+        </div>
+
         <div className="flex space-x-4 mt-6">
           <button
             type="button"
             className="flex items-center border border-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center text-black"
-            onClick={() => setIsPreview(!isPreview)}
+            onClick={() => setShowPreview(!showPreview)}
           >
-            {isPreview ? (
+            {showPreview ? (
               <EyeOffIcon className="w-4 h-4 mr-2" />
             ) : (
               <EyeIcon className="w-4 h-4 mr-2" />
             )}
-            {isPreview ? "Exit Preview" : "Preview"}
+            {showPreview ? "Hide Preview" : "Preview"}
           </button>
 
           <button
