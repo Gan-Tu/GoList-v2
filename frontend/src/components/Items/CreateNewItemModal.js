@@ -74,7 +74,7 @@ export default function CreateNewItemModal({ collectionId, isOpen, onClose }) {
 
           <TextInput
             inputId="linkTarget"
-            labelText="Item URL"
+            labelText="URL"
             value={newData.linkTarget}
             setValue={(val) => setNewData({ ...newData, linkTarget: val })}
             isDisabled={isLoading}
@@ -83,15 +83,6 @@ export default function CreateNewItemModal({ collectionId, isOpen, onClose }) {
 
           {showExtraFields && (
             <>
-              <TextInput
-                inputId="imageUrl"
-                labelText="Thumbnail Url"
-                value={newData.imageUrl}
-                setValue={(val) => setNewData({ ...newData, imageUrl: val })}
-                isDisabled={isLoading}
-                isRequired={true}
-              />
-
               <TextInput
                 inputId="title"
                 labelText="Item Title"
@@ -114,6 +105,15 @@ export default function CreateNewItemModal({ collectionId, isOpen, onClose }) {
                 characterLimit={100}
                 isTextArea={true}
                 rows={3}
+              />
+
+              <TextInput
+                inputId="imageUrl"
+                labelText="Thumbnail Url"
+                value={newData.imageUrl}
+                setValue={(val) => setNewData({ ...newData, imageUrl: val })}
+                isDisabled={isLoading}
+                isRequired={true}
               />
             </>
           )}

@@ -71,10 +71,10 @@ export default function ItemEditModal({ itemId, isOpen, onClose }) {
           )}
 
           <TextInput
-            inputId="imageUrl"
-            labelText="Thumbnail Url"
-            value={newData.imageUrl}
-            setValue={(val) => setNewData({ ...newData, imageUrl: val })}
+            inputId="linkTarget"
+            labelText="URL"
+            value={newData.linkTarget}
+            setValue={(val) => setNewData({ ...newData, linkTarget: val })}
             isDisabled={isLoading}
             isRequired={true}
           />
@@ -104,10 +104,10 @@ export default function ItemEditModal({ itemId, isOpen, onClose }) {
           />
 
           <TextInput
-            inputId="linkTarget"
-            labelText="Item URL"
-            value={newData.linkTarget}
-            setValue={(val) => setNewData({ ...newData, linkTarget: val })}
+            inputId="imageUrl"
+            labelText="Thumbnail URL"
+            value={newData.imageUrl}
+            setValue={(val) => setNewData({ ...newData, imageUrl: val })}
             isDisabled={isLoading}
             isRequired={true}
           />
