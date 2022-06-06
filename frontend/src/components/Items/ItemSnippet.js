@@ -29,13 +29,15 @@ export function ItemSnippetView({ data }) {
             {data?.linkTarget || ""}
           </span>
         </div>
-        <div className="flex-shrink-0 m-2">
-          <img
-            className="w-12 h-12 rounded"
-            src={data?.imageUrl || ""}
-            alt="Preview"
-          />
-        </div>
+        {data?.imageUrl && (
+          <div className="flex-shrink-0 m-2">
+            <img
+              className="w-12 h-12 rounded"
+              src={data?.imageUrl || ""}
+              alt="Preview"
+            />
+          </div>
+        )}
       </div>
     </div>
   );
