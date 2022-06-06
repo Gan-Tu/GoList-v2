@@ -30,7 +30,7 @@ function needsUpdate(originalData, newData) {
   );
 }
 
-export default function ItemModal({ itemId, isOpen, onClose }) {
+export default function ItemEditModal({ itemId, isOpen, onClose }) {
   const originalData = useItemData(itemId);
   const isLoading = useItemIsLoading(itemId);
   const [newData, setNewData] = useState({ ...originalData });

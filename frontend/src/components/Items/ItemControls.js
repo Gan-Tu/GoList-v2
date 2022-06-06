@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useState } from "react";
-import ItemModal from "./ItemModal";
+import { useState } from "react";
+import ItemEditModal from "./ItemEditModal";
 import DeleteConfirmation from "./DeleteConfirmation";
 import { PencilEditIcon, TrashIcon } from "../Utilities/SvgIcons";
 import { useItemData } from "../../hooks/items";
@@ -32,7 +32,7 @@ export default function ItemControls({ id, collectionId }) {
 
   return (
     <>
-      <ItemModal
+      <ItemEditModal
         itemId={id}
         isOpen={editMode}
         onClose={() => setEditMode(false)}
