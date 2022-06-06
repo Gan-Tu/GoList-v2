@@ -40,8 +40,8 @@ export default function CreateNewItemModal({ collectionId, isOpen, onClose }) {
   }, [newData]);
 
   const onSave = () => {
-    if (!newData.linkTarget?.length) {
-      toast.error("URL is required");
+    if (!newData.linkTarget?.length || !newData.title?.length) {
+      toast.error("URL and title are both required");
     } else {
       dispatch({
         type: "CREATE_ITEM_IN_COLLECTION",
