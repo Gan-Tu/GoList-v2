@@ -24,9 +24,9 @@ export default function CreateNewItemModal({ collectionId, isOpen, onClose }) {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [newData, setNewData] = useState({
-    title: "No Title",
+    title: "",
     imageUrl: "",
-    snippet: "No description yet.",
+    snippet: "",
     linkTarget: "",
   });
   const [showPreview, setShowPreview] = useState(false);
@@ -34,12 +34,12 @@ export default function CreateNewItemModal({ collectionId, isOpen, onClose }) {
 
   useEffect(() => {
     let hasUrl = newData.linkTarget?.length > 0;
-    setShowPreview(hasUrl);
+    let hasTitle = newData.title?.length > 0;
     setShowExtraFields(hasUrl);
+    setShowPreview(hasUrl && hasTitle);
   }, [newData]);
 
   const onSave = () => {
-    // setIsLoading(true);
     if (!newData.linkTarget?.length) {
       toast.error("URL is required");
     } else {
