@@ -17,16 +17,18 @@ import { useCollectionTitle, useCollectionItems } from "../hooks/collections";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
-import toast from "react-hot-toast";
 import ItemView from "./Items/ItemView";
 import { AdjustmentIcon, PlusCircleIcon } from "./Utilities/SvgIcons";
+import CreateNewItemModal from "./Items/CreateNewItemModal";
 
 export default function CollectionView() {
   const dispatch = useDispatch();
   const { id } = useParams();
-  const [editMode, toggleEditMode] = useState(false);
   const title = useCollectionTitle(id);
   const items = useCollectionItems(id);
+
+  const [editMode, setEditMode] = useState(false);
+  const [createMode, setCreateMode] = useState(false);
 
   useEffect(() => {
     dispatch({ type: "FETCH_COLLECTION", id });
@@ -37,6 +39,11 @@ export default function CollectionView() {
       layout
       className="p-5 mt-10 min-w-m bg-white rounded-lg border shadow-md sm:p-8 dark:bg-gray-800 dark:border-gray-700"
     >
+      <CreateNewItemModal
+        collectionId={id}
+        isOpen={createMode}
+        onClose={() => setCreateMode(false)}
+      />
       <div className="flex justify-between items-center text-center h-15 pl-4 pr-4 pb-4 space-y-2">
         <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white">
           {title}
@@ -44,7 +51,7 @@ export default function CollectionView() {
         {editMode ? (
           <motion.button
             whileHover={{ scale: 1.1 }}
-            onClick={() => toggleEditMode(!editMode)}
+            onClick={() => setEditMode(!editMode)}
             className="text-sm font-medium text-black flex space-y-4 items-center"
           >
             <p className="w-6 h-6 font-bold">Done</p>
@@ -53,14 +60,14 @@ export default function CollectionView() {
           <div className="flex items-center space-x-4">
             <motion.button
               whileHover={{ scale: 1.1 }}
-              onClick={() => toggleEditMode(!editMode)}
+              onClick={() => setEditMode(!editMode)}
               className="text-sm font-medium text-black flex space-y-4 items-center"
             >
               <AdjustmentIcon className="w-6 h-6" />
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.1 }}
-              onClick={() => toast.error("Add is unimplemented!")}
+              onClick={() => setCreateMode(!createMode)}
               className="text-sm font-medium text-black flex space-y-4 -mr-4 items-center"
             >
               <PlusCircleIcon className="w-6 h-6" />
