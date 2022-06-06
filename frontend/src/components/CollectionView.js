@@ -12,45 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useCollectionTitle, useCollectionItems } from "../hooks/collections";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import ItemView from "./Items/ItemView";
-import {
-  AdjustmentIcon,
-  PlusCircleIcon,
-  SolidHomeIcon,
-  RightChevronIcon,
-} from "./Utilities/SvgIcons";
-
-function BreadCrumb({ title }) {
-  return (
-    <nav className="flex p-4" aria-label="Breadcrumb">
-      <ol className="inline-flex items-center space-x-1 md:space-x-3">
-        <li className="inline-flex items-center">
-          <Link
-            to="/"
-            className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-          >
-            <SolidHomeIcon className="w-4 h-4 mr-2" />
-            Home
-          </Link>
-        </li>
-        <li aria-current="page">
-          <div className="flex items-center">
-            <RightChevronIcon className="w-6 h-6 text-gray-400" />
-            <span className="ml-1 text-sm font-medium text-gray-500 md:ml-2 dark:text-gray-400">
-              {title}
-            </span>
-          </div>
-        </li>
-      </ol>
-    </nav>
-  );
-}
+import { AdjustmentIcon, PlusCircleIcon } from "./Utilities/SvgIcons";
 
 export default function CollectionView() {
   const dispatch = useDispatch();
@@ -68,8 +37,6 @@ export default function CollectionView() {
       layout
       className="p-5 mt-10 min-w-m bg-white rounded-lg border shadow-md sm:p-8 dark:bg-gray-800 dark:border-gray-700"
     >
-      <BreadCrumb title={title} />
-
       <div className="flex justify-between items-center text-center h-15 pl-4 pr-4 pb-4 space-y-2">
         <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white">
           {title}
