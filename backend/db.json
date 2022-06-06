@@ -12,7 +12,7 @@
         "https://flowbite.com/docs/images/people/profile-picture-4.jpg"
       ],
       "status": "Favorited by 4 friends",
-      "item_ids": [1, 2, 3, 4, 5]
+      "item_ids": ["HhLKsnx", "CWKP3L", "8TMj_8x", "Y9RAqg1", "Pn9hGE3"]
     },
     {
       "id": "demo",
@@ -24,51 +24,44 @@
         "https://flowbite.com/docs/images/people/profile-picture-1.jpg"
       ],
       "status": "Favorited by 2 friends",
-      "item_ids": [2, 4, 5]
+      "item_ids": ["CWKP3L", "Y9RAqg1", "Pn9hGE3"]
     }
   ],
   "items": [
     {
-      "id": 1,
+      "id": "HhLKsnx",
       "title": "New Icon for App",
       "snippet": "Building in trend is difficult enough, especially when you are not well resourced to keep up with the styles all the time.",
       "linkTarget": "http://example.com/12345",
       "imageUrl": "https://flowbite.com/docs/images/people/profile-picture-1.jpg"
     },
     {
-      "id": 2,
+      "id": "CWKP3L",
       "title": "Figma is Adobe Killer",
       "snippet": "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Vel, omnis earum amet sunt tenetur.",
       "linkTarget": "http://example.com/14234",
       "imageUrl": "https://flowbite.com/docs/images/people/profile-picture-2.jpg"
     },
     {
-      "id": 3,
+      "id": "8TMj_8x",
       "title": "Reprehenderit, modi incidunt!",
       "snippet": "Voluptatum quasi illum corporis repudiandae voluptatem velit quos provident impedit beatae mollitia autem!",
       "linkTarget": "http://example.com/92843",
       "imageUrl": "https://flowbite.com/docs/images/people/profile-picture-3.jpg"
     },
     {
-      "id": 4,
+      "id": "Y9RAqg1",
       "title": "Consectetur adipiscing elit pellentesque",
       "snippet": "Purus non enim praesent elementum facilisis leo. Amet justo donec enim diam vulputate ut pharetra. Id faucibus nisl tincidunt eget nullam non.",
       "linkTarget": "http://example.com/25463",
       "imageUrl": "https://flowbite.com/docs/images/people/profile-picture-4.jpg"
     },
     {
-      "id": 5,
+      "id": "Pn9hGE3",
       "title": "Tempus iaculis urna id volutpat",
       "snippet": "Adipiscing enim eu turpis egestas pretium aenean pharetra. Imperdiet massa tincidunt nunc pulvinar sapien et ligula.",
       "linkTarget": "http://example.com/00374",
       "imageUrl": "https://flowbite.com/docs/images/people/profile-picture-5.jpg"
-    },
-    {
-      "id": "123",
-      "title": "New Icon for App",
-      "snippet": "Building in trend is difficult enough, especially when you are not well resourced to keep up with the styles all the time.",
-      "linkTarget": "http://example.com/12345",
-      "imageUrl": "https://static.wikia.nocookie.net/youtube/images/f/f1/EdSheeranFace.jpg"
     }
   ]
 }
