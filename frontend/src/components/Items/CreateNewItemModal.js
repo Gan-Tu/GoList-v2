@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ItemSnippetView } from "./ItemSnippet";
 import { useDispatch } from "react-redux";
 import TextInput from "../Utilities/TextInput";
 import Modal from "../Utilities/Modal";
-import { SaveIcon, EyeIcon, EyeOffIcon } from "../Utilities/SvgIcons";
+import { NewFileIcon, EyeIcon, EyeOffIcon } from "../Utilities/SvgIcons";
+import toast from "react-hot-toast";
 
 export default function CreateNewItemModal({ collectionId, isOpen, onClose }) {
   const dispatch = useDispatch();
@@ -25,100 +26,111 @@ export default function CreateNewItemModal({ collectionId, isOpen, onClose }) {
   const [newData, setNewData] = useState({
     title: "No Title",
     imageUrl: "",
-    snippet: "",
+    snippet: "No description yet.",
     linkTarget: "",
   });
-  const [isPreview, setIsPreview] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [showExtraFields, setShowExtraFields] = useState(false);
+
+  useEffect(() => {
+    let hasUrl = newData.linkTarget?.length > 0;
+    setShowPreview(hasUrl);
+    setShowExtraFields(hasUrl);
+  }, [newData]);
 
   const onSave = () => {
-    setIsLoading(true);
-    dispatch({
-      type: "CREATE_ITEM_IN_COLLECTION",
-      collectionId,
-      data: newData,
-    });
+    // setIsLoading(true);
+    if (!newData.linkTarget?.length) {
+      toast.error("URL is required");
+    } else {
+      dispatch({
+        type: "CREATE_ITEM_IN_COLLECTION",
+        collectionId,
+        itemData: newData,
+      });
+    }
   };
 
   return (
-    <Modal title="Create New Item" isOpen={isOpen} onClose={onClose}>
+    <Modal title="Add New Item" isOpen={isOpen} onClose={onClose}>
       <form className="mt-5">
-        {isPreview ? (
-          <div className="sm:py-4 border rounded-lg p-4 mt-4 hover:shadow-lg">
-            <a
-              href={newData.linkTarget || null}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <ItemSnippetView data={newData} />
-            </a>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {newData.imageUrl && (
-              <div className="flex flex-shrink-0 m-2 justify-center">
-                <img
-                  className="w-24 h-24 rounded"
-                  src={newData.imageUrl}
-                  alt="Thumbnail Preview"
-                />
+        <div className="space-y-4">
+          {showPreview && (
+            <div>
+              <div className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300 flex justify-between">
+                Card Preview
               </div>
-            )}
+              <div className="sm:py-4 border rounded-lg p-4 mt-4 hover:shadow-lg">
+                <a
+                  href={newData.linkTarget || null}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <ItemSnippetView data={newData} />
+                </a>
+              </div>
+            </div>
+          )}
 
-            <TextInput
-              inputId="imageUrl"
-              labelText="Thumbnail Url"
-              value={newData.imageUrl}
-              setValue={(val) => setNewData({ ...newData, imageUrl: val })}
-              isDisabled={isLoading}
-              isRequired={true}
-            />
+          <TextInput
+            inputId="linkTarget"
+            labelText="Item URL"
+            value={newData.linkTarget}
+            setValue={(val) => setNewData({ ...newData, linkTarget: val })}
+            isDisabled={isLoading}
+            isRequired={true}
+          />
 
-            <TextInput
-              inputId="title"
-              labelText="Item Title"
-              value={newData.title}
-              setValue={(val) => setNewData({ ...newData, title: val })}
-              isDisabled={isLoading}
-              isRequired={true}
-              showCharacterCount={true}
-              characterLimit={40}
-            />
+          {showExtraFields && (
+            <>
+              <TextInput
+                inputId="imageUrl"
+                labelText="Thumbnail Url"
+                value={newData.imageUrl}
+                setValue={(val) => setNewData({ ...newData, imageUrl: val })}
+                isDisabled={isLoading}
+                isRequired={true}
+              />
 
-            <TextInput
-              inputId="snippet"
-              labelText="Item Snippet"
-              value={newData.snippet}
-              setValue={(val) => setNewData({ ...newData, snippet: val })}
-              isDisabled={isLoading}
-              isRequired={true}
-              showCharacterCount={true}
-              characterLimit={100}
-              isTextArea={true}
-              rows={3}
-            />
+              <TextInput
+                inputId="title"
+                labelText="Item Title"
+                value={newData.title}
+                setValue={(val) => setNewData({ ...newData, title: val })}
+                isDisabled={isLoading}
+                isRequired={true}
+                showCharacterCount={true}
+                characterLimit={40}
+              />
 
-            <TextInput
-              inputId="linkTarget"
-              labelText="Item URL"
-              value={newData.linkTarget}
-              setValue={(val) => setNewData({ ...newData, linkTarget: val })}
-              isDisabled={isLoading}
-              isRequired={true}
-            />
-          </div>
-        )}
+              <TextInput
+                inputId="snippet"
+                labelText="Item Snippet"
+                value={newData.snippet}
+                setValue={(val) => setNewData({ ...newData, snippet: val })}
+                isDisabled={isLoading}
+                isRequired={true}
+                showCharacterCount={true}
+                characterLimit={100}
+                isTextArea={true}
+                rows={3}
+              />
+            </>
+          )}
+        </div>
+
         <div className="flex space-x-4 mt-6">
           <button
             type="button"
             className="flex items-center border border-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center text-black"
-            onClick={() => setIsPreview(!isPreview)}
+            onClick={() => setShowPreview(!showPreview)}
           >
-            {isPreview ? (
+            {showPreview ? (
               <EyeOffIcon className="w-4 h-4 mr-2" />
             ) : (
               <EyeIcon className="w-4 h-4 mr-2" />
             )}
-            {isPreview ? "Exit Preview" : "Preview"}
+            {showPreview ? "Hide Preview" : "Preview"}
           </button>
 
           <button
@@ -127,7 +139,7 @@ export default function CreateNewItemModal({ collectionId, isOpen, onClose }) {
             disabled={isLoading}
             onClick={onSave}
           >
-            <SaveIcon className="w-4 h-4 mr-2" /> Save
+            <NewFileIcon className="w-5 h-5 mr-2" /> Create
           </button>
         </div>
       </form>
