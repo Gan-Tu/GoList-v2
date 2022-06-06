@@ -12,7 +12,13 @@
         "https://flowbite.com/docs/images/people/profile-picture-4.jpg"
       ],
       "status": "Favorited by 4 friends",
-      "item_ids": ["HhLKsnx", "CWKP3L", "8TMj_8x", "Y9RAqg1", "Pn9hGE3"]
+      "item_ids": [
+        "HhLKsnx",
+        "CWKP3L",
+        "8TMj_8x",
+        "Y9RAqg1",
+        "Pn9hGE3"
+      ]
     },
     {
       "id": "demo",
@@ -24,7 +30,11 @@
         "https://flowbite.com/docs/images/people/profile-picture-1.jpg"
       ],
       "status": "Favorited by 2 friends",
-      "item_ids": ["CWKP3L", "Y9RAqg1", "Pn9hGE3"]
+      "item_ids": [
+        "CWKP3L",
+        "Y9RAqg1",
+        "Pn9hGE3"
+      ]
     }
   ],
   "items": [

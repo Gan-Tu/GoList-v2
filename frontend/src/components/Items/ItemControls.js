@@ -17,14 +17,15 @@ import ItemModal from "./ItemModal";
 import DeleteConfirmation from "./DeleteConfirmation";
 import { PencilEditIcon, TrashIcon } from "../Utilities/SvgIcons";
 import { useItemData } from "../../hooks/items";
+import { useUpdateEffect } from "react-use";
 
 export default function ItemControls({ id, collectionId }) {
+  const itemData = useItemData(id);
   const [editMode, setEditMode] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
-  const itemData = useItemData(id);
 
   // Whenever source item data is updated, close the edit modal.
-  useEffect(() => {
+  useUpdateEffect(() => {
     const timer = setTimeout(() => setEditMode(false), 1000);
     return () => clearTimeout(timer);
   }, [itemData]);
