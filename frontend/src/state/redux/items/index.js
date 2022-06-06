@@ -47,7 +47,7 @@ function* fetchItems({ collectionId }) {
           data: itemData,
         });
         yield put({
-          type: "ADD_ITEM_ID_FOR_COLLECTION",
+          type: "ADD_ITEM_ID_TO_COLLECTION",
           id: collectionId,
           itemId: itemData.id,
         });
@@ -123,14 +123,37 @@ function* createItem({ collectionId, itemData }) {
   toast.success(`New item created with ID: ${data.id}`);
   yield put({ type: "SET_ITEM_WITH_DATA", id: data.id, data });
   yield put({
-    type: "ADD_ITEM_ID_FOR_COLLECTION",
+    type: "ADD_ITEM_ID_TO_COLLECTION",
     id: collectionId,
     itemId: data.id,
   });
+  // TODO(tugan): Auto close after create
+}
+
+function* deleteItem({ id, collectionId }) {
+  const resp = yield call(
+    fetchWithTimeout,
+    `http://localhost:8080/items/${id}`,
+    {
+      method: "DELETE",
+    }
+  );
+  if (!resp.ok) {
+    console.error(resp.statusText);
+    toast.error(`Failed to delete item: ${resp.statusText}`);
+    return;
+  }
+  yield put({
+    type: "REMOVE_ITEM_ID_FROM_COLLECTION",
+    collectionId,
+    itemId: id,
+  });
+  toast.success("Item deleted successfuly.");
 }
 
 export function* watchItemApp() {
   yield takeEvery("FETCH_ITEMS", fetchItems);
   yield takeLatest("UPDATE_ITEM", updateItem);
   yield takeLatest("CREATE_ITEM", createItem);
+  yield takeLatest("DELETE_ITEM", deleteItem);
 }

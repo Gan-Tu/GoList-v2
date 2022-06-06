@@ -17,6 +17,14 @@ const initialState = {
   itemIdsPerCollection: new Map(),
 };
 
+function removeItemOnce(arr, value) {
+  var index = arr.indexOf(value);
+  if (index > -1) {
+    arr.splice(index, 1);
+  }
+  return arr;
+}
+
 export default function reducer(state = initialState, action) {
   switch (action.type) {
     case "FETCH_COLLECTION_SUCCESS": {
@@ -26,10 +34,19 @@ export default function reducer(state = initialState, action) {
     }
     case "FETCH_COLLECTION_FAILED":
       return state;
-    case "ADD_ITEM_ID_FOR_COLLECTION": {
+    case "ADD_ITEM_ID_TO_COLLECTION": {
       let newMapping = state.itemIdsPerCollection;
       let newIds = newMapping.get(action.id) || [];
       newIds.push(action.itemId);
+      newMapping.set(action.id, newIds);
+      return { ...state, itemIdsPerCollection: newMapping };
+    }
+    case "REMOVE_ITEM_ID_FROM_COLLECTION": {
+      let newMapping = state.itemIdsPerCollection;
+      let newIds = newMapping.get(action.collectionId) || [];
+      newIds = removeItemOnce(newIds, action.itemId);
+      // TODO(tugan): fix refresh issue after delete
+      // TODO(tugan): Auto close after delete
       newMapping.set(action.id, newIds);
       return { ...state, itemIdsPerCollection: newMapping };
     }

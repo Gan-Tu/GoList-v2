@@ -14,11 +14,17 @@
 
 import ItemSnippet from "./ItemSnippet";
 import Modal from "../Utilities/Modal";
-import toast from "react-hot-toast";
 import { TrashIcon } from "../Utilities/SvgIcons";
+import { useDispatch } from "react-redux";
 
 export default function DeleteConfirmation(props) {
-  const { itemId, isOpen, onClose } = props;
+  const dispatch = useDispatch();
+  const { itemId, collectionId, isOpen, onClose } = props;
+
+  const onDelete = () => {
+    // Add notifications for success/failure
+    dispatch({ type: "DELETE_ITEM", id: itemId, collectionId });
+  };
 
   return (
     <Modal
@@ -39,7 +45,7 @@ export default function DeleteConfirmation(props) {
         <button
           type="button"
           className="inline-flex justify-center text-center items-center rounded-md border border-transparent bg-red-100 px-4 py-2 text-sm font-medium text-red-900 hover:bg-red-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
-          onClick={() => toast.error("Delete is Unimplemented!")}
+          onClick={onDelete}
         >
           <TrashIcon className="w-4 h-4 mr-2" />
           Permanently Delete
