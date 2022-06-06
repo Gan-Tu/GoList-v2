@@ -36,6 +36,7 @@ function* fetchCollection({ id }) {
   const data = yield resp.json();
   if (!!data) {
     yield put({ type: "FETCH_COLLECTION_SUCCESS", id, data });
+    yield put({ type: "FETCH_ITEMS", collectionId: id });
   } else {
     yield put({ type: "FETCH_COLLECTION_FAILED", id });
   }

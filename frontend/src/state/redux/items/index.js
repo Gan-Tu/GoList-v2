@@ -27,10 +27,10 @@ async function fetchWithTimeout(resource, options = {}) {
   return response;
 }
 
-function* fetchItem({ id }) {
+function* fetchItems({ collectionId }) {
   const resp = yield call(
     fetchWithTimeout,
-    `http://localhost:8080/items/${id}`
+    `http://localhost:8080/collections/${collectionId}/items`
   );
   if (!resp.ok) {
     console.error(resp.statusText);
@@ -38,7 +38,21 @@ function* fetchItem({ id }) {
   }
   const data = yield resp.json();
   if (!!data) {
-    yield put({ type: "SET_ITEM_WITH_DATA", id, data });
+    for (let i = 0; i < data.length; i++) {
+      let itemData = data[i];
+      if (itemData) {
+        yield put({
+          type: "SET_ITEM_WITH_DATA",
+          id: itemData.id,
+          data: itemData,
+        });
+        yield put({
+          type: "ADD_ITEM_ID_FOR_COLLECTION",
+          id: collectionId,
+          itemId: itemData.id,
+        });
+      }
+    }
   }
 }
 
@@ -90,6 +104,6 @@ function* updateItem({ id, data }) {
 }
 
 export function* watchItemApp() {
-  yield takeEvery("FETCH_ITEM", fetchItem);
+  yield takeEvery("FETCH_ITEMS", fetchItems);
   yield takeLatest("UPDATE_ITEM", updateItem);
 }

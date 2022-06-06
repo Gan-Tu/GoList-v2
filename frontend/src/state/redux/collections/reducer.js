@@ -14,16 +14,25 @@
 
 const initialState = {
   data: new Map(),
+  itemIdsPerCollection: new Map(),
 };
 
 export default function reducer(state = initialState, action) {
   switch (action.type) {
-    case "FETCH_COLLECTION_SUCCESS":
+    case "FETCH_COLLECTION_SUCCESS": {
       let newData = state.data;
       newData.set(action.id, action.data);
       return { ...state, data: newData };
+    }
     case "FETCH_COLLECTION_FAILED":
       return state;
+    case "ADD_ITEM_ID_FOR_COLLECTION": {
+      let newMapping = state.itemIdsPerCollection;
+      let newIds = newMapping.get(action.id) || [];
+      newIds.push(action.itemId);
+      newMapping.set(action.id, newIds);
+      return { ...state, itemIdsPerCollection: newMapping };
+    }
     default:
       return { ...state };
   }

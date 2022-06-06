@@ -12,20 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
 import ItemSnippet from "./ItemSnippet";
 import ItemControls from "./ItemControls";
 import { useItemLinkTarget } from "../../hooks/items";
 
 export default function ItemView({ id, collectionId, showControls }) {
-  const dispatch = useDispatch();
   const linkTarget = useItemLinkTarget(id);
-
-  useEffect(() => {
-    dispatch({ type: "FETCH_ITEM", id });
-  }, [dispatch, id]);
-
   if (showControls) {
     return (
       <div className="sm:py-4 border rounded-lg p-4 hover:shadow-lg">

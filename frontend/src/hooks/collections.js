@@ -23,8 +23,8 @@ function useCollectionTitle(id) {
 }
 
 function useCollectionItems(id) {
-  return useSelector(
-    (store) => store.CollectionsReducer.data.get(id)?.item_ids
+  return useSelector((store) =>
+    store.CollectionsReducer.itemIdsPerCollection.get(id)
   );
 }
 
