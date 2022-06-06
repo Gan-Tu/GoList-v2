@@ -55,7 +55,7 @@ export default function ItemEditModal({ itemId, isOpen, onClose }) {
         {isPreview ? (
           <div className="sm:py-4 border rounded-lg p-4 mt-4 hover:shadow-lg">
             <a
-              href={newData.linkTarget || "#"}
+              href={newData.linkTarget || null}
               target="_blank"
               rel="noreferrer"
             >
