@@ -18,7 +18,7 @@ import ItemSnippet from "./ItemSnippet";
 import ItemControls from "./ItemControls";
 import { useItemLinkTarget } from "../../hooks/items";
 
-export default function ItemView({ id, showControls }) {
+export default function ItemView({ id, collectionId, showControls }) {
   const dispatch = useDispatch();
   const linkTarget = useItemLinkTarget(id);
 
@@ -30,7 +30,7 @@ export default function ItemView({ id, showControls }) {
     return (
       <div className="sm:py-4 border rounded-lg p-4 hover:shadow-lg">
         <ItemSnippet id={id} />
-        <ItemControls id={id} />
+        <ItemControls id={id} collectionId={collectionId} />
       </div>
     );
   } else {

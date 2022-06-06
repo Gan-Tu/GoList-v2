@@ -18,7 +18,7 @@ import DeleteConfirmation from "./DeleteConfirmation";
 import { PencilEditIcon, TrashIcon } from "../Utilities/SvgIcons";
 import { useItemData } from "../../hooks/items";
 
-export default function ItemControls({ id }) {
+export default function ItemControls({ id, collectionId }) {
   const [editMode, setEditMode] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
   const itemData = useItemData(id);
@@ -38,6 +38,7 @@ export default function ItemControls({ id }) {
       />
       <DeleteConfirmation
         itemId={id}
+        collectionId={collectionId}
         isOpen={deleteMode}
         onClose={() => setDeleteMode(false)}
       />

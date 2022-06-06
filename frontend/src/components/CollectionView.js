@@ -109,9 +109,13 @@ export default function CollectionView() {
           } gap-4`}
         >
           {items
-            ? items.map((id) => (
-                <motion.li layout key={`item-${id}`}>
-                  <ItemView id={id} showControls={editMode} />
+            ? items.map((itemId) => (
+                <motion.li layout key={`item-${itemId}`}>
+                  <ItemView
+                    id={itemId}
+                    collectionId={id}
+                    showControls={editMode}
+                  />
                 </motion.li>
               ))
             : null}

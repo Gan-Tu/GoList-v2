@@ -17,7 +17,9 @@ import Modal from "../Utilities/Modal";
 import toast from "react-hot-toast";
 import { TrashIcon } from "../Utilities/SvgIcons";
 
-export default function DeleteConfirmation({ itemId, isOpen, onClose }) {
+export default function DeleteConfirmation(props) {
+  const { itemId, isOpen, onClose } = props;
+
   return (
     <Modal
       title="Are you sure you want to delete?"
