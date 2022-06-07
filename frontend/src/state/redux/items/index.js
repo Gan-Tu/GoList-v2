@@ -48,7 +48,7 @@ function* fetchItems({ collectionId }) {
         });
         yield put({
           type: "ADD_ITEM_ID_TO_COLLECTION",
-          id: collectionId,
+          collectionId,
           itemId: itemData.id,
         });
       }
@@ -56,15 +56,15 @@ function* fetchItems({ collectionId }) {
   }
 }
 
-function* updateItem({ id, data }) {
+function* updateItem({ itemId, data }) {
   const existingItemData = yield select(
-    (store) => store.ItemsReducer.data.get(id) || {}
+    (store) => store.ItemsReducer.data.get(itemId) || {}
   );
 
   // Marks update as in progress & shows notification if 1 second passed.
   yield put({
     type: "SET_ITEM_LOADING_STATUS",
-    id: id,
+    id: itemId,
     isLoading: true,
   });
   let toastId;
@@ -76,7 +76,7 @@ function* updateItem({ id, data }) {
   const newData = { ...existingItemData, ...data };
   const resp = yield call(
     fetchWithTimeout,
-    `http://localhost:8080/items/${id}`,
+    `http://localhost:8080/items/${itemId}`,
     {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -89,13 +89,13 @@ function* updateItem({ id, data }) {
   clearTimeout(timer);
   yield put({
     type: "SET_ITEM_LOADING_STATUS",
-    id: id,
+    id: itemId,
     isLoading: false,
   });
 
   // Inform update status
   if (resp.ok) {
-    yield put({ type: "SET_ITEM_WITH_DATA", id, data: newData });
+    yield put({ type: "SET_ITEM_WITH_DATA", id: itemId, data: newData });
     toast.success("Updated item details successfully");
   } else {
     console.error("Failed to POST", resp);
@@ -124,16 +124,16 @@ function* createItem({ collectionId, itemData }) {
   yield put({ type: "SET_ITEM_WITH_DATA", id: data.id, data });
   yield put({
     type: "ADD_ITEM_ID_TO_COLLECTION",
-    id: collectionId,
+    collectionId,
     itemId: data.id,
   });
   // TODO(tugan): Auto close after create
 }
 
-function* deleteItem({ id, collectionId }) {
+function* deleteItem({ itemId, collectionId }) {
   const resp = yield call(
     fetchWithTimeout,
-    `http://localhost:8080/items/${id}`,
+    `http://localhost:8080/items/${itemId}`,
     {
       method: "DELETE",
     }
@@ -146,7 +146,7 @@ function* deleteItem({ id, collectionId }) {
   yield put({
     type: "REMOVE_ITEM_ID_FROM_COLLECTION",
     collectionId,
-    itemId: id,
+    itemId,
   });
   toast.success("Item deleted successfuly.");
 }

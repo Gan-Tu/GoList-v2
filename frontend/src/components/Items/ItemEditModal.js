@@ -41,7 +41,7 @@ export default function ItemEditModal({ itemId, isOpen, onClose }) {
     if (needsUpdate(originalData, newData)) {
       dispatch({
         type: "UPDATE_ITEM",
-        id: itemId,
+        itemId,
         data: newData,
       });
     } else {

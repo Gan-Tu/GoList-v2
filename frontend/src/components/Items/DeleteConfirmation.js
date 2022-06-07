@@ -23,7 +23,7 @@ export default function DeleteConfirmation(props) {
 
   const onDelete = () => {
     // Add notifications for success/failure
-    dispatch({ type: "DELETE_ITEM", id: itemId, collectionId });
+    dispatch({ type: "DELETE_ITEM", itemId, collectionId });
   };
 
   return (

@@ -36,18 +36,19 @@ export default function reducer(state = initialState, action) {
       return state;
     case "ADD_ITEM_ID_TO_COLLECTION": {
       let newMapping = state.itemIdsPerCollection;
-      let newIds = newMapping.get(action.id) || [];
+      let newIds = newMapping.get(action.collectionId) || [];
       newIds.push(action.itemId);
-      newMapping.set(action.id, newIds);
+      newMapping.set(action.collectionId, [...newIds]);
       return { ...state, itemIdsPerCollection: newMapping };
     }
     case "REMOVE_ITEM_ID_FROM_COLLECTION": {
       let newMapping = state.itemIdsPerCollection;
       let newIds = newMapping.get(action.collectionId) || [];
-      newIds = removeItemOnce(newIds, action.itemId);
+      removeItemOnce(newIds, action.itemId);
       // TODO(tugan): fix refresh issue after delete
       // TODO(tugan): Auto close after delete
-      newMapping.set(action.id, newIds);
+      newMapping.set(action.collectionId, [...newIds]);
+      console.log(newMapping);
       return { ...state, itemIdsPerCollection: newMapping };
     }
     default:
