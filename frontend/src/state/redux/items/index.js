@@ -120,7 +120,7 @@ function* createItem({ collectionId, itemData }) {
     toast.error("Failed to create new item.");
     return;
   }
-  toast.success(`New item created with ID: ${data.id}`);
+  toast.success("New item successfully created");
   yield put({ type: "SET_ITEM_WITH_DATA", id: data.id, data });
   yield put({
     type: "ADD_ITEM_ID_TO_COLLECTION",
