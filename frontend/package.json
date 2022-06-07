@@ -2,6 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "homepage": "https://gan-tu.github.io/GoList-v2",
+  "proxy":"http://localhost:8080",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.1.1",
