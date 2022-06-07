@@ -40,6 +40,45 @@ export default function CreateNewItemModal({ collectionId, isOpen, onClose }) {
     setShowPreview(hasUrl && hasTitle);
   }, [newData]);
 
+  useEffect(() => {
+    if (showExtraFields) {
+      if (
+        newData.linkTarget &&
+        !newData.title &&
+        !newData.imageUrl &&
+        !newData.snippet
+      ) {
+        fetch(`http://localhost:8080/getMetadata`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: newData.linkTarget }),
+        })
+          .then((resp) => resp.json())
+          .then((metadata) => {
+            setNewData({
+              title:
+                metadata.twitterTitle ||
+                metadata.ogTitle ||
+                metadata.title ||
+                metadata.twitterSite ||
+                "",
+              snippet:
+                metadata.twitterDescription ||
+                metadata.ogDescription ||
+                metadata.description ||
+                "",
+              imageUrl: metadata.ogImage || "",
+              linkTarget: newData.linkTarget,
+            });
+          })
+          .catch((err) => {
+            console.error(err);
+            toast.error("Failed to get metadata for the url.");
+          });
+      }
+    }
+  }, [showExtraFields, newData]);
+
   const onSave = () => {
     if (!newData.linkTarget?.length || !newData.title?.length) {
       toast.error("URL and title are both required");
