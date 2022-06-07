@@ -28,7 +28,7 @@ async function fetchWithTimeout(resource, options = {}) {
 }
 
 function* fetchCollection({ id }) {
-  const resp = yield call(fetch, `http://localhost:8080/collections/${id}`);
+  const resp = yield call(fetch, `http://localhost:3000/dataApi/collections/${id}`);
   if (!resp.ok) {
     console.error(resp.statusText);
     return;

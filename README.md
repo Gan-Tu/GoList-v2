@@ -11,7 +11,7 @@ Simply run `npm install` inside both the `backend` and the `frontend` folders, s
 
 ## Running App Locally
 
-First, start backend by going to the `backend` folder and run `npm run fake`.
+First, start backend by going to the `backend` folder and run `npm run dev`.
 
 Then, start frontend by going to the `frontend` folder and run `npm run start`.
 

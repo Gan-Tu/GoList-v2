@@ -30,7 +30,7 @@ async function fetchWithTimeout(resource, options = {}) {
 function* fetchItems({ collectionId }) {
   const resp = yield call(
     fetchWithTimeout,
-    `http://localhost:8080/collections/${collectionId}/items`
+    `http://localhost:3000/dataApi/collections/${collectionId}/items`
   );
   if (!resp.ok) {
     console.error(resp.statusText);
@@ -76,7 +76,7 @@ function* updateItem({ itemId, data }) {
   const newData = { ...existingItemData, ...data };
   const resp = yield call(
     fetchWithTimeout,
-    `http://localhost:8080/items/${itemId}`,
+    `http://localhost:3000/dataApi/items/${itemId}`,
     {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -104,7 +104,7 @@ function* updateItem({ itemId, data }) {
 }
 
 function* createItem({ collectionId, itemData }) {
-  const resp = yield call(fetchWithTimeout, "http://localhost:8080/items", {
+  const resp = yield call(fetchWithTimeout, "http://localhost:3000/dataApi/items", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ...itemData, collectionId }),
@@ -132,7 +132,7 @@ function* createItem({ collectionId, itemData }) {
 function* deleteItem({ itemId, collectionId }) {
   const resp = yield call(
     fetchWithTimeout,
-    `http://localhost:8080/items/${itemId}`,
+    `http://localhost:3000/dataApi/items/${itemId}`,
     {
       method: "DELETE",
     }
