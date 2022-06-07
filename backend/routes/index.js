@@ -29,6 +29,7 @@ router.post("/getMetadata", function (req, res, next) {
     .then((resp) => {
       const $ = cheerio.load(resp.data);
       res.json({
+        url: req.body.url,
         title: $("title").text(),
         description: $("meta[name='description']").attr("content"),
         ogTitle: $("meta[property='og:title']").attr("content"),
