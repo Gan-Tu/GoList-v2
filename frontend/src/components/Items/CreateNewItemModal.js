@@ -22,7 +22,8 @@ import toast from "react-hot-toast";
 
 export default function CreateNewItemModal({ collectionId, isOpen, onClose }) {
   const dispatch = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
+  // TODO(tugan): Change to loading after submit, and not loading after success/failure
+  const isLoading = false;
   const [newData, setNewData] = useState({
     title: "",
     imageUrl: "",

@@ -45,8 +45,6 @@ export default function reducer(state = initialState, action) {
       let newMapping = state.itemIdsPerCollection;
       let newIds = newMapping.get(action.collectionId) || [];
       removeItemOnce(newIds, action.itemId);
-      // TODO(tugan): fix refresh issue after delete
-      // TODO(tugan): Auto close after delete
       newMapping.set(action.collectionId, [...newIds]);
       console.log(newMapping);
       return { ...state, itemIdsPerCollection: newMapping };

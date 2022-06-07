@@ -127,7 +127,6 @@ function* createItem({ collectionId, itemData }) {
     collectionId,
     itemId: data.id,
   });
-  // TODO(tugan): Auto close after create
 }
 
 function* deleteItem({ itemId, collectionId }) {

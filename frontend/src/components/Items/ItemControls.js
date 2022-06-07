@@ -24,9 +24,12 @@ export default function ItemControls({ id, collectionId }) {
   const [editMode, setEditMode] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
 
-  // Whenever source item data is updated, close the edit modal.
+  // Whenever source item data is updated, close the edit/delete modals.
   useUpdateEffect(() => {
-    const timer = setTimeout(() => setEditMode(false), 1000);
+    const timer = setTimeout(() => {
+      setEditMode(false);
+      setDeleteMode(false);
+    }, 1000);
     return () => clearTimeout(timer);
   }, [itemData]);
 
