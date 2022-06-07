@@ -13,11 +13,12 @@
 // limitations under the License.
 
 import { useState } from "react";
-import ItemEditModal from "./ItemEditModal";
+import ItemEditForm from "./ItemEditForm";
 import DeleteConfirmation from "./DeleteConfirmation";
 import { PencilEditIcon, TrashIcon } from "../Utilities/SvgIcons";
 import { useItemData } from "../../hooks/items";
 import { useUpdateEffect } from "react-use";
+import Modal from "../Utilities/Modal";
 
 export default function ItemControls({ id, collectionId }) {
   const itemData = useItemData(id);
@@ -35,11 +36,13 @@ export default function ItemControls({ id, collectionId }) {
 
   return (
     <>
-      <ItemEditModal
-        itemId={id}
+      <Modal
+        title="Edit Item Details"
         isOpen={editMode}
         onClose={() => setEditMode(false)}
-      />
+      >
+        <ItemEditForm itemId={id} />
+      </Modal>
       <DeleteConfirmation
         itemId={id}
         collectionId={collectionId}
