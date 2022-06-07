@@ -19,6 +19,7 @@ import TextInput from "../Utilities/TextInput";
 import Modal from "../Utilities/Modal";
 import { NewFileIcon, EyeIcon, EyeOffIcon } from "../Utilities/SvgIcons";
 import toast from "react-hot-toast";
+import { useUrlMetadata } from "../../hooks/items";
 
 export default function CreateNewItemModal({ collectionId, isOpen, onClose }) {
   const dispatch = useDispatch();
@@ -32,6 +33,7 @@ export default function CreateNewItemModal({ collectionId, isOpen, onClose }) {
   });
   const [showPreview, setShowPreview] = useState(false);
   const [showExtraFields, setShowExtraFields] = useState(false);
+  const [metadata, error] = useUrlMetadata(newData.linkTarget);
 
   useEffect(() => {
     let hasUrl = newData.linkTarget?.length > 0;
@@ -41,43 +43,27 @@ export default function CreateNewItemModal({ collectionId, isOpen, onClose }) {
   }, [newData]);
 
   useEffect(() => {
-    if (showExtraFields) {
-      if (
-        newData.linkTarget &&
-        !newData.title &&
-        !newData.imageUrl &&
-        !newData.snippet
-      ) {
-        fetch(`http://localhost:8080/getMetadata`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: newData.linkTarget }),
-        })
-          .then((resp) => resp.json())
-          .then((metadata) => {
-            setNewData({
-              title:
-                metadata.twitterTitle ||
-                metadata.ogTitle ||
-                metadata.title ||
-                metadata.twitterSite ||
-                "",
-              snippet:
-                metadata.twitterDescription ||
-                metadata.ogDescription ||
-                metadata.description ||
-                "",
-              imageUrl: metadata.ogImage || "",
-              linkTarget: newData.linkTarget,
-            });
-          })
-          .catch((err) => {
-            console.error(err);
-            toast.error("Failed to get metadata for the url.");
-          });
-      }
+    if (error) {
+      console.error(error);
+      toast.error("Failed to get URL metadata");
+    } else {
+      setNewData({
+        title:
+          metadata.twitterTitle ||
+          metadata.ogTitle ||
+          metadata.title ||
+          metadata.twitterSite ||
+          "",
+        snippet:
+          metadata.twitterDescription ||
+          metadata.ogDescription ||
+          metadata.description ||
+          "",
+        imageUrl: metadata.ogImage || "",
+        linkTarget: metadata.url || "",
+      });
     }
-  }, [showExtraFields, newData]);
+  }, [metadata, error]);
 
   const onSave = () => {
     if (!newData.linkTarget?.length || !newData.title?.length) {

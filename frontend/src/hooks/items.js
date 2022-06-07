@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 function useItemData(id) {
@@ -26,4 +27,25 @@ function useItemLinkTarget(id) {
   return useSelector((store) => store.ItemsReducer.data.get(id)?.linkTarget);
 }
 
-export { useItemData, useItemIsLoading, useItemLinkTarget };
+function useUrlMetadata(url) {
+  const [metadata, setMetadata] = useState({});
+  const [error, setError] = useState(null);
+  useEffect(() => {
+    if (url) {
+      let controller = new AbortController();
+      fetch(`http://localhost:8080/getMetadata`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+        signal: controller.signal,
+      })
+        .then((resp) => resp.json())
+        .then(setMetadata)
+        .catch(setError);
+      return () => controller.abort();
+    }
+  }, [url]);
+  return [metadata, error];
+}
+
+export { useItemData, useItemIsLoading, useItemLinkTarget, useUrlMetadata };
