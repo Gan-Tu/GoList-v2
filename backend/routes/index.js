@@ -28,9 +28,10 @@ router.post("/getMetadata", function (req, res, next) {
     .get(req.body.url)
     .then((resp) => {
       const $ = cheerio.load(resp.data);
-      res.json({
+      let parsedData = {
         url: req.body.url,
         title: $("title").text(),
+        icon: $("link[rel='icon']").attr("href"),
         description: $("meta[name='description']").attr("content"),
         ogTitle: $("meta[property='og:title']").attr("content"),
         ogSiteName: $("meta[property='og:site_name']").attr("content"),
@@ -42,7 +43,16 @@ router.post("/getMetadata", function (req, res, next) {
           "content"
         ),
         twitterImage: $("meta[name='twitter:image']").attr("content"),
-      });
+      };
+      const origin = new URL(req.body.url).origin;
+      if (origin && origin !== "null") {
+        for (const key of Object.keys(parsedData)) {
+          if (parsedData[key] && parsedData[key].startsWith("/")) {
+            parsedData[key] = `${origin}${parsedData[key]}`;
+          }
+        }
+      }
+      res.json(parsedData);
     })
     .catch((err) => res.status(500).json(err));
 });
