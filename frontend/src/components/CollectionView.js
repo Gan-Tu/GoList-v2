@@ -50,7 +50,10 @@ export default function CollectionView() {
       <CreateFlow
         collectionId={id}
         isOpen={createMode}
-        onClose={() => setCreateMode(false)}
+        onClose={() => {
+          setCreateMode(false);
+          dispatch({ type: "SET_NEW_ITEM_ID", itemId: null });
+        }}
       />
       <div className="flex justify-between items-center text-center h-15 pl-4 pr-4 pb-4 space-y-2">
         <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white">
