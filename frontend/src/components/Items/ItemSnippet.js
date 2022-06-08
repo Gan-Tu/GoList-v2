@@ -19,15 +19,21 @@ export function ItemSnippetView({ data }) {
     <div>
       <div className="flex items-center space-x-4">
         <div className="flex-1 min-w-0 w-60 lg:w-80 space-y-1">
-          <p className="text-sm font-medium text-gray-900 line-clamp-1 text-ellipsis overflow-hidden dark:text-white">
-            {data?.title || ""}
-          </p>
-          <p className="text-sm text-gray-500 line-clamp-2 dark:text-gray-400">
-            {data?.snippet || ""}
-          </p>
-          <span className="inline-flex justify-between text-xs font-normal line-clamp-1 text-gray-600 text-ellipsis overflow-hidden">
-            {data?.linkTarget || ""}
-          </span>
+          {data?.title && (
+            <p className="text-sm font-medium text-gray-900 line-clamp-1 text-ellipsis overflow-hidden dark:text-white">
+              {data.title}
+            </p>
+          )}
+          {data?.snippet && (
+            <p className="text-sm text-gray-500 line-clamp-2 dark:text-gray-400">
+              {data.snippet}
+            </p>
+          )}
+          {data?.linkTarget && (
+            <span className="inline-flex justify-between text-xs font-normal line-clamp-1 text-gray-600 text-ellipsis overflow-hidden">
+              {data.linkTarget}
+            </span>
+          )}
         </div>
         {data?.imageUrl && (
           <div className="flex-shrink-0 m-2">
