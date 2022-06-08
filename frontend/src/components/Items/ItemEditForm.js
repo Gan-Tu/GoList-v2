@@ -29,7 +29,11 @@ function needsUpdate(originalData, newData) {
   );
 }
 
-export default function ItemEditForm({ itemId }) {
+export default function ItemEditForm({
+  itemId,
+  toastIfNoUpdatesMade,
+  onSaveCallBack,
+}) {
   const originalData = useItemData(itemId);
   const isLoading = useItemIsLoading(itemId);
   const [newData, setNewData] = useState({ ...originalData });
@@ -43,8 +47,11 @@ export default function ItemEditForm({ itemId }) {
         itemId,
         data: newData,
       });
-    } else {
+    } else if (toastIfNoUpdatesMade) {
       toast.success("Nothing to save. No updates made.");
+    }
+    if (onSaveCallBack) {
+      onSaveCallBack();
     }
   };
 

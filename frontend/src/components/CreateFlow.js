@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import TextInput from "./Utilities/TextInput";
 import Modal from "./Utilities/Modal";
@@ -25,7 +25,7 @@ export default function CreateFlow({ collectionId, isOpen, onClose }) {
   const dispatch = useDispatch();
   // TODO(tugan): Change to loading after submit, and not loading after success/failure
   const isLoading = false;
-  const [url, setNewUrl] = useState("");
+  const [url, setUrl] = useState("");
   const itemId = useNewItemId();
   const editMode = itemId?.length > 0;
 
@@ -37,6 +37,12 @@ export default function CreateFlow({ collectionId, isOpen, onClose }) {
     }
   };
 
+  useEffect(() => {
+    if (!itemId) {
+      setUrl("");
+    }
+  }, [itemId]);
+
   return (
     <Modal
       title={editMode ? "Edit Details" : "Add New Item"}
@@ -44,7 +50,11 @@ export default function CreateFlow({ collectionId, isOpen, onClose }) {
       onClose={onClose}
     >
       {editMode ? (
-        <ItemEditForm itemId={itemId} />
+        <ItemEditForm
+          itemId={itemId}
+          toastIfNoUpdatesMade={false}
+          onSaveCallBack={onClose}
+        />
       ) : (
         <form className="mt-5">
           <div className="space-y-4">
@@ -52,7 +62,7 @@ export default function CreateFlow({ collectionId, isOpen, onClose }) {
               inputId="url"
               labelText="URL"
               value={url}
-              setValue={setNewUrl}
+              setValue={setUrl}
               isDisabled={isLoading}
               isRequired={true}
             />
