@@ -38,7 +38,7 @@ export function ItemSnippetView({ data }) {
         {data?.imageUrl && (
           <div className="flex-shrink-0 m-2">
             <img
-              className="w-12 h-12 rounded"
+              className="object-cover w-12 h-12 rounded"
               src={data?.imageUrl || ""}
               alt="Preview"
             />
