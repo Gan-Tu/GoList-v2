@@ -24,7 +24,7 @@ import ItemEditForm from "./Items/ItemEditForm";
 export default function CreateFlow({ collectionId, isOpen, onClose }) {
   const dispatch = useDispatch();
   // TODO(tugan): Change to loading after submit, and not loading after success/failure
-  const isLoading = false;
+  const [isLoading, setIsLoading] = useState(false);
   const [url, setUrl] = useState("");
   const itemId = useNewItemId();
   const editMode = itemId?.length > 0;
@@ -33,6 +33,7 @@ export default function CreateFlow({ collectionId, isOpen, onClose }) {
     if (!url) {
       toast.error("URL is empty.");
     } else {
+      setIsLoading(true);
       dispatch({ type: "CREATE_ITEM", url, collectionId });
     }
   };
@@ -41,6 +42,7 @@ export default function CreateFlow({ collectionId, isOpen, onClose }) {
     if (!itemId) {
       setUrl("");
     }
+    setIsLoading(false);
   }, [itemId]);
 
   return (
