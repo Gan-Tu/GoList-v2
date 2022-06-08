@@ -15,6 +15,7 @@
 const initialState = {
   data: new Map(),
   isLoading: new Map(),
+  newItemId: null, // the itemId of newly created item
 };
 
 export default function reducer(state = initialState, action) {
@@ -29,6 +30,8 @@ export default function reducer(state = initialState, action) {
       newLoadingStatus.set(action.id, action.isLoading);
       return { ...state, status: newLoadingStatus };
     }
+    case "SET_NEW_ITEM_ID":
+      return { ...state, newItemId: action.id };
     default:
       return { ...state };
   }

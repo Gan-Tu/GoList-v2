@@ -103,12 +103,46 @@ function* updateItem({ itemId, data }) {
   }
 }
 
-function* createItem({ collectionId, itemData }) {
-  const resp = yield call(fetchWithTimeout, "http://localhost:8080/dataApi/items", {
+function* createItem({ collectionId, url }) {
+  const metadataResp = yield call(fetch, "http://localhost:8080/getMetadata", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...itemData, collectionId }),
+    body: JSON.stringify({ url }),
   });
+  let metadata = {};
+  try {
+    if (metadataResp.ok) {
+      metadata = yield call(() => metadataResp.json());
+    }
+  } catch (error) {
+    console.log("Failed to get metadata as json");
+  }
+  const itemData = {
+    title:
+      metadata.twitterTitle ||
+      metadata.ogTitle ||
+      metadata.title ||
+      metadata.twitterSite ||
+      "",
+    snippet:
+      metadata.twitterDescription ||
+      metadata.ogDescription ||
+      metadata.description ||
+      "",
+    imageUrl: metadata.ogImage || "",
+    linkTarget: url,
+    collectionId: collectionId,
+  };
+
+  const resp = yield call(
+    fetchWithTimeout,
+    "http://localhost:8080/dataApi/items",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(itemData),
+    }
+  );
   if (!resp.ok) {
     console.error(resp.statusText);
     toast.error(`Failed to create new item: ${resp.statusText}`);
@@ -127,6 +161,7 @@ function* createItem({ collectionId, itemData }) {
     collectionId,
     itemId: data.id,
   });
+  yield put({ type: "SET_NEW_ITEM_ID", id: data.id });
 }
 
 function* deleteItem({ itemId, collectionId }) {

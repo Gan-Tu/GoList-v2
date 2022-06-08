@@ -19,8 +19,8 @@ import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
 import ItemView from "./Items/ItemView";
 import { AdjustmentIcon, PlusCircleIcon } from "./Utilities/SvgIcons";
-import CreateNewItemModal from "./Items/CreateNewItemModal";
 import { useUpdateEffect } from "react-use";
+import CreateFlow from "./CreateFlow";
 
 export default function CollectionView() {
   const dispatch = useDispatch();
@@ -36,18 +36,18 @@ export default function CollectionView() {
   }, [dispatch, id]);
 
   // Whenever source item data is updated, close the create modal.
-  useUpdateEffect(() => {
-    const timer = setTimeout(() => setCreateMode(false), 1000);
-    return () => clearTimeout(timer);
-  }, [itemIds]);
+  // useUpdateEffect(() => {
+  //   const timer = setTimeout(() => setCreateMode(false), 1000);
+  //   return () => clearTimeout(timer);
+  // }, [itemIds]);
 
   return (
     <motion.div
       layout
       className="p-5 mt-10 min-w-m bg-white rounded-lg border shadow-md sm:p-8 dark:bg-gray-800 dark:border-gray-700"
-    > 
+    >
       {/* TODO(tugan): Clear create modal after successful create */}
-      <CreateNewItemModal
+      <CreateFlow
         collectionId={id}
         isOpen={createMode}
         onClose={() => setCreateMode(false)}

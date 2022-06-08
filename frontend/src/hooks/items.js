@@ -27,25 +27,8 @@ function useItemLinkTarget(id) {
   return useSelector((store) => store.ItemsReducer.data.get(id)?.linkTarget);
 }
 
-function useUrlMetadata(url) {
-  const [metadata, setMetadata] = useState({});
-  const [error, setError] = useState(null);
-  useEffect(() => {
-    if (url) {
-      let controller = new AbortController();
-      fetch(`http://localhost:8080/getMetadata`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
-        signal: controller.signal,
-      })
-        .then((resp) => resp.json())
-        .then(setMetadata)
-        .catch(setError);
-      return () => controller.abort();
-    }
-  }, [url]);
-  return [metadata, error];
+function useNewItemId() {
+  return useSelector((store) => store.ItemsReducer.newItemId);
 }
 
-export { useItemData, useItemIsLoading, useItemLinkTarget, useUrlMetadata };
+export { useItemData, useItemIsLoading, useItemLinkTarget, useNewItemId };
