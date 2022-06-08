@@ -104,6 +104,7 @@ function* updateItem({ itemId, data }) {
 }
 
 function* createItem({ collectionId, url }) {
+  let toastId = toast.loading("Creating new item...", {"duration": 5000});
   const metadataResp = yield call(fetch, "http://localhost:8080/getMetadata", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -117,6 +118,7 @@ function* createItem({ collectionId, url }) {
   } catch (error) {
     console.log("Failed to get metadata as json");
   }
+
   const itemData = {
     title:
       metadata.twitterTitle ||
@@ -145,15 +147,18 @@ function* createItem({ collectionId, url }) {
   );
   if (!resp.ok) {
     console.error(resp.statusText);
+    toast.dismiss(toastId);
     toast.error(`Failed to create new item: ${resp.statusText}`);
     return;
   }
   const data = yield resp.json();
   if (!data?.id) {
     console.error("Failed to find the ID for newly created item");
+    toast.dismiss(toastId);
     toast.error("Failed to create new item.");
     return;
   }
+  toast.dismiss(toastId);
   toast.success("New item successfully created");
   yield put({ type: "SET_ITEM_WITH_DATA", id: data.id, data });
   yield put({
