@@ -107,7 +107,7 @@ export default function ItemEditForm({
           showCharacterCount={true}
           characterLimit={100}
           isTextArea={true}
-          rows={3}
+          rows={4}
         />
 
         <TextInput
