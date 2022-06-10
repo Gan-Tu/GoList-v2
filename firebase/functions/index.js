@@ -6,6 +6,7 @@ const cheerio = require("cheerio");
 // https://firebase.google.com/docs/functions/write-firebase-functions
 
 exports.getUrlMetadata = functions.https.onRequest((req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
   if (req.method !== "POST") {
     return res.sendStatus(404);
   }
