@@ -17,8 +17,7 @@ import CollectionCover from "./CollectionCover";
 function Home() {
   return (
     <div className="grid grid-cols-2 gap-5">
-      {/* <CollectionCover id="web-mobile" /> */}
-      <CollectionCover id="XqWLea7s4KEZhdMNflfP" />
+      <CollectionCover id="web-mobile" />
       <CollectionCover id="demo" />
     </div>
   );
