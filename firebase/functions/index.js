@@ -5,17 +5,13 @@ const cheerio = require("cheerio");
 // Create and Deploy Your First Cloud Functions
 // https://firebase.google.com/docs/functions/write-firebase-functions
 
-exports.getUrlMetadata = functions.https.onRequest((req, res) => {
-  res.set("Access-Control-Allow-Origin", "*");
-  if (req.method !== "POST") {
-    return res.sendStatus(404);
-  }
+exports.getUrlMetadata = functions.https.onCall(async (url) => {
   return axios
-    .get(req.body.url)
+    .get(url)
     .then((resp) => {
       const $ = cheerio.load(resp.data);
       const parsedData = {
-        url: req.body.url,
+        url: url,
         title: $("title").text(),
         icon: $("link[rel='icon']").attr("href"),
         description: $("meta[name='description']").attr("content"),
@@ -30,7 +26,7 @@ exports.getUrlMetadata = functions.https.onRequest((req, res) => {
         ),
         twitterImage: $("meta[name='twitter:image']").attr("content"),
       };
-      const origin = new URL(req.body.url).origin;
+      const origin = new URL(url).origin;
       if (origin && origin !== "null") {
         for (const key of Object.keys(parsedData)) {
           if (parsedData[key] && parsedData[key].startsWith("/")) {
@@ -38,7 +34,9 @@ exports.getUrlMetadata = functions.https.onRequest((req, res) => {
           }
         }
       }
-      return res.json(parsedData);
+      return parsedData;
     })
-    .catch((err) => res.status(500).json(err));
+    .catch((err) => {
+      throw new functions.https.HttpsError('internal', `Fail to get url metadat: ${err}`);
+    });
 });
