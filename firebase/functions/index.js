@@ -37,6 +37,6 @@ exports.getUrlMetadata = functions.https.onCall(async (url) => {
       return parsedData;
     })
     .catch((err) => {
-      throw new functions.https.HttpsError('internal', `Fail to get url metadat: ${err}`);
+      throw new functions.https.HttpsError('internal', `Fail to get url metadata: ${err}`);
     });
 });
