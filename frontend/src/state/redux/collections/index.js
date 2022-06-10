@@ -13,20 +13,13 @@
 // limitations under the License.
 
 import { call, put, takeEvery } from "redux-saga/effects";
-import { fireStore } from "../../../firebase";
+import { db } from "../../../firebase";
 import { doc, getDoc } from "firebase/firestore";
 
 function* fetchCollection({ id }) {
-  // const resp = yield call(fetch, `http://localhost:8080/dataApi/collections/${id}`);
-  const docRef = doc(fireStore, "collections", id);
+  const docRef = doc(db, "collections", id);
   const documentSnapshot = yield call(getDoc, docRef);
-  // if (!resp.ok) {
-  //   console.error(resp.statusText);
-  //   return;
-  // }
-  // const data = yield resp.json();
   const data = documentSnapshot.data();
-  console.log(data);
   if (!!data) {
     yield put({ type: "FETCH_COLLECTION_SUCCESS", id, data });
     yield put({ type: "FETCH_ITEMS", collectionId: id });

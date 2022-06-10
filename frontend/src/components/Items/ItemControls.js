@@ -41,7 +41,11 @@ export default function ItemControls({ id, collectionId }) {
         isOpen={editMode}
         onClose={() => setEditMode(false)}
       >
-        <ItemEditForm itemId={id} toastIfNoUpdatesMade={true} />
+        <ItemEditForm
+          itemId={id}
+          collectionId={collectionId}
+          toastIfNoUpdatesMade={true}
+        />
       </Modal>
       <DeleteConfirmation
         itemId={id}

@@ -14,52 +14,42 @@
 
 import { call, put, select, takeEvery, takeLatest } from "redux-saga/effects";
 import toast from "react-hot-toast";
-
-async function fetchWithTimeout(resource, options = {}) {
-  const { timeout = 5000 } = options;
-  const abortController = new AbortController();
-  const id = setTimeout(() => abortController.abort(), timeout);
-  const response = await fetch(resource, {
-    ...options,
-    signal: abortController.signal,
-  });
-  clearTimeout(id);
-  return response;
-}
+import { db } from "../../../firebase";
+import {
+  doc,
+  collection,
+  addDoc,
+  updateDoc,
+  getDocs,
+  deleteDoc,
+} from "firebase/firestore";
 
 function* fetchItems({ collectionId }) {
-  const resp = yield call(
-    fetchWithTimeout,
-    `http://localhost:8080/dataApi/collections/${collectionId}/items`
-  );
-  if (!resp.ok) {
-    console.error(resp.statusText);
-    return;
-  }
-  const data = yield resp.json();
-  if (!!data) {
-    for (let i = 0; i < data.length; i++) {
-      let itemData = data[i];
-      if (itemData) {
-        yield put({
-          type: "SET_ITEM_WITH_DATA",
-          id: itemData.id,
-          data: itemData,
-        });
-        yield put({
-          type: "ADD_ITEM_ID_TO_COLLECTION",
-          collectionId,
-          itemId: itemData.id,
-        });
-      }
+  const ref = collection(db, "collections", collectionId, "items");
+  const querySnapshot = yield call(getDocs, ref);
+  for (let i = 0; i < querySnapshot.docs.length; i++) {
+    let itemData = querySnapshot.docs[i].data();
+    itemData = { ...itemData, id: querySnapshot.docs[i].id, collectionId };
+    if (itemData) {
+      yield put({
+        type: "SET_ITEM_WITH_DATA",
+        id: itemData.id,
+        data: itemData,
+      });
+      yield put({
+        type: "ADD_ITEM_ID_TO_COLLECTION",
+        collectionId,
+        itemId: itemData.id,
+      });
     }
   }
 }
 
-function* updateItem({ itemId, data }) {
+function* updateItem({ itemId, collectionId, data }) {
   const existingItemData = yield select(
     (store) => store.ItemsReducer.data.get(itemId) || {}
   );
+  const newData = { ...existingItemData, ...data };
 
   // Marks update as in progress & shows notification if 1 second passed.
   yield put({
@@ -73,16 +63,8 @@ function* updateItem({ itemId, data }) {
   }, 1000);
 
   // Post to the API the update
-  const newData = { ...existingItemData, ...data };
-  const resp = yield call(
-    fetchWithTimeout,
-    `http://localhost:8080/dataApi/items/${itemId}`,
-    {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newData),
-    }
-  );
+  const docRef = doc(db, "collections", collectionId, "items", itemId);
+  yield call(updateDoc, docRef, newData);
 
   // Clear any loading animations
   toast.dismiss(toastId);
@@ -93,18 +75,12 @@ function* updateItem({ itemId, data }) {
     isLoading: false,
   });
 
-  // Inform update status
-  if (resp.ok) {
-    yield put({ type: "SET_ITEM_WITH_DATA", id: itemId, data: newData });
-    toast.success("Updated item details successfully");
-  } else {
-    console.error("Failed to POST", resp);
-    toast.error(`Failed to update item: ${resp.statusText}`);
-  }
+  yield put({ type: "SET_ITEM_WITH_DATA", id: itemId, data: newData });
+  toast.success("Updated item details successfully");
 }
 
 function* createItem({ collectionId, url }) {
-  let toastId = toast.loading("Creating new item...", {"duration": 5000});
+  let toastId = toast.loading("Creating new item...", { duration: 5000 });
   const metadataResp = yield call(fetch, "http://localhost:8080/getMetadata", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -133,26 +109,13 @@ function* createItem({ collectionId, url }) {
       "",
     imageUrl: metadata.twitterImage || metadata.ogImage || metadata.icon || "",
     link: url,
-    collectionId: collectionId,
   };
-
-  const resp = yield call(
-    fetchWithTimeout,
-    "http://localhost:8080/dataApi/items",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(itemData),
-    }
+  const docRef = yield call(
+    addDoc,
+    collection(db, "collections", collectionId, "items"),
+    itemData
   );
-  if (!resp.ok) {
-    console.error(resp.statusText);
-    toast.dismiss(toastId);
-    toast.error(`Failed to create new item: ${resp.statusText}`);
-    return;
-  }
-  const data = yield resp.json();
-  if (!data?.id) {
+  if (!docRef.id) {
     console.error("Failed to find the ID for newly created item");
     toast.dismiss(toastId);
     toast.error("Failed to create new item.");
@@ -160,28 +123,22 @@ function* createItem({ collectionId, url }) {
   }
   toast.dismiss(toastId);
   toast.success("New item successfully created");
-  yield put({ type: "SET_ITEM_WITH_DATA", id: data.id, data });
+  yield put({
+    type: "SET_ITEM_WITH_DATA",
+    id: docRef.id,
+    data: { ...itemData, collectionId, id: docRef.id },
+  });
   yield put({
     type: "ADD_ITEM_ID_TO_COLLECTION",
     collectionId,
-    itemId: data.id,
+    itemId: docRef.id,
   });
-  yield put({ type: "SET_NEW_ITEM_ID", id: data.id });
+  yield put({ type: "SET_NEW_ITEM_ID", id: docRef.id });
 }
 
 function* deleteItem({ itemId, collectionId }) {
-  const resp = yield call(
-    fetchWithTimeout,
-    `http://localhost:8080/dataApi/items/${itemId}`,
-    {
-      method: "DELETE",
-    }
-  );
-  if (!resp.ok) {
-    console.error(resp.statusText);
-    toast.error(`Failed to delete item: ${resp.statusText}`);
-    return;
-  }
+  const docRef = doc(db, "collections", collectionId, "items", itemId);
+  yield call(deleteDoc, docRef);
   yield put({
     type: "REMOVE_ITEM_ID_FROM_COLLECTION",
     collectionId,

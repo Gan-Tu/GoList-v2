@@ -54,6 +54,7 @@ export default function CreateFlow({ collectionId, isOpen, onClose }) {
       {editMode ? (
         <ItemEditForm
           itemId={itemId}
+          collectionId={collectionId}
           toastIfNoUpdatesMade={false}
           onSaveCallBack={onClose}
         />
