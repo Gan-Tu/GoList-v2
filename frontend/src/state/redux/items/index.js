@@ -137,7 +137,7 @@ function* deleteItem({ itemId, collectionId }) {
 }
 
 export function* watchItemApp() {
-  yield takeEvery("FETCH_ITEMS", fetchItems);
+  yield takeLatest("FETCH_ITEMS", fetchItems);
   yield takeLatest("UPDATE_ITEM", updateItem);
   yield takeLatest("CREATE_ITEM", createItem);
   yield takeLatest("DELETE_ITEM", deleteItem);
