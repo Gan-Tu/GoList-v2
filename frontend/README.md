@@ -1,7 +1,5 @@
 # GoList Frontend
 
-Make sure to start the backend located at root directory's `backend` folder.
-
 ## Available Scripts
 
 In the project directory, you can run:
