@@ -16,7 +16,6 @@
     "firebase": "^9.8.3",
     "flowbite": "^1.4.7",
     "framer-motion": "^6.3.10",
-    "gh-pages": "^4.0.0",
     "node-fetch": "^3.2.0",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
@@ -33,7 +32,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "deploy": "gh-pages -d build",
+    "deploy": "firebase deploy --only hosting",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
