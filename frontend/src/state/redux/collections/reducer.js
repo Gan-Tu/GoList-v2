@@ -37,7 +37,9 @@ export default function reducer(state = initialState, action) {
     case "ADD_ITEM_ID_TO_COLLECTION": {
       let newMapping = state.itemIdsPerCollection;
       let newIds = newMapping.get(action.collectionId) || [];
-      newIds.push(action.itemId);
+      if (newIds.indexOf(action.itemId) === -1) {
+        newIds.push(action.itemId);
+      }
       newMapping.set(action.collectionId, [...newIds]);
       return { ...state, itemIdsPerCollection: newMapping };
     }
