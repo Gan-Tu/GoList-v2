@@ -47,8 +47,8 @@ function CollectionCover(props) {
         </span>
         <div className="pt-5 flex ">
           <div className="flex mb-5 -space-x-4">
-            {data && data.profile_pics
-              ? data.profile_pics.map((img, index) => (
+            {data && data.profilePics
+              ? data.profilePics.map((img, index) => (
                   <img
                     className="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"
                     src={img}

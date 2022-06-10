@@ -5,7 +5,7 @@
       "title": "Web & Mobile Industry",
       "imageUrl": "https://flowbite.com/docs/images/blog/image-1.jpg",
       "subtitle": "5 Web Links",
-      "profile_pics": [
+      "profilePics": [
         "https://flowbite.com/docs/images/people/profile-picture-5.jpg",
         "https://flowbite.com/docs/images/people/profile-picture-2.jpg",
         "https://flowbite.com/docs/images/people/profile-picture-3.jpg",
@@ -18,7 +18,7 @@
       "title": "Simple Demo",
       "subtitle": "2 Web Links",
       "imageUrl": "https://flowbite.com/docs/images/blog/image-2.jpg",
-      "profile_pics": [
+      "profilePics": [
         "https://flowbite.com/docs/images/people/profile-picture-5.jpg",
         "https://flowbite.com/docs/images/people/profile-picture-1.jpg"
       ],
