@@ -132,7 +132,7 @@ function* createItem({ collectionId, url }) {
       metadata.description ||
       "",
     imageUrl: metadata.twitterImage || metadata.ogImage || metadata.icon || "",
-    linkTarget: url,
+    link: url,
     collectionId: collectionId,
   };
 

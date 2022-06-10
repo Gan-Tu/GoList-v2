@@ -23,12 +23,12 @@ function useItemIsLoading(id) {
   return useSelector((store) => store.ItemsReducer.isLoading.get(id));
 }
 
-function useItemLinkTarget(id) {
-  return useSelector((store) => store.ItemsReducer.data.get(id)?.linkTarget);
+function useItemlink(id) {
+  return useSelector((store) => store.ItemsReducer.data.get(id)?.link);
 }
 
 function useNewItemId() {
   return useSelector((store) => store.ItemsReducer.newItemId);
 }
 
-export { useItemData, useItemIsLoading, useItemLinkTarget, useNewItemId };
+export { useItemData, useItemIsLoading, useItemlink, useNewItemId };

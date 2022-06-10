@@ -31,7 +31,7 @@
       "collectionId": "web-mobile",
       "title": "New Icon for App",
       "snippet": "Building in trend is difficult enough, especially when you are not well resourced to keep up with the styles all the time.",
-      "linkTarget": "http://example.com/12345",
+      "link": "http://example.com/12345",
       "imageUrl": "https://flowbite.com/docs/images/people/profile-picture-1.jpg"
     },
     {
@@ -39,7 +39,7 @@
       "collectionId": "web-mobile",
       "title": "Figma is Adobe Killer",
       "snippet": "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Vel, omnis earum amet sunt tenetur.",
-      "linkTarget": "http://example.com/14234",
+      "link": "http://example.com/14234",
       "imageUrl": "https://flowbite.com/docs/images/people/profile-picture-2.jpg"
     },
     {
@@ -47,7 +47,7 @@
       "collectionId": "web-mobile",
       "title": "Reprehenderit, modi incidunt!",
       "snippet": "Voluptatum quasi illum corporis repudiandae voluptatem velit quos provident impedit beatae mollitia autem!",
-      "linkTarget": "http://example.com/92843",
+      "link": "http://example.com/92843",
       "imageUrl": "https://flowbite.com/docs/images/people/profile-picture-3.jpg"
     },
     {
@@ -55,7 +55,7 @@
       "collectionId": "web-mobile",
       "title": "Consectetur adipiscing elit pellentesque",
       "snippet": "Purus non enim praesent elementum facilisis leo. Amet justo donec enim diam vulputate ut pharetra. Id faucibus nisl tincidunt eget nullam non.",
-      "linkTarget": "http://example.com/25463",
+      "link": "http://example.com/25463",
       "imageUrl": "https://flowbite.com/docs/images/people/profile-picture-4.jpg"
     },
     {
@@ -63,15 +63,15 @@
       "collectionId": "web-mobile",
       "title": "Tempus iaculis urna id volutpat",
       "snippet": "Adipiscing enim eu turpis egestas pretium aenean pharetra. Imperdiet massa tincidunt nunc pulvinar sapien et ligula.",
-      "linkTarget": "http://example.com/00374",
+      "link": "http://example.com/00374",
       "imageUrl": "https://flowbite.com/docs/images/people/profile-picture-5.jpg"
     },
     {
       "id": "kolPKLq",
       "collectionId": "demo",
-      "title": "New Icon for App",
+      "title": "New Icon for App!!",
       "snippet": "Building in trend is difficult enough, especially when you are not well resourced to keep up with the styles all the time.",
-      "linkTarget": "http://example.com/12345",
+      "link": "http://example.com/12345",
       "imageUrl": "https://flowbite.com/docs/images/people/profile-picture-3.jpg"
     },
     {
@@ -79,7 +79,7 @@
       "collectionId": "demo",
       "title": "Figma is Adobe Killer",
       "snippet": "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Vel, omnis earum amet sunt tenetur.",
-      "linkTarget": "http://example.com/14234",
+      "link": "http://example.com/14234",
       "imageUrl": "https://flowbite.com/docs/images/people/profile-picture-5.jpg"
     },
     {
@@ -87,7 +87,7 @@
       "collectionId": "demo",
       "title": "Consectetur adipiscing elit pellentesque",
       "snippet": "Purus non enim praesent elementum facilisis leo. Amet justo donec enim diam vulputate ut pharetra. Id faucibus nisl tincidunt eget nullam non.",
-      "linkTarget": "http://example.com/25463",
+      "link": "http://example.com/25463",
       "imageUrl": "https://flowbite.com/docs/images/people/profile-picture-2.jpg"
     }
   ]

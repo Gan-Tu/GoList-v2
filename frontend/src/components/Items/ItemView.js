@@ -14,10 +14,10 @@
 
 import ItemSnippet from "./ItemSnippet";
 import ItemControls from "./ItemControls";
-import { useItemLinkTarget } from "../../hooks/items";
+import { useItemlink } from "../../hooks/items";
 
 export default function ItemView({ id, collectionId, showControls }) {
-  const linkTarget = useItemLinkTarget(id);
+  const link = useItemlink(id);
   if (showControls) {
     return (
       <div className="sm:py-4 border rounded-lg p-4 hover:shadow-lg">
@@ -28,7 +28,7 @@ export default function ItemView({ id, collectionId, showControls }) {
   } else {
     return (
       <div className="sm:py-4 border rounded-lg p-4 hover:shadow-lg">
-        <a href={linkTarget || "#"} target="_blank" rel="noreferrer">
+        <a href={link || "#"} target="_blank" rel="noreferrer">
           <ItemSnippet id={id} />
         </a>
       </div>

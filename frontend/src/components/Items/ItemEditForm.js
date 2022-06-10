@@ -25,7 +25,7 @@ function needsUpdate(originalData, newData) {
     originalData.title !== newData?.title ||
     originalData.snippet !== newData?.snippet ||
     originalData.imageUrl !== newData?.imageUrl ||
-    originalData.linkTarget !== newData?.linkTarget
+    originalData.link !== newData?.link
   );
 }
 
@@ -65,7 +65,7 @@ export default function ItemEditForm({
             </div>
             <div className="sm:py-4 border rounded-lg p-4 mt-4 hover:shadow-lg">
               <a
-                href={newData.linkTarget || null}
+                href={newData.link || null}
                 target="_blank"
                 rel="noreferrer"
               >
@@ -76,10 +76,10 @@ export default function ItemEditForm({
         )}
 
         <TextInput
-          inputId="linkTarget"
+          inputId="link"
           labelText="URL"
-          value={newData.linkTarget}
-          setValue={(val) => setNewData({ ...newData, linkTarget: val })}
+          value={newData.link}
+          setValue={(val) => setNewData({ ...newData, link: val })}
           isDisabled={isLoading}
           isRequired={true}
         />

@@ -29,9 +29,9 @@ export function ItemSnippetView({ data }) {
               {data.snippet}
             </p>
           )}
-          {data?.linkTarget && (
+          {data?.link && (
             <span className="inline-flex justify-between text-xs font-normal line-clamp-1 text-gray-600 text-ellipsis overflow-hidden">
-              {data.linkTarget}
+              {data.link}
             </span>
           )}
         </div>
