@@ -14,7 +14,7 @@
 
 import { call, put, select, takeEvery, takeLatest } from "redux-saga/effects";
 import toast from "react-hot-toast";
-import { db } from "../../../firebase";
+import { db, functions } from "../../../firebase";
 import {
   doc,
   collection,
@@ -23,6 +23,7 @@ import {
   getDocs,
   deleteDoc,
 } from "firebase/firestore";
+import { httpsCallable } from "firebase/functions";
 
 function* fetchItems({ collectionId }) {
   const ref = collection(db, "collections", collectionId, "items");
@@ -81,20 +82,8 @@ function* updateItem({ itemId, collectionId, data }) {
 
 function* createItem({ collectionId, url }) {
   let toastId = toast.loading("Creating new item...", { duration: 5000 });
-  const metadataResp = yield call(fetch, "http://localhost:8080/getMetadata", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ url }),
-  });
-  let metadata = {};
-  try {
-    if (metadataResp.ok) {
-      metadata = yield call(() => metadataResp.json());
-    }
-  } catch (error) {
-    console.log("Failed to get metadata as json");
-  }
-
+  const result = yield call(httpsCallable(functions, "getUrlMetadata"), url);
+  const metadata = result.data;
   const itemData = {
     title:
       metadata.twitterTitle ||
