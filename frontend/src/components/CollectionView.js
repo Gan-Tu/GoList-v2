@@ -19,7 +19,6 @@ import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
 import ItemView from "./Items/ItemView";
 import { AdjustmentIcon, PlusCircleIcon } from "./Utilities/SvgIcons";
-import { useUpdateEffect } from "react-use";
 import CreateFlow from "./CreateFlow";
 
 export default function CollectionView() {
@@ -34,12 +33,6 @@ export default function CollectionView() {
   useEffect(() => {
     dispatch({ type: "FETCH_COLLECTION", id });
   }, [dispatch, id]);
-
-  // Whenever source item data is updated, close the create modal.
-  // useUpdateEffect(() => {
-  //   const timer = setTimeout(() => setCreateMode(false), 1000);
-  //   return () => clearTimeout(timer);
-  // }, [itemIds]);
 
   return (
     <motion.div

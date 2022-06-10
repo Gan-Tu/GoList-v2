@@ -13,19 +13,6 @@
 // limitations under the License.
 
 import { call, put, takeEvery } from "redux-saga/effects";
-import toast from "react-hot-toast";
-
-async function fetchWithTimeout(resource, options = {}) {
-  const { timeout = 5000 } = options;
-  const abortController = new AbortController();
-  const id = setTimeout(() => abortController.abort(), timeout);
-  const response = await fetch(resource, {
-    ...options,
-    signal: abortController.signal,
-  });
-  clearTimeout(id);
-  return response;
-}
 
 function* fetchCollection({ id }) {
   const resp = yield call(fetch, `http://localhost:8080/dataApi/collections/${id}`);
