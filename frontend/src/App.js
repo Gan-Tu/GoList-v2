@@ -24,8 +24,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/:id" element={<CollectionView />} />
-          <Route path="/:id/cover" element={<CollectionCover />} />
+          <Route path="/c/:id" element={<CollectionView />} />
+          <Route path="/c/:id/cover" element={<CollectionCover />} />
           <Route path="/*" element={<Home />} />
         </Routes>
       </BrowserRouter>
