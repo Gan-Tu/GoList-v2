@@ -63,7 +63,7 @@ function CollectionCover(props) {
           </span>
         </div>
         <Link
-          to={`/${id}`}
+          to={`/c/${id}`}
           type="button"
           className="w-full text-center text-white bg-[#050708] hover:bg-[#050708]/90 focus:ring-4 focus:outline-none focus:ring-[#050708]/50 font-small rounded-lg text-sm px-5 py-2.5 dark:focus:ring-[#050708]/50 dark:hover:bg-[#050708]/30 mr-2 mb-2"
         >
