@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { call, put, select, takeEvery, takeLatest } from "redux-saga/effects";
+import { call, put, select, takeLatest } from "redux-saga/effects";
 import toast from "react-hot-toast";
 import { db, functions } from "../../../firebase";
 import {
