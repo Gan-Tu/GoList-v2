@@ -19,7 +19,7 @@ import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
 import ItemView from "./Items/ItemView";
 import { AdjustmentIcon, PlusCircleIcon } from "./Utilities/SvgIcons";
-import CreateFlow from "./CreateFlow";
+import CreateItemFlow from "./Items/CreateItemFlow";
 
 export default function CollectionView() {
   const dispatch = useDispatch();
@@ -40,7 +40,7 @@ export default function CollectionView() {
       className="p-5 mt-10 min-w-m bg-white rounded-lg border shadow-md sm:p-8 dark:bg-gray-800 dark:border-gray-700"
     >
       {/* TODO(tugan): Clear create modal after successful create */}
-      <CreateFlow
+      <CreateItemFlow
         groupId={id}
         isOpen={createMode}
         onClose={() => {

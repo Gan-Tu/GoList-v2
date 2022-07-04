@@ -14,14 +14,14 @@
 
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import TextInput from "./Utilities/TextInput";
-import Modal from "./Utilities/Modal";
-import { NewFileIcon } from "./Utilities/SvgIcons";
+import TextInput from "../Utilities/TextInput";
+import Modal from "../Utilities/Modal";
+import { NewFileIcon } from "../Utilities/SvgIcons";
 import toast from "react-hot-toast";
-import { useGroupUpdateStatus } from "../hooks/data";
-import ItemEditForm from "./Items/ItemEditForm";
+import { useGroupUpdateStatus } from "../../hooks/data";
+import ItemEditForm from "./ItemEditForm";
 
-export default function CreateFlow({ groupId, isOpen, onClose }) {
+export default function CreateItemFlow({ groupId, isOpen, onClose }) {
   const dispatch = useDispatch();
   // TODO(tugan): Change to loading after submit, and not loading after success/failure
   const [url, setUrl] = useState("");
