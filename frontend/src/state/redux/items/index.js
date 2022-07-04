@@ -12,53 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { call, put, select, takeLatest } from "redux-saga/effects";
+import { call, put, takeLatest } from "redux-saga/effects";
 import toast from "react-hot-toast";
 import { db, functions } from "../../../firebase";
-import {
-  doc,
-  collection,
-  addDoc,
-  updateDoc,
-  getDocs,
-  deleteDoc,
-  FieldValue,
-} from "firebase/firestore";
+import { collection, addDoc } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
-
-function* updateItem({ itemId, collectionId, data }) {
-  const existingItemData = yield select(
-    (store) => store.ItemsReducer.data.get(itemId) || {}
-  );
-  const newData = { ...existingItemData, ...data };
-
-  // Marks update as in progress & shows notification if 1 second passed.
-  yield put({
-    type: "SET_ITEM_LOADING_STATUS",
-    id: itemId,
-    isLoading: true,
-  });
-  let toastId;
-  const timer = setTimeout(() => {
-    toastId = toast.loading("Still saving the data...");
-  }, 1000);
-
-  // Post to the API the update
-  const docRef = doc(db, "collections", collectionId, "items", itemId);
-  yield call(updateDoc, docRef, newData);
-
-  // Clear any loading animations
-  toast.dismiss(toastId);
-  clearTimeout(timer);
-  yield put({
-    type: "SET_ITEM_LOADING_STATUS",
-    id: itemId,
-    isLoading: false,
-  });
-
-  yield put({ type: "SET_ITEM_WITH_DATA", id: itemId, data: newData });
-  toast.success("Updated item details successfully");
-}
 
 function* createItem({ collectionId, url }) {
   let toastId = toast.loading("Creating new item...", { duration: 5000 });
@@ -105,19 +63,6 @@ function* createItem({ collectionId, url }) {
   yield put({ type: "SET_NEW_ITEM_ID", id: docRef.id });
 }
 
-function* deleteItem({ itemId, collectionId }) {
-  const docRef = doc(db, "collections", collectionId, "items", itemId);
-  yield call(deleteDoc, docRef);
-  yield put({
-    type: "REMOVE_ITEM_ID_FROM_COLLECTION",
-    collectionId,
-    itemId,
-  });
-  toast.success("Item deleted successfuly.");
-}
-
 export function* watchItemApp() {
-  yield takeLatest("UPDATE_ITEM", updateItem);
   yield takeLatest("CREATE_ITEM", createItem);
-  // yield takeLatest("DELETE_ITEM", deleteItem);
 }

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { call, put, takeEvery, takeLatest } from "redux-saga/effects";
+import { call, put, select, takeEvery, takeLatest } from "redux-saga/effects";
 import { db } from "../../../firebase";
 import { doc, deleteField, getDoc, updateDoc } from "firebase/firestore";
 import toast from "react-hot-toast";
@@ -41,7 +41,55 @@ function* deleteItem({ groupId, itemId }) {
   toast.success("Item deleted successfuly.");
 }
 
+function* updateItem({ itemId, groupId, data }) {
+  // Start item update
+  yield put({
+    type: "SET_ITEM_UPDATE_STATUS",
+    id: itemId,
+    status: {
+      isLoading: true,
+    },
+  });
+
+  // Show saving in progress notification after 1 second.
+  let toastId;
+  const timer = setTimeout(() => {
+    toastId = toast.loading("Still saving the data...");
+  }, 1000);
+
+  // Update date remotely and locally
+  const docRef = doc(db, "DataGroups", groupId);
+  const currentData = yield select(
+    (store) => store.DataGroupsReducer.items.get(itemId) || {}
+  );
+  const newData = { ...currentData, ...data };
+  let update = {};
+  update[`items.${itemId}`] = newData;
+  yield call(updateDoc, docRef, update);
+  yield put({
+    type: "SET_ITEM_DATA",
+    id: itemId,
+    data: newData,
+  });
+
+  // Clear any loading animations
+  toast.dismiss(toastId);
+  clearTimeout(timer);
+
+  // End item update
+  yield put({
+    type: "SET_ITEM_UPDATE_STATUS",
+    id: itemId,
+    status: {
+      isLoading: false,
+    },
+  });
+
+  toast.success("Updated item details successfully");
+}
+
 export function* watchDataGroupsApp() {
   yield takeLatest("FETCH_GROUP", fetchDataGroup);
+  yield takeLatest("UPDATE_ITEM", updateItem);
   yield takeLatest("DELETE_ITEM", deleteItem);
 }

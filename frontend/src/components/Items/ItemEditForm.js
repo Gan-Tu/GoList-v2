@@ -15,7 +15,7 @@
 import toast from "react-hot-toast";
 import { useState } from "react";
 import { useItemData } from "../../hooks/data";
-import { useItemIsLoading } from "../../hooks/items";
+import { useItemIsLoading } from "../../hooks/data";
 import { ItemSnippetView } from "./ItemSnippet";
 import { useDispatch } from "react-redux";
 import TextInput from "../Utilities/TextInput";
@@ -47,7 +47,7 @@ export default function ItemEditForm({
       dispatch({
         type: "UPDATE_ITEM",
         itemId,
-        collectionId,
+        groupId: collectionId,
         data: newData,
       });
     } else if (toastIfNoUpdatesMade) {

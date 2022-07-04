@@ -15,6 +15,7 @@
 const initialState = {
   groupInfo: new Map(),
   items: new Map(),
+  itemsUpdateStatus: new Map(),
 };
 
 function removeItemOnce(arr, value) {
@@ -45,6 +46,14 @@ export default function reducer(state = initialState, action) {
       return {
         ...state,
         items: newItems,
+      };
+    }
+    case "SET_ITEM_UPDATE_STATUS": {
+      let newStatus = new Map(state.itemsUpdateStatus);
+      newStatus.set(action.id, action.status);
+      return {
+        ...state,
+        itemsUpdateStatus: newStatus,
       };
     }
     case "REMOVE_ITEM_ID_FROM_GROUP": {

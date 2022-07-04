@@ -14,20 +14,8 @@
 
 import { useSelector } from "react-redux";
 
-function useItemData(id) {
-  return useSelector((store) => store.ItemsReducer.data.get(id));
-}
-
-function useItemIsLoading(id) {
-  return useSelector((store) => store.ItemsReducer.isLoading.get(id));
-}
-
-function useItemlink(id) {
-  return useSelector((store) => store.ItemsReducer.data.get(id)?.link);
-}
-
 function useNewItemId() {
   return useSelector((store) => store.ItemsReducer.newItemId);
 }
 
-export { useItemData, useItemIsLoading, useItemlink, useNewItemId };
+export { useNewItemId };

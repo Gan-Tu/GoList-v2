@@ -40,9 +40,11 @@ function useItemlink(id) {
   return useSelector((store) => store.DataGroupsReducer.items.get(id)?.link);
 }
 
-// function useItemIsLoading(id) {
-//   return useSelector((store) => store.DataGroupsReducer.isLoading.get(id));
-// }
+function useItemIsLoading(id) {
+  return useSelector(
+    (store) => store.DataGroupsReducer.itemsUpdateStatus.get(id)?.isLoading
+  );
+}
 
 // function useNewItemId() {
 //   return useSelector((store) => store.DataGroupsReducer.newItemId);
@@ -53,7 +55,7 @@ export {
   useGroupTitle,
   useGroupItemIds,
   useItemData,
-  // useItemIsLoading,
+  useItemIsLoading,
   useItemlink,
   // useNewItemId,
 };
