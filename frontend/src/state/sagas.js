@@ -13,9 +13,8 @@
 // limitations under the License.
 
 import { all } from "redux-saga/effects";
-import { watchItemApp } from "./redux/items";
 import { watchDataGroupsApp } from "./redux/DataGroups";
 
 export default function* rootSagas() {
-  yield all([watchItemApp(), watchDataGroupsApp()]);
+  yield all([watchDataGroupsApp()]);
 }

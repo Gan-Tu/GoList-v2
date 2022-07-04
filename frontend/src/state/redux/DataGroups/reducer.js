@@ -14,6 +14,7 @@
 
 const initialState = {
   groupInfo: new Map(),
+  groupUpdateStatus: new Map(),
   items: new Map(),
   itemsUpdateStatus: new Map(),
 };
@@ -36,6 +37,14 @@ export default function reducer(state = initialState, action) {
         groupInfo: newGroupInfo,
       };
     }
+    case "SET_GROUP_UPDATE_STATUS": {
+      let newStatus = new Map(state.groupUpdateStatus);
+      newStatus.set(action.id, action.status);
+      return {
+        ...state,
+        groupUpdateStatus: newStatus,
+      };
+    }
     case "SET_ITEM_DATA": {
       let newItems = new Map(state.items);
       if (!!action.data) {
@@ -56,11 +65,23 @@ export default function reducer(state = initialState, action) {
         itemsUpdateStatus: newStatus,
       };
     }
+    case "ADD_ITEM_ID_TO_GROUP": {
+      let newGroupInfo = new Map(state.groupInfo);
+      let newGroup = newGroupInfo.get(action.groupId);
+      if (newGroup) {
+        newGroup.itemIds = [...(newGroup?.itemIds || []), action.itemId];
+        newGroup.itemIds.sort();
+      }
+      return {
+        ...state,
+        groupInfo: newGroupInfo,
+      };
+    }
     case "REMOVE_ITEM_ID_FROM_GROUP": {
       let newGroupInfo = new Map(state.groupInfo);
       let newGroup = newGroupInfo.get(action.groupId);
-      if (newGroup?.itemIds) {
-        newGroup.itemIds = [...newGroup.itemIds];
+      if (newGroup) {
+        newGroup.itemIds = [...(newGroup?.itemIds || [])];
         removeItemOnce(newGroup.itemIds, action.itemId);
       }
       return {

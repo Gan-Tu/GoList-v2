@@ -32,6 +32,13 @@ function useGroupItemIds(id) {
   return itemIds;
 }
 
+function useGroupUpdateStatus(id) {
+  let status = useSelector((store) =>
+    store.DataGroupsReducer.groupUpdateStatus.get(id)
+  );
+  return [status?.isUpdating || false, status?.newItemId];
+}
+
 function useItemData(id) {
   return useSelector((store) => store.DataGroupsReducer.items.get(id));
 }
@@ -46,16 +53,12 @@ function useItemIsLoading(id) {
   );
 }
 
-// function useNewItemId() {
-//   return useSelector((store) => store.DataGroupsReducer.newItemId);
-// }
-
 export {
   useGroupInfo,
   useGroupTitle,
   useGroupItemIds,
+  useGroupUpdateStatus,
   useItemData,
   useItemIsLoading,
   useItemlink,
-  // useNewItemId,
 };

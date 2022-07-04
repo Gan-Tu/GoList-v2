@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { call, put, select, takeEvery, takeLatest } from "redux-saga/effects";
-import { db } from "../../../firebase";
+import { call, put, select, takeLatest } from "redux-saga/effects";
+import { db, functions } from "../../../firebase";
 import { doc, deleteField, getDoc, updateDoc } from "firebase/firestore";
 import toast from "react-hot-toast";
+import { v4 as uuidv4 } from "uuid";
+import { httpsCallable } from "firebase/functions";
 
 function* fetchDataGroup({ groupId }) {
   const docRef = doc(db, "DataGroups", groupId);
@@ -88,8 +90,90 @@ function* updateItem({ itemId, groupId, data }) {
   toast.success("Updated item details successfully");
 }
 
+function* createItem({ groupId, url }) {
+  const itemId = uuidv4();
+
+  // Start item update
+  yield put({
+    type: "SET_GROUP_UPDATE_STATUS",
+    id: groupId,
+    status: {
+      isUpdating: true,
+      newItemId: itemId,
+    },
+  });
+  let toastId = toast.loading("Creating new item...", { duration: 5000 });
+
+  let itemData = {
+    id: itemId,
+    link: url,
+    title: "URL",
+    snippet: "",
+    imageUrl: "https://picsum.photos/48",
+  };
+  console.log(itemData);
+
+  // Try fetching url metadata
+  try {
+    const metadata = yield call(
+      httpsCallable(functions, "getUrlMetadata"),
+      url
+    );
+    console.log(metadata);
+    itemData = {
+      ...itemData,
+      title:
+        metadata?.data?.twitterTitle ||
+        metadata?.data?.ogTitle ||
+        metadata?.data?.title ||
+        metadata?.data?.twitterSite ||
+        "",
+      snippet:
+        metadata?.data?.twitterDescription ||
+        metadata?.data?.ogDescription ||
+        metadata?.data?.description ||
+        "",
+      imageUrl:
+        metadata?.data?.twitterImage ||
+        metadata?.data?.ogImage ||
+        metadata?.data?.icon ||
+        "",
+    };
+  } catch (error) {
+    console.error(`Failed to fetch url metadata: ${error}`);
+  }
+
+  // Create date remotely and locally
+  const docRef = doc(db, "DataGroups", groupId);
+  let update = {};
+  update[`items.${itemId}`] = itemData;
+  yield call(updateDoc, docRef, update);
+  console.log("update", update);
+  yield put({
+    type: "SET_ITEM_DATA",
+    id: itemId,
+    data: itemData,
+  });
+  yield put({ type: "ADD_ITEM_ID_TO_GROUP", groupId, itemId });
+
+  // Clear any loading animations
+  toast.dismiss(toastId);
+
+  // End item update
+  yield put({
+    type: "SET_GROUP_UPDATE_STATUS",
+    id: groupId,
+    status: {
+      isUpdating: false,
+      newItemId: itemId,
+    },
+  });
+  toast.success("New item successfully created");
+}
+
 export function* watchDataGroupsApp() {
   yield takeLatest("FETCH_GROUP", fetchDataGroup);
+  yield takeLatest("CREATE_ITEM", createItem);
   yield takeLatest("UPDATE_ITEM", updateItem);
   yield takeLatest("DELETE_ITEM", deleteItem);
 }
