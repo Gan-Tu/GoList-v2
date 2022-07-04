@@ -73,10 +73,8 @@ exports.onCreateDataGroups = functions.firestore
     const data = snap.data();
     let itemsData = data?.items || {};
     for (const [itemId, itemData] of Object.entries(itemsData)) {
-      console.log(itemData);
       if (itemData.link) {
         const [metadata, err] = await getUrlMetadataImpl(itemData.link);
-        console.log(metadata);
         if (err) {
           console.error(err);
           continue;
