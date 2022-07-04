@@ -25,9 +25,11 @@ function useGroupTitle(id) {
 }
 
 function useGroupItemIds(id) {
-  return useSelector(
+  let itemIds = useSelector(
     (store) => store.DataGroupsReducer.groupInfo.get(id)?.itemIds || []
   );
+  itemIds.sort();
+  return itemIds;
 }
 
 function useItemData(id) {
