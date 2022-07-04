@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { useParams } from "react-router-dom";
-import { useCollectionTitle, useCollectionItems } from "../hooks/collections";
+import { useGroupTitle, useGroupItemIds } from "../hooks/data";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
@@ -24,14 +24,14 @@ import CreateFlow from "./CreateFlow";
 export default function CollectionView() {
   const dispatch = useDispatch();
   const { id } = useParams();
-  const title = useCollectionTitle(id);
-  const itemIds = useCollectionItems(id);
+  const title = useGroupTitle(id);
+  const itemIds = useGroupItemIds(id);
 
   const [editMode, setEditMode] = useState(false);
   const [createMode, setCreateMode] = useState(false);
 
   useEffect(() => {
-    dispatch({ type: "FETCH_COLLECTION", id });
+    dispatch({ type: "FETCH_GROUP", groupId: id });
   }, [dispatch, id]);
 
   return (
@@ -41,11 +41,18 @@ export default function CollectionView() {
     >
       {/* TODO(tugan): Clear create modal after successful create */}
       <CreateFlow
-        collectionId={id}
+        groupId={id}
         isOpen={createMode}
         onClose={() => {
           setCreateMode(false);
-          dispatch({ type: "SET_NEW_ITEM_ID", itemId: null });
+          dispatch({
+            type: "SET_GROUP_UPDATE_STATUS",
+            id: id,
+            status: {
+              isUpdating: false,
+              newItemId: null,
+            },
+          });
         }}
       />
       <div className="flex justify-between items-center text-center h-15 pl-4 pr-4 pb-4 space-y-2">
@@ -89,11 +96,7 @@ export default function CollectionView() {
           {itemIds
             ? itemIds.map((itemId) => (
                 <motion.li layout key={`item-${itemId}`}>
-                  <ItemView
-                    id={itemId}
-                    collectionId={id}
-                    showControls={editMode}
-                  />
+                  <ItemView id={itemId} groupId={id} showControls={editMode} />
                 </motion.li>
               ))
             : null}

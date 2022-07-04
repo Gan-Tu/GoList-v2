@@ -14,15 +14,15 @@
 
 import ItemSnippet from "./ItemSnippet";
 import ItemControls from "./ItemControls";
-import { useItemlink } from "../../hooks/items";
+import { useItemlink } from "../../hooks/data";
 
-export default function ItemView({ id, collectionId, showControls }) {
+export default function ItemView({ id, groupId, showControls }) {
   const link = useItemlink(id);
   if (showControls) {
     return (
       <div className="sm:py-4 border rounded-lg p-4 hover:shadow-lg">
         <ItemSnippet id={id} />
-        <ItemControls id={id} collectionId={collectionId} />
+        <ItemControls id={id} groupId={groupId} />
       </div>
     );
   } else {

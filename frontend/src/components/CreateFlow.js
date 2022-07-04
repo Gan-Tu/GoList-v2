@@ -18,32 +18,31 @@ import TextInput from "./Utilities/TextInput";
 import Modal from "./Utilities/Modal";
 import { NewFileIcon } from "./Utilities/SvgIcons";
 import toast from "react-hot-toast";
-import { useNewItemId } from "../hooks/items";
+import { useGroupUpdateStatus } from "../hooks/data";
 import ItemEditForm from "./Items/ItemEditForm";
 
-export default function CreateFlow({ collectionId, isOpen, onClose }) {
+export default function CreateFlow({ groupId, isOpen, onClose }) {
   const dispatch = useDispatch();
   // TODO(tugan): Change to loading after submit, and not loading after success/failure
-  const [isLoading, setIsLoading] = useState(false);
   const [url, setUrl] = useState("");
-  const itemId = useNewItemId();
-  const editMode = itemId?.length > 0;
+  const [isUpdating, itemId] = useGroupUpdateStatus(groupId);
+  const editMode = !isUpdating && itemId?.length > 0;
 
   const onCreate = () => {
     if (!url) {
       toast.error("URL is empty.");
     } else {
-      setIsLoading(true);
-      dispatch({ type: "CREATE_ITEM", url, collectionId });
+      dispatch({ type: "CREATE_ITEM", url, groupId });
     }
   };
 
   useEffect(() => {
-    if (!itemId) {
+    if (!isUpdating && itemId) {
+      // When we have a itemId, and isUpdating finishes,
+      // reset the create modal.
       setUrl("");
     }
-    setIsLoading(false);
-  }, [itemId]);
+  }, [dispatch, isUpdating, itemId]);
 
   return (
     <Modal
@@ -54,7 +53,7 @@ export default function CreateFlow({ collectionId, isOpen, onClose }) {
       {editMode ? (
         <ItemEditForm
           itemId={itemId}
-          collectionId={collectionId}
+          groupId={groupId}
           toastIfNoUpdatesMade={false}
           onSaveCallBack={onClose}
         />
@@ -66,7 +65,7 @@ export default function CreateFlow({ collectionId, isOpen, onClose }) {
               labelText="URL"
               value={url}
               setValue={setUrl}
-              isDisabled={isLoading}
+              isDisabled={isUpdating}
               isRequired={true}
             />
           </div>
@@ -74,8 +73,8 @@ export default function CreateFlow({ collectionId, isOpen, onClose }) {
           <div className="mt-6">
             <button
               type="button"
-              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex items-center"
-              disabled={isLoading}
+              className="text-white bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex items-center"
+              disabled={isUpdating}
               onClick={onCreate}
             >
               <NewFileIcon className="w-5 h-5 mr-2" /> Create

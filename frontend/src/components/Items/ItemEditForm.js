@@ -14,7 +14,8 @@
 
 import toast from "react-hot-toast";
 import { useState } from "react";
-import { useItemData, useItemIsLoading } from "../../hooks/items";
+import { useItemData } from "../../hooks/data";
+import { useItemIsUpdating } from "../../hooks/data";
 import { ItemSnippetView } from "./ItemSnippet";
 import { useDispatch } from "react-redux";
 import TextInput from "../Utilities/TextInput";
@@ -31,12 +32,12 @@ function needsUpdate(originalData, newData) {
 
 export default function ItemEditForm({
   itemId,
-  collectionId,
+  groupId,
   toastIfNoUpdatesMade,
   onSaveCallBack,
 }) {
   const originalData = useItemData(itemId);
-  const isLoading = useItemIsLoading(itemId);
+  const isUpdating = useItemIsUpdating(itemId);
   const [newData, setNewData] = useState({ ...originalData });
   const [showPreview, setShowPreview] = useState(true);
   const dispatch = useDispatch();
@@ -46,7 +47,7 @@ export default function ItemEditForm({
       dispatch({
         type: "UPDATE_ITEM",
         itemId,
-        collectionId,
+        groupId,
         data: newData,
       });
     } else if (toastIfNoUpdatesMade) {
@@ -66,11 +67,7 @@ export default function ItemEditForm({
               Card Preview
             </div>
             <div className="sm:py-4 border rounded-lg p-4 mt-4 hover:shadow-lg">
-              <a
-                href={newData.link || null}
-                target="_blank"
-                rel="noreferrer"
-              >
+              <a href={newData.link || null} target="_blank" rel="noreferrer">
                 <ItemSnippetView data={newData} />
               </a>
             </div>
@@ -82,7 +79,7 @@ export default function ItemEditForm({
           labelText="URL"
           value={newData.link}
           setValue={(val) => setNewData({ ...newData, link: val })}
-          isDisabled={isLoading}
+          isDisabled={isUpdating}
           isRequired={true}
         />
 
@@ -91,7 +88,7 @@ export default function ItemEditForm({
           labelText="Item Title"
           value={newData.title}
           setValue={(val) => setNewData({ ...newData, title: val })}
-          isDisabled={isLoading}
+          isDisabled={isUpdating}
           isRequired={true}
           showCharacterCount={true}
           characterLimit={40}
@@ -102,7 +99,7 @@ export default function ItemEditForm({
           labelText="Item Snippet"
           value={newData.snippet}
           setValue={(val) => setNewData({ ...newData, snippet: val })}
-          isDisabled={isLoading}
+          isDisabled={isUpdating}
           isRequired={true}
           showCharacterCount={true}
           characterLimit={100}
@@ -115,7 +112,7 @@ export default function ItemEditForm({
           labelText="Thumbnail URL"
           value={newData.imageUrl}
           setValue={(val) => setNewData({ ...newData, imageUrl: val })}
-          isDisabled={isLoading}
+          isDisabled={isUpdating}
           isRequired={true}
         />
       </div>
@@ -137,7 +134,7 @@ export default function ItemEditForm({
         <button
           type="button"
           className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex items-center"
-          disabled={isLoading}
+          disabled={isUpdating}
           onClick={onSave}
         >
           <SaveIcon className="w-4 h-4 mr-2" /> Save
