@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useItemData } from "../../hooks/items";
+import { useItemData } from "../../hooks/data";
 
 export function ItemSnippetView({ data }) {
   return (

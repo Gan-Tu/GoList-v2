@@ -15,10 +15,12 @@
 import { combineReducers } from "redux";
 import CollectionsReducer from "./collections/reducer";
 import ItemsReducer from "./items/reducer";
+import DataGroupsReducer from "./DataGroups/reducer";
 
 const reducers = combineReducers({
   CollectionsReducer,
   ItemsReducer,
+  DataGroupsReducer,
 });
 
 export default reducers;

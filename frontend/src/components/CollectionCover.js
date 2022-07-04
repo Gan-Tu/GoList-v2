@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { Link, useParams } from "react-router-dom";
-import { useCollection } from "../hooks/collections";
+import { useGroupInfo } from "../hooks/data";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
@@ -23,10 +23,10 @@ function CollectionCover(props) {
     id = props.id;
   }
   const dispatch = useDispatch();
-  const data = useCollection(id);
+  const data = useGroupInfo(id);
 
   useEffect(() => {
-    dispatch({ type: "FETCH_COLLECTION", id });
+    dispatch({ type: "FETCH_GROUP", groupId: id });
   }, [dispatch, id]);
 
   return (

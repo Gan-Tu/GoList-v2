@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { useParams } from "react-router-dom";
-import { useCollectionTitle, useCollectionItems } from "../hooks/collections";
+import { useGroupTitle, useGroupItemIds } from "../hooks/data";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
@@ -24,14 +24,14 @@ import CreateFlow from "./CreateFlow";
 export default function CollectionView() {
   const dispatch = useDispatch();
   const { id } = useParams();
-  const title = useCollectionTitle(id);
-  const itemIds = useCollectionItems(id);
+  const title = useGroupTitle(id);
+  const itemIds = useGroupItemIds(id);
 
   const [editMode, setEditMode] = useState(false);
   const [createMode, setCreateMode] = useState(false);
 
   useEffect(() => {
-    dispatch({ type: "FETCH_COLLECTION", id });
+    dispatch({ type: "FETCH_GROUP", groupId: id });
   }, [dispatch, id]);
 
   return (

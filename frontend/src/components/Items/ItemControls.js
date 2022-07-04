@@ -16,7 +16,7 @@ import { useState } from "react";
 import ItemEditForm from "./ItemEditForm";
 import DeleteConfirmation from "./DeleteConfirmation";
 import { PencilEditIcon, TrashIcon } from "../Utilities/SvgIcons";
-import { useItemData } from "../../hooks/items";
+import { useItemData } from "../../hooks/data";
 import { useUpdateEffect } from "react-use";
 import Modal from "../Utilities/Modal";
 

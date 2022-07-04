@@ -14,7 +14,7 @@
 
 import ItemSnippet from "./ItemSnippet";
 import ItemControls from "./ItemControls";
-import { useItemlink } from "../../hooks/items";
+import { useItemlink } from "../../hooks/data";
 
 export default function ItemView({ id, collectionId, showControls }) {
   const link = useItemlink(id);

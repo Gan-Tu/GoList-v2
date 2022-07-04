@@ -14,7 +14,8 @@
 
 import toast from "react-hot-toast";
 import { useState } from "react";
-import { useItemData, useItemIsLoading } from "../../hooks/items";
+import { useItemData } from "../../hooks/data";
+import { useItemIsLoading } from "../../hooks/items";
 import { ItemSnippetView } from "./ItemSnippet";
 import { useDispatch } from "react-redux";
 import TextInput from "../Utilities/TextInput";
@@ -66,11 +67,7 @@ export default function ItemEditForm({
               Card Preview
             </div>
             <div className="sm:py-4 border rounded-lg p-4 mt-4 hover:shadow-lg">
-              <a
-                href={newData.link || null}
-                target="_blank"
-                rel="noreferrer"
-              >
+              <a href={newData.link || null} target="_blank" rel="noreferrer">
                 <ItemSnippetView data={newData} />
               </a>
             </div>
