@@ -14,7 +14,13 @@
 
 import { call, put, select, takeEvery, takeLatest } from "redux-saga/effects";
 import { db, functions } from "../../../firebase";
-import { doc, deleteField, getDoc, updateDoc } from "firebase/firestore";
+import {
+  doc,
+  deleteField,
+  getDoc,
+  updateDoc,
+  setDoc,
+} from "firebase/firestore";
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
 import { httpsCallable } from "firebase/functions";
@@ -171,7 +177,23 @@ function* deleteItem({ groupId, itemId }) {
 }
 
 function* createGroup({ shortUrl, title, urls }) {
-  toast.error("Not implemented");
+  const docRef = doc(db, "DataGroups", shortUrl);
+  let itemsData = {};
+  for (const url of urls.trim().split("\n")) {
+    if (url.length > 0) {
+      const itemId = uuidv4();
+      itemsData[itemId] = {
+        id: itemId,
+        link: url,
+      };
+    }
+  }
+  yield call(setDoc, docRef, {
+    id: shortUrl,
+    title: title,
+    items: itemsData,
+  });
+  toast.success("Group created successfuly.");
 }
 
 export function* watchDataGroupsApp() {

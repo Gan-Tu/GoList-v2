@@ -18,6 +18,7 @@ import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
 import TextInput from "./Utilities/TextInput";
 import Modal from "./Utilities/Modal";
+import { useGroupUpdateStatus } from "../hooks/data";
 
 export default function CreateCollectionFlow() {
   const dispatch = useDispatch();
@@ -74,7 +75,7 @@ export default function CreateCollectionFlow() {
                 placeholder={shortUrl}
                 value={shortUrl}
                 onChange={(e) => setShortUrl(e.target.value)}
-                isRequired={true}
+                required={true}
               />
             </div>
 
