@@ -45,7 +45,14 @@ export default function CollectionView() {
         isOpen={createMode}
         onClose={() => {
           setCreateMode(false);
-          dispatch({ type: "SET_NEW_ITEM_ID", itemId: null });
+          dispatch({
+            type: "SET_GROUP_UPDATE_STATUS",
+            id: id,
+            status: {
+              isUpdating: false,
+              newItemId: null,
+            },
+          });
         }}
       />
       <div className="flex justify-between items-center text-center h-15 pl-4 pr-4 pb-4 space-y-2">
@@ -89,11 +96,7 @@ export default function CollectionView() {
           {itemIds
             ? itemIds.map((itemId) => (
                 <motion.li layout key={`item-${itemId}`}>
-                  <ItemView
-                    id={itemId}
-                    groupId={id}
-                    showControls={editMode}
-                  />
+                  <ItemView id={itemId} groupId={id} showControls={editMode} />
                 </motion.li>
               ))
             : null}
