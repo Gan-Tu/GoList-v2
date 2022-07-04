@@ -47,9 +47,9 @@ function useItemlink(id) {
   return useSelector((store) => store.DataGroupsReducer.items.get(id)?.link);
 }
 
-function useItemIsLoading(id) {
+function useItemIsUpdating(id) {
   return useSelector(
-    (store) => store.DataGroupsReducer.itemsUpdateStatus.get(id)?.isLoading
+    (store) => store.DataGroupsReducer.itemsUpdateStatus.get(id)?.isUpdating
   );
 }
 
@@ -59,6 +59,6 @@ export {
   useGroupItemIds,
   useGroupUpdateStatus,
   useItemData,
-  useItemIsLoading,
+  useItemIsUpdating,
   useItemlink,
 };

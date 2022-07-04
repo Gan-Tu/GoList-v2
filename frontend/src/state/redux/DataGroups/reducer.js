@@ -89,26 +89,6 @@ export default function reducer(state = initialState, action) {
         groupInfo: newGroupInfo,
       };
     }
-    // case "PUT_DATA_GROUP": {
-    //   let newData = state.data;
-    //   newData.set(action.id, action.data);
-    //   return { ...state, data: newData };
-    // }
-    // case "REMOVE_ITEM": {
-    //   let collection = state.data.get(action.collectionId);
-    //   if (collection) {
-    //     delete collection.items[action.itemId];
-    //   }
-    //   return { ...state, data: newData };
-    // }
-    // case "REMOVE_ITEM_ID_FROM_COLLECTION": {
-    //   let newMapping = state.itemIdsPerCollection;
-    //   let newIds = newMapping.get(action.collectionId) || [];
-    //   removeItemOnce(newIds, action.itemId);
-    //   newMapping.set(action.collectionId, [...newIds]);
-    //   console.log(newMapping);
-    //   return { ...state, itemIdsPerCollection: newMapping };
-    // }
     default:
       return { ...state };
   }

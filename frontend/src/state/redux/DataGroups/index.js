@@ -33,63 +33,6 @@ function* fetchDataGroup({ groupId }) {
   }
 }
 
-function* deleteItem({ groupId, itemId }) {
-  const docRef = doc(db, "DataGroups", groupId);
-  let update = {};
-  update[`items.${itemId}`] = deleteField();
-  yield call(updateDoc, docRef, update);
-  yield put({ type: "SET_ITEM_DATA", id: itemId, data: null });
-  yield put({ type: "REMOVE_ITEM_ID_FROM_GROUP", groupId, itemId });
-  toast.success("Item deleted successfuly.");
-}
-
-function* updateItem({ itemId, groupId, data }) {
-  // Start item update
-  yield put({
-    type: "SET_ITEM_UPDATE_STATUS",
-    id: itemId,
-    status: {
-      isLoading: true,
-    },
-  });
-
-  // Show saving in progress notification after 1 second.
-  let toastId;
-  const timer = setTimeout(() => {
-    toastId = toast.loading("Still saving the data...");
-  }, 1000);
-
-  // Update date remotely and locally
-  const docRef = doc(db, "DataGroups", groupId);
-  const currentData = yield select(
-    (store) => store.DataGroupsReducer.items.get(itemId) || {}
-  );
-  const newData = { ...currentData, ...data };
-  let update = {};
-  update[`items.${itemId}`] = newData;
-  yield call(updateDoc, docRef, update);
-  yield put({
-    type: "SET_ITEM_DATA",
-    id: itemId,
-    data: newData,
-  });
-
-  // Clear any loading animations
-  toast.dismiss(toastId);
-  clearTimeout(timer);
-
-  // End item update
-  yield put({
-    type: "SET_ITEM_UPDATE_STATUS",
-    id: itemId,
-    status: {
-      isLoading: false,
-    },
-  });
-
-  toast.success("Updated item details successfully");
-}
-
 function* createItem({ groupId, url }) {
   const itemId = uuidv4();
 
@@ -169,6 +112,63 @@ function* createItem({ groupId, url }) {
     },
   });
   toast.success("New item successfully created");
+}
+
+function* updateItem({ itemId, groupId, data }) {
+  // Start item update
+  yield put({
+    type: "SET_ITEM_UPDATE_STATUS",
+    id: itemId,
+    status: {
+      isUpdating: true,
+    },
+  });
+
+  // Show saving in progress notification after 1 second.
+  let toastId;
+  const timer = setTimeout(() => {
+    toastId = toast.loading("Still saving the data...");
+  }, 1000);
+
+  // Update date remotely and locally
+  const docRef = doc(db, "DataGroups", groupId);
+  const currentData = yield select(
+    (store) => store.DataGroupsReducer.items.get(itemId) || {}
+  );
+  const newData = { ...currentData, ...data };
+  let update = {};
+  update[`items.${itemId}`] = newData;
+  yield call(updateDoc, docRef, update);
+  yield put({
+    type: "SET_ITEM_DATA",
+    id: itemId,
+    data: newData,
+  });
+
+  // Clear any loading animations
+  toast.dismiss(toastId);
+  clearTimeout(timer);
+
+  // End item update
+  yield put({
+    type: "SET_ITEM_UPDATE_STATUS",
+    id: itemId,
+    status: {
+      isUpdating: false,
+    },
+  });
+
+  toast.success("Updated item details successfully");
+}
+
+function* deleteItem({ groupId, itemId }) {
+  const docRef = doc(db, "DataGroups", groupId);
+  let update = {};
+  update[`items.${itemId}`] = deleteField();
+  yield call(updateDoc, docRef, update);
+  yield put({ type: "SET_ITEM_DATA", id: itemId, data: null });
+  yield put({ type: "REMOVE_ITEM_ID_FROM_GROUP", groupId, itemId });
+  toast.success("Item deleted successfuly.");
 }
 
 export function* watchDataGroupsApp() {
