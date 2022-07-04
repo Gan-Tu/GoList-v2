@@ -62,7 +62,6 @@ function* createItem({ groupId, url }) {
       httpsCallable(functions, "getUrlMetadata"),
       url
     );
-    console.log(metadata);
     itemData = {
       ...itemData,
       title:
