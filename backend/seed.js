@@ -12,27 +12,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const { initializeApp, applicationDefault, cert } = require('firebase-admin/app');
-const { getFirestore } = require('firebase-admin/firestore');
+const { initializeApp, cert } = require("firebase-admin/app");
+const { getFirestore } = require("firebase-admin/firestore");
 
 var serviceAccount = require("./golist-v2-firebase-adminsdk.json");
 var seedDb = require("./db.json");
 
 initializeApp({
-  credential: cert(serviceAccount)
+  credential: cert(serviceAccount),
 });
 
 const db = getFirestore();
 
+// async function main() {
+//   for (const data of seedDb.collections) {
+//     const docRef = db.collection('collections').doc(data.id);
+//     await docRef.set(data);
+//   }
+
+//   for (const data of seedDb.items) {
+//     const docRef = db.collection('collections').doc(data.collectionId).collection("items").doc(data.id);
+//     await docRef.set(data);
+//   }
+// }
 
 async function main() {
+  let documents = new Map();
   for (const data of seedDb.collections) {
-    const docRef = db.collection('collections').doc(data.id);
-    await docRef.set(data);
+    documents.set(data.id, { ...data, items: {} });
   }
 
   for (const data of seedDb.items) {
-    const docRef = db.collection('collections').doc(data.collectionId).collection("items").doc(data.id);
+    let collection = documents.get(data.collectionId);
+    collection.items[data.id] = data;
+    delete collection.items[data.id].collectionId;
+  }
+
+  for (const [id, data] of documents) {
+    const docRef = db.collection("DataGroups").doc(id);
     await docRef.set(data);
   }
 }
