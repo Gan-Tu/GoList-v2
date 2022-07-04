@@ -32,7 +32,7 @@ function needsUpdate(originalData, newData) {
 
 export default function ItemEditForm({
   itemId,
-  collectionId,
+  groupId,
   toastIfNoUpdatesMade,
   onSaveCallBack,
 }) {
@@ -47,7 +47,7 @@ export default function ItemEditForm({
       dispatch({
         type: "UPDATE_ITEM",
         itemId,
-        groupId: collectionId,
+        groupId,
         data: newData,
       });
     } else if (toastIfNoUpdatesMade) {

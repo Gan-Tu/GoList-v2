@@ -20,7 +20,7 @@ import { useItemData } from "../../hooks/data";
 import { useUpdateEffect } from "react-use";
 import Modal from "../Utilities/Modal";
 
-export default function ItemControls({ id, collectionId }) {
+export default function ItemControls({ id, groupId }) {
   const itemData = useItemData(id);
   const [editMode, setEditMode] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
@@ -43,13 +43,13 @@ export default function ItemControls({ id, collectionId }) {
       >
         <ItemEditForm
           itemId={id}
-          collectionId={collectionId}
+          groupId={groupId}
           toastIfNoUpdatesMade={true}
         />
       </Modal>
       <DeleteConfirmation
         itemId={id}
-        collectionId={collectionId}
+        groupId={groupId}
         isOpen={deleteMode}
         onClose={() => setDeleteMode(false)}
       />

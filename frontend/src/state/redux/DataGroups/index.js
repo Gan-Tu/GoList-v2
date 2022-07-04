@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { call, put, select, takeLatest } from "redux-saga/effects";
+import { call, put, select, takeEvery, takeLatest } from "redux-saga/effects";
 import { db, functions } from "../../../firebase";
 import { doc, deleteField, getDoc, updateDoc } from "firebase/firestore";
 import toast from "react-hot-toast";
@@ -172,7 +172,7 @@ function* deleteItem({ groupId, itemId }) {
 }
 
 export function* watchDataGroupsApp() {
-  yield takeLatest("FETCH_GROUP", fetchDataGroup);
+  yield takeEvery("FETCH_GROUP", fetchDataGroup);
   yield takeLatest("CREATE_ITEM", createItem);
   yield takeLatest("UPDATE_ITEM", updateItem);
   yield takeLatest("DELETE_ITEM", deleteItem);

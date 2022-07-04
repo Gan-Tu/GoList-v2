@@ -41,7 +41,7 @@ export default function CollectionView() {
     >
       {/* TODO(tugan): Clear create modal after successful create */}
       <CreateFlow
-        collectionId={id}
+        groupId={id}
         isOpen={createMode}
         onClose={() => {
           setCreateMode(false);
@@ -91,7 +91,7 @@ export default function CollectionView() {
                 <motion.li layout key={`item-${itemId}`}>
                   <ItemView
                     id={itemId}
-                    collectionId={id}
+                    groupId={id}
                     showControls={editMode}
                   />
                 </motion.li>

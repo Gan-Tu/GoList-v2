@@ -21,18 +21,18 @@ import toast from "react-hot-toast";
 import { useGroupUpdateStatus } from "../hooks/data";
 import ItemEditForm from "./Items/ItemEditForm";
 
-export default function CreateFlow({ collectionId, isOpen, onClose }) {
+export default function CreateFlow({ groupId, isOpen, onClose }) {
   const dispatch = useDispatch();
   // TODO(tugan): Change to loading after submit, and not loading after success/failure
   const [url, setUrl] = useState("");
-  const [isUpdating, itemId] = useGroupUpdateStatus(collectionId);
+  const [isUpdating, itemId] = useGroupUpdateStatus(groupId);
   const editMode = !isUpdating && itemId?.length > 0;
 
   const onCreate = () => {
     if (!url) {
       toast.error("URL is empty.");
     } else {
-      dispatch({ type: "CREATE_ITEM", url, groupId: collectionId });
+      dispatch({ type: "CREATE_ITEM", url, groupId });
     }
   };
 
@@ -53,7 +53,7 @@ export default function CreateFlow({ collectionId, isOpen, onClose }) {
       {editMode ? (
         <ItemEditForm
           itemId={itemId}
-          collectionId={collectionId}
+          groupId={groupId}
           toastIfNoUpdatesMade={false}
           onSaveCallBack={onClose}
         />

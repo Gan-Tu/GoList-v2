@@ -19,10 +19,10 @@ import { useDispatch } from "react-redux";
 
 export default function DeleteConfirmation(props) {
   const dispatch = useDispatch();
-  const { itemId, collectionId, isOpen, onClose } = props;
+  const { itemId, groupId, isOpen, onClose } = props;
 
   const onDelete = () => {
-    dispatch({ type: "DELETE_ITEM", itemId, groupId: collectionId });
+    dispatch({ type: "DELETE_ITEM", itemId, groupId });
   };
 
   return (
