@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import CollectionCover from "./CollectionCover";
-
 function Home() {
   return (
-    <div className="grid sm:grid-cols-1 lg:grid-cols-2 gap-5">
-      <CollectionCover id="web-mobile" />
-      <CollectionCover id="demo" />
+    <div className="grid sm:grid-cols-1 lg:grid-cols-1 gap-5">
+      <button className="w-full text-center text-white bg-[#050708] hover:bg-[#050708]/90 focus:ring-4 focus:outline-none focus:ring-[#050708]/50 font-small rounded-lg text-sm px-5 py-2.5 dark:focus:ring-[#050708]/50 dark:hover:bg-[#050708]/30 mr-2 mb-2">
+        Create a Collection
+      </button>
     </div>
   );
 }
