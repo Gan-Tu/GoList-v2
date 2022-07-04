@@ -22,29 +22,9 @@ import {
   updateDoc,
   getDocs,
   deleteDoc,
+  FieldValue,
 } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
-
-function* fetchItems({ collectionId }) {
-  const ref = collection(db, "collections", collectionId, "items");
-  const querySnapshot = yield call(getDocs, ref);
-  for (let i = 0; i < querySnapshot.docs.length; i++) {
-    let itemData = querySnapshot.docs[i].data();
-    itemData = { ...itemData, id: querySnapshot.docs[i].id, collectionId };
-    if (itemData) {
-      yield put({
-        type: "SET_ITEM_WITH_DATA",
-        id: itemData.id,
-        data: itemData,
-      });
-      yield put({
-        type: "ADD_ITEM_ID_TO_COLLECTION",
-        collectionId,
-        itemId: itemData.id,
-      });
-    }
-  }
-}
 
 function* updateItem({ itemId, collectionId, data }) {
   const existingItemData = yield select(
@@ -137,8 +117,7 @@ function* deleteItem({ itemId, collectionId }) {
 }
 
 export function* watchItemApp() {
-  yield takeLatest("FETCH_ITEMS", fetchItems);
   yield takeLatest("UPDATE_ITEM", updateItem);
   yield takeLatest("CREATE_ITEM", createItem);
-  yield takeLatest("DELETE_ITEM", deleteItem);
+  // yield takeLatest("DELETE_ITEM", deleteItem);
 }

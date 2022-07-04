@@ -27,16 +27,38 @@ function removeItemOnce(arr, value) {
 
 export default function reducer(state = initialState, action) {
   switch (action.type) {
-    case "PUT_GROUP":
+    case "SET_GROUP_DATA": {
+      let newGroupInfo = new Map(state.groupInfo);
+      newGroupInfo.set(action.id, action.data);
       return {
         ...state,
-        groupInfo: new Map(state.groupInfo.set(action.id, action.data)),
+        groupInfo: newGroupInfo,
       };
-    case "PUT_ITEM":
+    }
+    case "SET_ITEM_DATA": {
+      let newItems = new Map(state.items);
+      if (!!action.data) {
+        newItems.set(action.id, action.data);
+      } else {
+        newItems.delete(action.id);
+      }
       return {
         ...state,
-        items: new Map(state.items.set(action.id, action.data)),
+        items: newItems,
       };
+    }
+    case "REMOVE_ITEM_ID_FROM_GROUP": {
+      let newGroupInfo = new Map(state.groupInfo);
+      let newGroup = newGroupInfo.get(action.groupId);
+      if (newGroup?.itemIds) {
+        newGroup.itemIds = [...newGroup.itemIds];
+        removeItemOnce(newGroup.itemIds, action.itemId);
+      }
+      return {
+        ...state,
+        groupInfo: newGroupInfo,
+      };
+    }
     // case "PUT_DATA_GROUP": {
     //   let newData = state.data;
     //   newData.set(action.id, action.data);

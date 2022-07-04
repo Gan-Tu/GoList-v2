@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { call, put, takeEvery } from "redux-saga/effects";
+import { call, put, takeEvery, takeLatest } from "redux-saga/effects";
 import { db } from "../../../firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, deleteField, getDoc, updateDoc } from "firebase/firestore";
+import toast from "react-hot-toast";
 
 function* fetchDataGroup({ groupId }) {
   const docRef = doc(db, "DataGroups", groupId);
@@ -22,14 +23,25 @@ function* fetchDataGroup({ groupId }) {
   const data = documentSnapshot.data();
   if (!!data) {
     for (const [itemId, itemData] of Object.entries(data.items)) {
-      yield put({ type: "PUT_ITEM", id: itemId, data: itemData });
+      yield put({ type: "SET_ITEM_DATA", id: itemId, data: itemData });
     }
     data.itemIds = Object.keys(data.items);
     delete data.items;
-    yield put({ type: "PUT_GROUP", id: groupId, data });
+    yield put({ type: "SET_GROUP_DATA", id: groupId, data });
   }
 }
 
+function* deleteItem({ groupId, itemId }) {
+  const docRef = doc(db, "DataGroups", groupId);
+  let update = {};
+  update[`items.${itemId}`] = deleteField();
+  yield call(updateDoc, docRef, update);
+  yield put({ type: "SET_ITEM_DATA", id: itemId, data: null });
+  yield put({ type: "REMOVE_ITEM_ID_FROM_GROUP", groupId, itemId });
+  toast.success("Item deleted successfuly.");
+}
+
 export function* watchDataGroupsApp() {
-  yield takeEvery("FETCH_GROUP", fetchDataGroup);
+  yield takeLatest("FETCH_GROUP", fetchDataGroup);
+  yield takeLatest("DELETE_ITEM", deleteItem);
 }
