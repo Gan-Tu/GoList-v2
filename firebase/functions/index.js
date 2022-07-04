@@ -19,7 +19,7 @@ const cheerio = require("cheerio");
 // Create and Deploy Your First Cloud Functions
 // https://firebase.google.com/docs/functions/write-firebase-functions
 
-exports.getUrlMetadata = functions.https.onCall(async (url) => {
+async function getUrlMetadataImpl(url) {
   return axios
     .get(url)
     .then((resp) => {
@@ -48,9 +48,62 @@ exports.getUrlMetadata = functions.https.onCall(async (url) => {
           }
         }
       }
-      return parsedData;
+      return [parsedData, null];
     })
     .catch((err) => {
-      throw new functions.https.HttpsError('internal', `Fail to get url metadata: ${err}`);
+      return [null, err];
     });
+}
+
+exports.getUrlMetadata = functions.https.onCall(async (url) => {
+  const [data, err] = await getUrlMetadataImpl(url);
+  if (err) {
+    throw new functions.https.HttpsError(
+      "internal",
+      `Fail to get url metadata: ${err}`
+    );
+  } else {
+    return data;
+  }
 });
+
+exports.onCreateDataGroups = functions.firestore
+  .document("DataGroups/{id}")
+  .onCreate(async (snap, _context) => {
+    const data = snap.data();
+    let itemsData = data?.items || {};
+    for (const [itemId, itemData] of Object.entries(itemsData)) {
+      console.log(itemData);
+      if (itemData.link) {
+        const [metadata, err] = await getUrlMetadataImpl(itemData.link);
+        console.log(metadata);
+        if (err) {
+          console.error(err);
+          continue;
+        }
+        itemsData[itemId] = {
+          ...itemData,
+          title:
+            itemData?.title ||
+            metadata?.twitterTitle ||
+            metadata?.ogTitle ||
+            metadata?.title ||
+            metadata?.twitterSite ||
+            "",
+          snippet:
+            itemData?.snippet ||
+            metadata?.twitterDescription ||
+            metadata?.ogDescription ||
+            metadata?.description ||
+            "",
+          imageUrl:
+            itemData?.imageUrl ||
+            metadata?.twitterImage ||
+            metadata?.ogImage ||
+            metadata?.icon ||
+            "",
+        };
+      }
+    }
+    snap.ref.set({ items: itemsData }, { merge: true });
+  });
