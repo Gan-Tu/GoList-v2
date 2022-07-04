@@ -170,8 +170,13 @@ function* deleteItem({ groupId, itemId }) {
   toast.success("Item deleted successfuly.");
 }
 
+function* createGroup({ shortUrl, title, urls }) {
+  toast.error("Not implemented");
+}
+
 export function* watchDataGroupsApp() {
   yield takeEvery("FETCH_GROUP", fetchDataGroup);
+  yield takeLatest("CREATE_GROUP", createGroup);
   yield takeLatest("CREATE_ITEM", createItem);
   yield takeLatest("UPDATE_ITEM", updateItem);
   yield takeLatest("DELETE_ITEM", deleteItem);
