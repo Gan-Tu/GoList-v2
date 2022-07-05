@@ -111,7 +111,7 @@ function* createGroup({ groupId, title, urls }) {
   }
 
   // End group creation
-  toast.success("Group created successfuly.", { id: toastId });
+  toast.success("Group created successfuly.", { id: toastId, duration: 1000 });
   yield put({
     type: "SET_GROUP_UPDATE_STATUS",
     id: groupId,
