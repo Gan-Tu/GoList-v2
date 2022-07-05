@@ -44,6 +44,16 @@ function* fetchDataGroup({ groupId }) {
     data.itemIds = Object.keys(data.items);
     delete data.items;
     yield put({ type: "SET_GROUP_DATA", id: groupId, data });
+  } else {
+    yield put({
+      type: "SET_GROUP_UPDATE_STATUS",
+      id: groupId,
+      status: {
+        mode: "fetch",
+        dataType: "group",
+        notFound: true,
+      },
+    });
   }
 }
 

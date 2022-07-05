@@ -12,8 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useParams } from "react-router-dom";
-import { useGroupTitle, useGroupItemIds } from "../hooks/data";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  useGroupTitle,
+  useGroupItemIds,
+  useGroupUpdateStatus,
+} from "../hooks/data";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
@@ -22,15 +26,19 @@ import {
   AdjustmentIcon,
   PlusCircleIcon,
   TrashIcon,
+  LoaderIcon,
 } from "./Utilities/SvgIcons";
 import CreateItemFlow from "./Items/CreateItemFlow";
 import DeleteCollectionConfirmation from "./DeleteCollectionConfirmation";
+import toast from "react-hot-toast";
 
 export default function CollectionView() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { id } = useParams();
   const title = useGroupTitle(id);
   const itemIds = useGroupItemIds(id);
+  const status = useGroupUpdateStatus(id);
 
   const [editMode, setEditMode] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
@@ -39,6 +47,32 @@ export default function CollectionView() {
   useEffect(() => {
     dispatch({ type: "FETCH_GROUP", groupId: id });
   }, [dispatch, id]);
+
+  useEffect(() => {
+    if (
+      status?.mode === "fetch" &&
+      status?.dataType === "group" &&
+      status?.notFound
+    ) {
+      toast.error(`Page /${id} not found`);
+      setTimeout(() => {
+        navigate("/");
+      }, 1000);
+    }
+  }, [status, navigate, id]);
+
+  if (!itemIds?.length) {
+    return (
+      <button
+        disabled
+        type="button"
+        className="py-2.5 px-5 mr-2 text-sm font-medium text-gray-900 bg-white dark:bg-gray-800 dark:text-gray-400 inline-flex items-center"
+      >
+        <LoaderIcon className="inline w-4 h-4 mr-2 text-gray-200 animate-spin dark:text-gray-600" />
+        Loading...
+      </button>
+    );
+  }
 
   return (
     <motion.div
