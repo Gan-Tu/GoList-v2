@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+const admin = require("firebase-admin");
 const functions = require("firebase-functions");
 const axios = require("axios").default;
 const cheerio = require("cheerio");
@@ -19,7 +20,15 @@ const cheerio = require("cheerio");
 // Create and Deploy Your First Cloud Functions
 // https://firebase.google.com/docs/functions/write-firebase-functions
 
+admin.initializeApp();
+const db = admin.firestore();
+
 async function getUrlMetadataImpl(url) {
+  if (!url) {
+    return [null, new Error("URL is required")];
+  } else if (!url.startsWith("http")) {
+    url = `http://${url}`;
+  }
   return axios
     .get(url)
     .then((resp) => {
@@ -67,41 +76,61 @@ exports.getUrlMetadata = functions.https.onCall(async (url) => {
   }
 });
 
-exports.onCreateDataGroups = functions.firestore
-  .document("DataGroups/{id}")
-  .onCreate(async (snap, _context) => {
-    const data = snap.data();
-    let itemsData = data?.items || {};
-    for (const [itemId, itemData] of Object.entries(itemsData)) {
-      if (itemData.link) {
-        const [metadata, err] = await getUrlMetadataImpl(itemData.link);
-        if (err) {
-          console.error(err);
-          continue;
-        }
-        itemsData[itemId] = {
-          ...itemData,
-          title:
-            itemData?.title ||
-            metadata?.twitterTitle ||
-            metadata?.ogTitle ||
-            metadata?.title ||
-            metadata?.twitterSite ||
-            "",
-          snippet:
-            itemData?.snippet ||
-            metadata?.twitterDescription ||
-            metadata?.ogDescription ||
-            metadata?.description ||
-            "",
-          imageUrl:
-            itemData?.imageUrl ||
-            metadata?.twitterImage ||
-            metadata?.ogImage ||
-            metadata?.icon ||
-            "",
-        };
+exports.populateUrlMetadata = functions.https.onCall(async (path) => {
+  return db
+    .doc(path)
+    .get()
+    .then(async (doc) => {
+      if (!doc.exists) {
+        throw new functions.https.HttpsError(
+          "not-found",
+          `Fail to find document with the path: ${path}`
+        );
       }
-    }
-    snap.ref.set({ items: itemsData }, { merge: true });
-  });
+      const data = doc.data();
+      let itemsData = data?.items || {};
+      let hasUpdate = false;
+      for (const [itemId, itemData] of Object.entries(itemsData)) {
+        if (itemData.link) {
+          const [metadata, err] = await getUrlMetadataImpl(itemData.link);
+          if (err) {
+            console.error(err);
+            continue;
+          }
+          hasUpdate = true;
+          itemsData[itemId] = {
+            ...itemData,
+            title:
+              itemData?.title ||
+              metadata?.twitterTitle ||
+              metadata?.ogTitle ||
+              metadata?.title ||
+              metadata?.twitterSite ||
+              "",
+            snippet:
+              itemData?.snippet ||
+              metadata?.twitterDescription ||
+              metadata?.ogDescription ||
+              metadata?.description ||
+              "",
+            imageUrl:
+              itemData?.imageUrl ||
+              metadata?.twitterImage ||
+              metadata?.ogImage ||
+              metadata?.icon ||
+              "",
+          };
+        }
+      }
+      if (hasUpdate) {
+        await db.doc(path).set({ items: itemsData }, { merge: true });
+      }
+      return itemsData;
+    })
+    .catch((err) => {
+      throw new functions.https.HttpsError(
+        "internal",
+        `Fail to update all url metadata: ${err}`
+      );
+    });
+});
