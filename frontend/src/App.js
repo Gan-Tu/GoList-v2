@@ -19,7 +19,7 @@ import CollectionView from "./components/CollectionView";
 
 function App() {
   return (
-    <div className="grid place-items-center h-screen">
+    <div className="grid place-items-center h-screen my-5">
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />

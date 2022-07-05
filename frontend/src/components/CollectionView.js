@@ -77,9 +77,8 @@ export default function CollectionView() {
   return (
     <motion.div
       layout
-      className="p-5 mt-10 min-w-m bg-white rounded-lg border shadow-md sm:p-8 dark:bg-gray-800 dark:border-gray-700"
+      className="p-5 min-w-m bg-white rounded-lg border shadow-md sm:p-8 dark:bg-gray-800 dark:border-gray-700"
     >
-      {/* TODO(tugan): Clear create modal after successful create */}
       <CreateItemFlow
         groupId={id}
         isOpen={createMode}
