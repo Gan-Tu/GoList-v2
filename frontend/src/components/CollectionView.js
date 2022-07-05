@@ -31,6 +31,7 @@ import {
 import CreateItemFlow from "./Items/CreateItemFlow";
 import DeleteCollectionConfirmation from "./DeleteCollectionConfirmation";
 import toast from "react-hot-toast";
+import { Helmet } from "react-helmet";
 
 export default function CollectionView() {
   const dispatch = useDispatch();
@@ -79,6 +80,11 @@ export default function CollectionView() {
       layout
       className="p-5 min-w-m bg-white rounded-lg border shadow-md sm:p-8 dark:bg-gray-800 dark:border-gray-700"
     >
+      {title && (
+        <Helmet>
+          <title>{title}</title>
+        </Helmet>
+      )}
       <CreateItemFlow
         groupId={id}
         isOpen={createMode}
