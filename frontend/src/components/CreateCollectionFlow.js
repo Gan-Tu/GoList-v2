@@ -39,6 +39,8 @@ export default function CreateCollectionFlow() {
   const onCreate = () => {
     if (urlCount <= 0) {
       toast.error("Item URLs are empty but required.");
+    } else if (urlCount > 10) {
+      toast.error("A max of 10 item URLs are allowed per collection.");
     } else if (!title) {
       toast.error("Title is empty but required.");
     } else if (!shortUrl) {
@@ -47,6 +49,15 @@ export default function CreateCollectionFlow() {
       dispatch({ type: "CREATE_GROUP", shortUrl, title, urls });
     }
   };
+
+  let urlCountBadge = null;
+  if (urlCount > 10) {
+    urlCountBadge = (
+      <span className="text-red-500 font-sm">({urlCount}/10 urls)</span>
+    );
+  } else {
+    urlCountBadge = <span className="font-sm">({urlCount}/10 urls)</span>;
+  }
 
   return (
     <motion.div layout>
@@ -92,7 +103,7 @@ export default function CreateCollectionFlow() {
               className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-300 flex justify-between"
             >
               Item URLs (1 per line)
-              <span className="text-red-500 font-sm">({urlCount}/10 urls)</span>
+              {urlCountBadge}
             </label>
             <div className="flex">
               <textarea
