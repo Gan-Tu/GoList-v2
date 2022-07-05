@@ -101,6 +101,7 @@ function* createGroup({ groupId, title, urls }) {
   }
 
   // End group creation
+  toast.success("Group created successfuly.", { id: toastId });
   yield put({
     type: "SET_GROUP_UPDATE_STATUS",
     id: groupId,
@@ -111,7 +112,6 @@ function* createGroup({ groupId, title, urls }) {
       newGroupId: groupId,
     },
   });
-  toast.success("Group created successfuly.", { id: toastId });
 }
 
 function* deleteGroup({ groupId }) {
@@ -191,6 +191,7 @@ function* createItem({ groupId, url }) {
   toast.dismiss(toastId);
 
   // End item update
+  toast.success("New item successfully created");
   yield put({
     type: "SET_GROUP_UPDATE_STATUS",
     id: groupId,
@@ -201,7 +202,6 @@ function* createItem({ groupId, url }) {
       newItemId: itemId,
     },
   });
-  toast.success("New item successfully created");
 }
 
 function* updateItem({ itemId, groupId, data }) {
@@ -244,6 +244,7 @@ function* updateItem({ itemId, groupId, data }) {
   clearTimeout(timer);
 
   // End item update
+  toast.success("Updated item details successfully");
   yield put({
     type: "SET_ITEM_UPDATE_STATUS",
     id: itemId,
@@ -251,8 +252,6 @@ function* updateItem({ itemId, groupId, data }) {
       isUpdating: false,
     },
   });
-
-  toast.success("Updated item details successfully");
 }
 
 function* deleteItem({ groupId, itemId }) {

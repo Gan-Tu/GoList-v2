@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useGroupTitle, useGroupItemIds } from "../hooks/data";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -28,7 +28,6 @@ import DeleteCollectionConfirmation from "./DeleteCollectionConfirmation";
 
 export default function CollectionView() {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { id } = useParams();
   const title = useGroupTitle(id);
   const itemIds = useGroupItemIds(id);
@@ -72,7 +71,6 @@ export default function CollectionView() {
           isOpen={deleteMode}
           onClose={() => {
             setDeleteMode(false);
-            navigate("/");
           }}
         />
 

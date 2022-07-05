@@ -15,14 +15,19 @@
 import Modal from "./Utilities/Modal";
 import { TrashIcon } from "./Utilities/SvgIcons";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 export default function DeleteCollectionConfirmation(props) {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { groupId, isOpen, onClose } = props;
 
   const onDelete = () => {
     dispatch({ type: "DELETE_GROUP", groupId });
-    setTimeout(onClose, 1500);
+    setTimeout(() => {
+      onClose();
+      navigate("/");
+    }, 1500);
   };
 
   return (
