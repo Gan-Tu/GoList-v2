@@ -18,6 +18,7 @@ import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
 import TextInput from "./Utilities/TextInput";
 import Modal from "./Utilities/Modal";
+import { useGroupUpdateStatus } from "../hooks/data";
 
 export default function CreateCollectionFlow() {
   const dispatch = useDispatch();
@@ -27,6 +28,14 @@ export default function CreateCollectionFlow() {
   const [createMode, setCreateMode] = useState(false);
   const [urlCount, setUrlCount] = useState(0);
 
+  const status = useGroupUpdateStatus(shortUrl);
+  const isUpdating =
+    (status?.mode === "create" &&
+      status?.dataType === "group" &&
+      status?.isUpdating) ||
+    false;
+  const newGroupId = status?.newGroupId;
+
   useEffect(() => {
     setUrlCount(
       urls
@@ -35,6 +44,12 @@ export default function CreateCollectionFlow() {
         .filter((x) => x.length > 0).length
     );
   }, [urls]);
+
+  useEffect(() => {
+    if (!isUpdating && newGroupId) {
+      console.log("group updated!");
+    }
+  }, [dispatch, isUpdating, newGroupId]);
 
   const onCreate = () => {
     if (urlCount <= 0) {
@@ -46,7 +61,7 @@ export default function CreateCollectionFlow() {
     } else if (!shortUrl) {
       toast.error("Collection URL is empty but required.");
     } else {
-      dispatch({ type: "CREATE_GROUP", shortUrl, title, urls });
+      dispatch({ type: "CREATE_GROUP", groupId: shortUrl, title, urls });
     }
   };
 

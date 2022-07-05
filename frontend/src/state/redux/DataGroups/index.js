@@ -42,11 +42,18 @@ function* fetchDataGroup({ groupId }) {
 function* createItem({ groupId, url }) {
   const itemId = uuidv4();
 
+  // Try fixing the url
+  if (!url?.startsWith("http")) {
+    url = `http://${url}`;
+  }
+
   // Start item update
   yield put({
     type: "SET_GROUP_UPDATE_STATUS",
     id: groupId,
     status: {
+      mode: "create",
+      dataType: "item",
       isUpdating: true,
       newItemId: itemId,
     },
@@ -60,7 +67,6 @@ function* createItem({ groupId, url }) {
     snippet: "",
     imageUrl: "https://picsum.photos/48",
   };
-  console.log(itemData);
 
   // Try fetching url metadata
   try {
@@ -96,7 +102,6 @@ function* createItem({ groupId, url }) {
   let update = {};
   update[`items.${itemId}`] = itemData;
   yield call(updateDoc, docRef, update);
-  console.log("update", update);
   yield put({
     type: "SET_ITEM_DATA",
     id: itemId,
@@ -112,6 +117,8 @@ function* createItem({ groupId, url }) {
     type: "SET_GROUP_UPDATE_STATUS",
     id: groupId,
     status: {
+      mode: "create",
+      dataType: "item",
       isUpdating: false,
       newItemId: itemId,
     },
@@ -176,8 +183,21 @@ function* deleteItem({ groupId, itemId }) {
   toast.success("Item deleted successfuly.");
 }
 
-function* createGroup({ shortUrl, title, urls }) {
-  const docRef = doc(db, "DataGroups", shortUrl);
+function* createGroup({ groupId, title, urls }) {
+  // Start group creation
+  yield put({
+    type: "SET_GROUP_UPDATE_STATUS",
+    id: groupId,
+    status: {
+      mode: "create",
+      dataType: "group",
+      isUpdating: true,
+      newGroupId: groupId,
+    },
+  });
+  let toastId = toast.loading("Creating new collection...", { duration: 5000 });
+
+  // Prepare firestore document
   let itemsData = {};
   for (const url of urls.trim().split("\n")) {
     if (url.length > 0) {
@@ -188,12 +208,43 @@ function* createGroup({ shortUrl, title, urls }) {
       };
     }
   }
-  yield call(setDoc, docRef, {
-    id: shortUrl,
+  let data = {
+    id: groupId,
     title: title,
     items: itemsData,
+  };
+
+  // Save to firestore
+  const docRef = doc(db, "DataGroups", groupId);
+  yield call(setDoc, docRef, data);
+
+  // Try populate all the url metadata
+  toastId = toast("Auto-populating metadata...", { id: toastId });
+  try {
+    const result = yield call(
+      httpsCallable(functions, "populateUrlMetadata"),
+      `DataGroups/${groupId}`
+    );
+    if (result?.data?.items) {
+      data.items = result.data.items;
+    }
+  } catch (error) {
+    toast.success("Failed to auto populate metadata.", { id: toastId });
+    console.error(`Failed to populate all the url metadata: ${error}`);
+  }
+
+  // End group creation
+  yield put({
+    type: "SET_GROUP_UPDATE_STATUS",
+    id: groupId,
+    status: {
+      mode: "create",
+      dataType: "group",
+      isUpdating: false,
+      newGroupId: groupId,
+    },
   });
-  toast.success("Group created successfuly.");
+  toast.success("Group created successfuly.", { id: toastId });
 }
 
 export function* watchDataGroupsApp() {

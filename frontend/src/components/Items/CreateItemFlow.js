@@ -25,7 +25,13 @@ export default function CreateItemFlow({ groupId, isOpen, onClose }) {
   const dispatch = useDispatch();
   // TODO(tugan): Change to loading after submit, and not loading after success/failure
   const [url, setUrl] = useState("");
-  const [isUpdating, itemId] = useGroupUpdateStatus(groupId);
+  const status = useGroupUpdateStatus(groupId);
+  const isUpdating =
+    (status?.mode === "create" &&
+      status?.dataType === "item" &&
+      status?.isUpdating) ||
+    false;
+  const itemId = status?.newItemId;
   const editMode = !isUpdating && itemId?.length > 0;
 
   const onCreate = () => {

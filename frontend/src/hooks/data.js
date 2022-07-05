@@ -33,10 +33,9 @@ function useGroupItemIds(id) {
 }
 
 function useGroupUpdateStatus(id) {
-  let status = useSelector((store) =>
+  return useSelector((store) =>
     store.DataGroupsReducer.groupUpdateStatus.get(id)
   );
-  return [status?.isUpdating || false, status?.newItemId];
 }
 
 function useItemData(id) {
