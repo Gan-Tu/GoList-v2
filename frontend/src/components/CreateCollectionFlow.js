@@ -19,9 +19,11 @@ import { motion } from "framer-motion";
 import TextInput from "./Utilities/TextInput";
 import Modal from "./Utilities/Modal";
 import { useGroupUpdateStatus } from "../hooks/data";
+import { useNavigate } from "react-router-dom";
 
 export default function CreateCollectionFlow() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [shortUrl, setShortUrl] = useState("");
   const [title, setTitle] = useState("");
   const [urls, setUrls] = useState("");
@@ -47,9 +49,12 @@ export default function CreateCollectionFlow() {
 
   useEffect(() => {
     if (!isUpdating && newGroupId) {
-      console.log("group updated!");
+      const timer = setTimeout(() => {
+        navigate(`/${newGroupId}`);
+      }, 1000);
+      return () => clearTimeout(timer);
     }
-  }, [dispatch, isUpdating, newGroupId]);
+  }, [dispatch, navigate, isUpdating, newGroupId]);
 
   const onCreate = () => {
     if (urlCount <= 0) {

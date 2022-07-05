@@ -229,7 +229,7 @@ function* createGroup({ groupId, title, urls }) {
       data.items = result.data.items;
     }
   } catch (error) {
-    toast.success("Failed to auto populate metadata.", { id: toastId });
+    toast.error("Failed to auto populate metadata.", { id: toastId });
     console.error(`Failed to populate all the url metadata: ${error}`);
   }
 
