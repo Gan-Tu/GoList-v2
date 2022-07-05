@@ -26,6 +26,13 @@ import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
 import { httpsCallable } from "firebase/functions";
 
+function fixUrl(url) {
+  if (!url?.startsWith("http")) {
+    url = `http://${url}`;
+  }
+  return url;
+}
+
 function* fetchDataGroup({ groupId }) {
   const docRef = doc(db, "DataGroups", groupId);
   const documentSnapshot = yield call(getDoc, docRef);
@@ -61,7 +68,7 @@ function* createGroup({ groupId, title, urls }) {
       const itemId = uuidv4();
       itemsData[itemId] = {
         id: itemId,
-        link: url,
+        link: fixUrl(url),
       };
     }
   }
@@ -116,11 +123,7 @@ function* deleteGroup({ groupId }) {
 
 function* createItem({ groupId, url }) {
   const itemId = uuidv4();
-
-  // Try fixing the url
-  if (!url?.startsWith("http")) {
-    url = `http://${url}`;
-  }
+  url = fixUrl(url);
 
   // Start item update
   yield put({
@@ -210,6 +213,10 @@ function* updateItem({ itemId, groupId, data }) {
       isUpdating: true,
     },
   });
+
+  if (data?.link) {
+    data.link = fixUrl(data.link);
+  }
 
   // Show saving in progress notification after 1 second.
   let toastId;

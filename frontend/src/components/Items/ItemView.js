@@ -16,6 +16,13 @@ import ItemSnippet from "./ItemSnippet";
 import ItemControls from "./ItemControls";
 import { useItemlink } from "../../hooks/data";
 
+function fixUrl(url) {
+  if (!url?.startsWith("http")) {
+    url = `http://${url}`;
+  }
+  return url;
+}
+
 export default function ItemView({ id, groupId, showControls }) {
   const link = useItemlink(id);
   if (showControls) {
@@ -28,7 +35,7 @@ export default function ItemView({ id, groupId, showControls }) {
   } else {
     return (
       <div className="sm:py-4 border rounded-lg p-4 hover:shadow-lg">
-        <a href={link || "#"} target="_blank" rel="noreferrer">
+        <a href={fixUrl(link) || "#"} target="_blank" rel="noreferrer">
           <ItemSnippet id={id} />
         </a>
       </div>
