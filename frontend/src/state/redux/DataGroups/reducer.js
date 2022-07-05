@@ -37,6 +37,22 @@ export default function reducer(state = initialState, action) {
         groupInfo: newGroupInfo,
       };
     }
+    case "DELETE_GROUP_DATA": {
+      let groupData = state.groupInfo.get(action.id);
+      let newGroupInfo = new Map(state.groupInfo);
+      let newItems = new Map(state.items);
+      if (groupData) {
+        for (const itemId of groupData.itemIds) {
+          newItems.delete(itemId);
+        }
+      }
+      newGroupInfo.delete(action.id);
+      return {
+        ...state,
+        groupInfo: newGroupInfo,
+        items: newItems,
+      };
+    }
     case "SET_GROUP_UPDATE_STATUS": {
       let newStatus = new Map(state.groupUpdateStatus);
       newStatus.set(action.id, action.status);

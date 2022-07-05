@@ -20,6 +20,7 @@ import {
   getDoc,
   updateDoc,
   setDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
@@ -37,6 +38,80 @@ function* fetchDataGroup({ groupId }) {
     delete data.items;
     yield put({ type: "SET_GROUP_DATA", id: groupId, data });
   }
+}
+
+function* createGroup({ groupId, title, urls }) {
+  // Start group creation
+  yield put({
+    type: "SET_GROUP_UPDATE_STATUS",
+    id: groupId,
+    status: {
+      mode: "create",
+      dataType: "group",
+      isUpdating: true,
+      newGroupId: groupId,
+    },
+  });
+  let toastId = toast.loading("Creating new collection...", { duration: 5000 });
+
+  // Prepare firestore document
+  let itemsData = {};
+  for (const url of urls.trim().split("\n")) {
+    if (url.length > 0) {
+      const itemId = uuidv4();
+      itemsData[itemId] = {
+        id: itemId,
+        link: url,
+      };
+    }
+  }
+  let data = {
+    id: groupId,
+    title: title,
+    items: itemsData,
+  };
+
+  // Save to firestore
+  const docRef = doc(db, "DataGroups", groupId);
+  yield call(setDoc, docRef, data);
+
+  // Try populate all the url metadata
+  toastId = toast.loading("Auto-populating metadata...", {
+    id: toastId,
+    duration: 10000,
+  });
+  try {
+    const result = yield call(
+      httpsCallable(functions, "populateUrlMetadata"),
+      `DataGroups/${groupId}`
+    );
+    if (result?.data?.items) {
+      data.items = result.data.items;
+    }
+  } catch (error) {
+    toast.error("Failed to auto populate metadata.", { id: toastId });
+    console.error(`Failed to populate all the url metadata: ${error}`);
+  }
+
+  // End group creation
+  yield put({
+    type: "SET_GROUP_UPDATE_STATUS",
+    id: groupId,
+    status: {
+      mode: "create",
+      dataType: "group",
+      isUpdating: false,
+      newGroupId: groupId,
+    },
+  });
+  toast.success("Group created successfuly.", { id: toastId });
+}
+
+function* deleteGroup({ groupId }) {
+  const docRef = doc(db, "DataGroups", groupId);
+  yield call(deleteDoc, docRef);
+  yield put({ type: "DELETE_GROUP_DATA", id: groupId });
+  toast.success("Group deleted successfuly.");
 }
 
 function* createItem({ groupId, url }) {
@@ -183,73 +258,10 @@ function* deleteItem({ groupId, itemId }) {
   toast.success("Item deleted successfuly.");
 }
 
-function* createGroup({ groupId, title, urls }) {
-  // Start group creation
-  yield put({
-    type: "SET_GROUP_UPDATE_STATUS",
-    id: groupId,
-    status: {
-      mode: "create",
-      dataType: "group",
-      isUpdating: true,
-      newGroupId: groupId,
-    },
-  });
-  let toastId = toast.loading("Creating new collection...", { duration: 5000 });
-
-  // Prepare firestore document
-  let itemsData = {};
-  for (const url of urls.trim().split("\n")) {
-    if (url.length > 0) {
-      const itemId = uuidv4();
-      itemsData[itemId] = {
-        id: itemId,
-        link: url,
-      };
-    }
-  }
-  let data = {
-    id: groupId,
-    title: title,
-    items: itemsData,
-  };
-
-  // Save to firestore
-  const docRef = doc(db, "DataGroups", groupId);
-  yield call(setDoc, docRef, data);
-
-  // Try populate all the url metadata
-  toastId = toast("Auto-populating metadata...", { id: toastId });
-  try {
-    const result = yield call(
-      httpsCallable(functions, "populateUrlMetadata"),
-      `DataGroups/${groupId}`
-    );
-    if (result?.data?.items) {
-      data.items = result.data.items;
-    }
-  } catch (error) {
-    toast.error("Failed to auto populate metadata.", { id: toastId });
-    console.error(`Failed to populate all the url metadata: ${error}`);
-  }
-
-  // End group creation
-  yield put({
-    type: "SET_GROUP_UPDATE_STATUS",
-    id: groupId,
-    status: {
-      mode: "create",
-      dataType: "group",
-      isUpdating: false,
-      newGroupId: groupId,
-    },
-  });
-  toast.success("Group created successfuly.", { id: toastId });
-}
-
 export function* watchDataGroupsApp() {
   yield takeEvery("FETCH_GROUP", fetchDataGroup);
   yield takeLatest("CREATE_GROUP", createGroup);
+  yield takeLatest("DELETE_GROUP", deleteGroup);
   yield takeLatest("CREATE_ITEM", createItem);
   yield takeLatest("UPDATE_ITEM", updateItem);
   yield takeLatest("DELETE_ITEM", deleteItem);

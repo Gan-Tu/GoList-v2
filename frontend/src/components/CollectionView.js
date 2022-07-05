@@ -12,22 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useGroupTitle, useGroupItemIds } from "../hooks/data";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
 import ItemView from "./Items/ItemView";
-import { AdjustmentIcon, PlusCircleIcon } from "./Utilities/SvgIcons";
+import {
+  AdjustmentIcon,
+  PlusCircleIcon,
+  TrashIcon,
+} from "./Utilities/SvgIcons";
 import CreateItemFlow from "./Items/CreateItemFlow";
+import DeleteCollectionConfirmation from "./DeleteCollectionConfirmation";
 
 export default function CollectionView() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { id } = useParams();
   const title = useGroupTitle(id);
   const itemIds = useGroupItemIds(id);
 
   const [editMode, setEditMode] = useState(false);
+  const [deleteMode, setDeleteMode] = useState(false);
   const [createMode, setCreateMode] = useState(false);
 
   useEffect(() => {
@@ -59,6 +66,16 @@ export default function CollectionView() {
         <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white">
           {title}
         </h5>
+
+        <DeleteCollectionConfirmation
+          groupId={id}
+          isOpen={deleteMode}
+          onClose={() => {
+            setDeleteMode(false);
+            navigate("/");
+          }}
+        />
+
         {editMode ? (
           <motion.button
             whileHover={{ scale: 1.1 }}
@@ -75,6 +92,13 @@ export default function CollectionView() {
               className="text-sm font-medium text-black flex space-y-4 items-center"
             >
               <AdjustmentIcon className="w-6 h-6" />
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              onClick={() => setDeleteMode(!deleteMode)}
+              className="text-sm font-medium text-black flex space-y-4 -mr-4 items-center"
+            >
+              <TrashIcon className="w-6 h-6" />
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.1 }}
