@@ -18,7 +18,6 @@ import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
 import TextInput from "./Utilities/TextInput";
 import Modal from "./Utilities/Modal";
-import { useGroupUpdateStatus } from "../hooks/data";
 
 export default function CreateCollectionFlow() {
   const dispatch = useDispatch();
