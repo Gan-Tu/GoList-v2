@@ -15,7 +15,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import Home from "./components/Home";
-import CollectionCover from "./components/CollectionCover";
 import CollectionView from "./components/CollectionView";
 
 function App() {
@@ -24,9 +23,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/c/:id" element={<CollectionView />} />
-          <Route path="/c/:id/cover" element={<CollectionCover />} />
-          <Route path="/*" element={<Home />} />
+          <Route path="/:id" element={<CollectionView />} />
         </Routes>
       </BrowserRouter>
       <Toaster position="top-right" />
