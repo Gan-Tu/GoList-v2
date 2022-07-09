@@ -21,8 +21,8 @@ export default function NavBar() {
 
   return (
     <nav className="bg-white border-gray-200 dark:bg-gray-800">
-      <div className="flex flex-wrap justify-between items-center mx-8 my-4 max-w-screen-xl px-4 md:px-6 py-2.5">
-        <a href="https://flowbite.com" className="flex items-center">
+      <div className="flex flex-wrap justify-between items-center m-4 max-w-screen-xl px-6 py-2.5">
+        <a type="button" href="/" className="flex items-center">
           <img
             src="/logo192.png"
             className="mr-3 h-6 sm:h-9"
@@ -33,10 +33,7 @@ export default function NavBar() {
           </span>
         </a>
         <div className="flex items-center">
-          <button
-            className="text-sm hover:underline"
-            onClick={onLogin}
-          >
+          <button className="text-sm hover:underline" onClick={onLogin}>
             Login
           </button>
         </div>
