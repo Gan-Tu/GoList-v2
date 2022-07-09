@@ -15,18 +15,22 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import Home from "./components/Home";
+import NavBar from "./components/NavBar";
 import CollectionView from "./components/CollectionView";
 
 function App() {
   return (
-    <div className="grid place-items-center h-screen my-5">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/:id" element={<CollectionView />} />
-        </Routes>
-      </BrowserRouter>
-      <Toaster position="top-right" />
+    <div className="grid grid-cols-1 h-screen">
+      <NavBar />
+      <div className="grid justify-items-center -mt-8">
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/:id" element={<CollectionView />} />
+          </Routes>
+        </BrowserRouter>
+        <Toaster position="top-right" />
+      </div>
     </div>
   );
 }
