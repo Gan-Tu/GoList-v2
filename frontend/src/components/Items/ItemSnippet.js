@@ -18,7 +18,7 @@ export function ItemSnippetView({ data }) {
   return (
     <div>
       <div className="flex items-center space-x-4">
-        <div className="flex-1 min-w-0 w-60 lg:w-80 space-y-1">
+        <div className="flex-1 min-w-0 w-60 md:w-80 space-y-1">
           {data?.title && (
             <p className="text-sm font-medium text-gray-900 line-clamp-1 text-ellipsis overflow-hidden dark:text-white">
               {data.title}
