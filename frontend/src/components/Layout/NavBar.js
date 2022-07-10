@@ -25,21 +25,25 @@ function UserProfile({ user, onLogin }) {
     );
   } else if (user?.photoURL) {
     return (
-      <button>
-        <img
-          src={user.photoURL}
-          className="w-10 h-10 rounded-full"
-          alt={user.displayName}
-        />
-      </button>
+      <div className="flex items-center gap-4">
+        <button>
+          <img
+            src={user.photoURL}
+            className="w-10 h-10 rounded-full"
+            alt={user.displayName}
+          />
+        </button>
+      </div>
     );
   } else {
     return (
-      <button>
-        <p className="text-sm">
-          {user?.displayName ? user.displayName : "Signed In"}
-        </p>
-      </button>
+      <div className="flex items-center gap-4">
+        <button>
+          <p className="text-sm">
+            {user?.displayName ? user.displayName : "Signed In"}
+          </p>
+        </button>
+      </div>
     );
   }
 }
