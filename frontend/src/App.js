@@ -38,7 +38,7 @@ function App() {
 
   return (
     <div className="grid grid-cols-1 justify-items-between min-h-screen">
-      <div className="grid items-start">
+      <div className="sticky top-0">
         <NavBar />
       </div>
       <div className="grid items-center">

@@ -31,8 +31,8 @@ function UserProfile({ user, onLogin }) {
         <button onClick={() => dispatch({ type: "LOG_OUT" })}>
           <img
             src={user.photoURL}
-            className="w-10 h-10 rounded-full"
-            alt={user.displayName}
+            className="w-10 h-10 rounded-full text-sm"
+            alt={user.displayName || "Signed In"}
           />
         </button>
       </div>
@@ -64,7 +64,7 @@ function NavBar() {
         isOpen={signInModalOpen}
         onClose={() => setSignInModalOpen(false)}
       />
-      <div className="flex flex-wrap justify-between items-center m-4 px-6 py-2.5">
+      <div className="flex flex-wrap justify-between items-center px-6 py-2.5">
         <a type="button" href="/" className="flex items-center">
           <img
             src="/logo192.png"
