@@ -42,6 +42,8 @@ function* logIn({ loginType }) {
       provider = new GithubAuthProvider();
       break;
     case "EMAIL":
+      toast.error("Email sign in is not implemented.");
+      return;
     case "GUEST":
       yield call(signInAnonymously, auth);
       toast.success("Successfully logged in.");
