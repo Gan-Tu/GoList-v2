@@ -21,7 +21,7 @@ import Modal from "./Utilities/Modal";
 import { useGroupUpdateStatus } from "../hooks/data";
 import { useNavigate } from "react-router-dom";
 
-export default function CreateCollectionFlow() {
+export default function CreateCollectionModal() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [shortUrl, setShortUrl] = useState("");
