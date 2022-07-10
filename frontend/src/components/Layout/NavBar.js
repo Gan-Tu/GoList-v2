@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import LogInModal from "../Session/LogInModal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLoggedInUser } from "../../hooks/session";
 import { useDispatch } from "react-redux";
 
@@ -57,6 +57,12 @@ function NavBar() {
   const onLogin = () => {
     setSignInModalOpen(true);
   };
+
+  useEffect(() => {
+    if (user) {
+      setSignInModalOpen(false);
+    }
+  }, [user]);
 
   return (
     <nav className="bg-white border-gray-200 dark:bg-gray-800">
