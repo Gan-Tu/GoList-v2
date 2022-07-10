@@ -19,6 +19,9 @@ const initialState = {
 export default function reducer(state = initialState, action) {
   switch (action.type) {
     case "SET_SESSION_USER":
+      if (action.user?.uid) {
+        console.log("Logged in as with uid: ", action.user.uid);
+      }
       return { ...state, user: action.user };
     default:
       return { ...state };

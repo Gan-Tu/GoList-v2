@@ -13,10 +13,11 @@
 // limitations under the License.
 
 import toast from "react-hot-toast";
-import { call, put, takeLatest } from "redux-saga/effects";
+import { call, takeLatest } from "redux-saga/effects";
 import {
   getAuth,
   signInWithPopup,
+  signInAnonymously,
   signOut,
   GoogleAuthProvider,
   FacebookAuthProvider,
@@ -42,13 +43,15 @@ function* logIn({ loginType }) {
       break;
     case "EMAIL":
     case "GUEST":
+      yield call(signInAnonymously, auth);
+      toast.success("Successfully logged in.");
+      return;
     default:
       toast.error("Log in is not implemented yet");
       return;
   }
   try {
-    const { user } = yield call(signInWithPopup, auth, provider);
-    yield put({ type: "SET_SESSION_USER", user });
+    yield call(signInWithPopup, auth, provider);
     toast.success("Successfully logged in.");
   } catch (error) {
     toast.error("Log In Failed.");
