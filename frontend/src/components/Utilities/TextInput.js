@@ -17,7 +17,7 @@ export default function TextInput(props) {
   const { value, setValue } = props;
   const { isDisabled, isRequired } = props;
   const { showCharacterCount, characterLimit } = props;
-  const { isTextArea, rows } = props;
+  const { isTextArea, isEmail, rows } = props;
 
   let charCount = null;
   if (showCharacterCount) {
@@ -40,7 +40,7 @@ export default function TextInput(props) {
     <div>
       <label
         htmlFor={inputId}
-        className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300 flex justify-between"
+        className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-300 flex justify-between"
       >
         {labelText} {charCount}
       </label>
@@ -59,7 +59,7 @@ export default function TextInput(props) {
         <input
           id={inputId}
           disabled={isDisabled}
-          type="text"
+          type={isEmail ? "email" : "text"}
           className="shadow-sm disabled:text-gray-500 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-sm-light"
           value={value}
           onChange={(e) => setValue(e.target.value)}

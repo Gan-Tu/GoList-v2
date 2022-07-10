@@ -18,4 +18,8 @@ function useLoggedInUser() {
   return useSelector((store) => store.SessionReducer.user);
 }
 
-export { useLoggedInUser };
+function useEmailForSignIn() {
+  return useSelector((store) => store.SessionReducer.emailForSignIn);
+}
+
+export { useLoggedInUser, useEmailForSignIn };

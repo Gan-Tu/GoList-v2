@@ -14,6 +14,7 @@
 
 const initialState = {
   user: null,
+  emailForSignIn: null,
 };
 
 export default function reducer(state = initialState, action) {
@@ -23,6 +24,8 @@ export default function reducer(state = initialState, action) {
         console.log("Logged in as with uid: ", action.user.uid);
       }
       return { ...state, user: action.user };
+    case "SET_EMAIL_FOR_SIGN_IN":
+      return { ...state, emailForSignIn: action.emailForSignIn };
     default:
       return { ...state };
   }

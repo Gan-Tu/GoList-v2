@@ -13,11 +13,12 @@
 // limitations under the License.
 
 import toast from "react-hot-toast";
-import { call, takeLatest } from "redux-saga/effects";
+import { call, put, takeLatest } from "redux-saga/effects";
 import {
   getAuth,
   signInWithPopup,
   signInAnonymously,
+  sendSignInLinkToEmail,
   signOut,
   GoogleAuthProvider,
   FacebookAuthProvider,
@@ -25,7 +26,7 @@ import {
   GithubAuthProvider,
 } from "firebase/auth";
 
-function* logIn({ loginType }) {
+function* logIn({ loginType, email }) {
   const auth = getAuth();
   let provider;
   switch (loginType) {
@@ -41,13 +42,29 @@ function* logIn({ loginType }) {
     case "GITHUB":
       provider = new GithubAuthProvider();
       break;
-    case "EMAIL":
-      toast.error("Email sign in is not implemented.");
-      return;
     case "GUEST":
       yield call(signInAnonymously, auth);
       toast.success("Successfully logged in.");
       return;
+    case "EMAIL": {
+      if (!email) {
+        toast.error("Email is required for email sign in.");
+        return;
+      }
+      try {
+        // yield call(sendSignInLinkToEmail, auth, email, {
+        //   url: "https://goli.st/verifyEmail",
+        //   handleCodeInApp: true,
+        // });
+        window.localStorage.setItem("emailForSignIn", email);
+        toast.success("A sign-in link is sent to your email!");
+        yield put({ type: "SET_EMAIL_FOR_SIGN_IN", emailForSignIn: email });
+      } catch (error) {
+        toast.error("Log In Failed.");
+        console.error(error);
+      }
+      return;
+    }
     default:
       toast.error("Log in is not implemented yet");
       return;
