@@ -58,7 +58,7 @@ export default function VerifyEmail() {
         className="py-2.5 gap-2 px-5 mr-2 text-sm font-medium text-green-500 bg-white inline-flex items-center"
       >
         <CircleCheck className="w-6 h-6" />
-        Verification Success!
+        Signed in successfully.
       </button>
     );
   } else if (failed) {
@@ -80,7 +80,7 @@ export default function VerifyEmail() {
         className="py-2.5 px-5 mr-2 text-sm font-medium text-gray-900 bg-white dark:bg-gray-800 dark:text-gray-400 inline-flex items-center"
       >
         <LoaderIcon className="inline w-4 h-4 mr-2 text-gray-200 animate-spin dark:text-gray-600" />
-        Verifying...
+        Signing in...
       </button>
     );
   }
