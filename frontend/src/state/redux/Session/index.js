@@ -13,9 +13,10 @@
 // limitations under the License.
 
 import toast from "react-hot-toast";
-import { takeLatest } from "redux-saga/effects";
+import { put, takeLatest } from "redux-saga/effects";
 
 function* login() {
+  yield put({ type: "SIGN_IN_USER" });
   toast.error("Log in is not implemented yet");
 }
 
