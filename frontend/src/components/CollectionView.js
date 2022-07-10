@@ -28,7 +28,7 @@ import {
   TrashIcon,
   LoaderIcon,
 } from "./Utilities/SvgIcons";
-import CreateItemFlow from "./Items/CreateItemFlow";
+import CreateItemModal from "./Items/CreateItemModal";
 import DeleteCollectionConfirmation from "./DeleteCollectionConfirmation";
 import toast from "react-hot-toast";
 import { Helmet } from "react-helmet";
@@ -85,7 +85,7 @@ export default function CollectionView() {
           <title>{title}</title>
         </Helmet>
       )}
-      <CreateItemFlow
+      <CreateItemModal
         groupId={id}
         isOpen={createMode}
         onClose={() => {

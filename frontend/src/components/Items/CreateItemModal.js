@@ -21,7 +21,7 @@ import toast from "react-hot-toast";
 import { useGroupUpdateStatus } from "../../hooks/data";
 import ItemEditForm from "./ItemEditForm";
 
-export default function CreateItemFlow({ groupId, isOpen, onClose }) {
+export default function CreateItemModal({ groupId, isOpen, onClose }) {
   const dispatch = useDispatch();
   // TODO(tugan): Change to loading after submit, and not loading after success/failure
   const [url, setUrl] = useState("");
