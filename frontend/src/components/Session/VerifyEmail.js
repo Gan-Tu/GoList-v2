@@ -21,6 +21,7 @@ import {
 } from "../../hooks/session";
 import { getAuth, isSignInWithEmailLink } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 export default function VerifyEmail() {
   const dispatch = useDispatch();
@@ -35,7 +36,19 @@ export default function VerifyEmail() {
     } else {
       navigate("/");
     }
-  });
+  }, [dispatch, navigate]);
+
+  useEffect(() => {
+    if (verified) {
+      toast.success("Email Verification Success!");
+    }
+  }, [verified]);
+
+  useEffect(() => {
+    if (!verified && failed) {
+      toast.error("Email Verification Failed");
+    }
+  }, [verified, failed]);
 
   if (verified) {
     return (

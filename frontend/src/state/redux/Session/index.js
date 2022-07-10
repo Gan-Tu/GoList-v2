@@ -100,11 +100,9 @@ function* verifyEmail() {
     }
     try {
       yield call(signInWithEmailLink, auth, email, window.location.href);
-      toast.success("Email Verification Success!");
       yield put({ type: "SET_EMAIL_VERIFICATION_SUCCESS" });
     } catch (error) {
       console.error(error);
-      toast.error("Email Verification Failed");
       yield put({ type: "SET_EMAIL_VERIFICATION_FAILED" });
     }
   }
