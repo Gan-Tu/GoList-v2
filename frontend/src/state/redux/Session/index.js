@@ -16,7 +16,7 @@ import toast from "react-hot-toast";
 import { call, put, takeLatest } from "redux-saga/effects";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
-function* login({ loginType }) {
+function* logIn({ loginType }) {
   const auth = getAuth();
   switch (loginType) {
     case "GOOGLE": {
@@ -47,6 +47,11 @@ function* login({ loginType }) {
   toast.error("Log in is not implemented yet");
 }
 
+function* logOut() {
+  yield put({ type: "SET_SESSION_USER", user: null });
+}
+
 export function* watchSessionApp() {
-  yield takeLatest("LOG_IN", login);
+  yield takeLatest("LOG_IN", logIn);
+  yield takeLatest("LOG_OUT", logOut);
 }
