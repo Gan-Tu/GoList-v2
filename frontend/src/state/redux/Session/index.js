@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { combineReducers } from "redux";
-import DataGroupsReducer from "./DataGroups/reducer";
-import SessionReducer from "./Session/reducer";
+import toast from "react-hot-toast";
+import { takeLatest } from "redux-saga/effects";
 
-const reducers = combineReducers({
-  DataGroupsReducer,
-  SessionReducer,
-});
+function* login() {
+  toast.error("Log in is not implemented yet");
+}
 
-export default reducers;
+export function* watchSessionApp() {
+  yield takeLatest("LOG_IN", login);
+}

@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { combineReducers } from "redux";
-import DataGroupsReducer from "./DataGroups/reducer";
-import SessionReducer from "./Session/reducer";
+const initialState = {
+  signedIn: false,
+};
 
-const reducers = combineReducers({
-  DataGroupsReducer,
-  SessionReducer,
-});
-
-export default reducers;
+export default function reducer(state = initialState, action) {
+  switch (action.type) {
+    default:
+      return { ...state };
+  }
+}

@@ -14,7 +14,8 @@
 
 import { all } from "redux-saga/effects";
 import { watchDataGroupsApp } from "./redux/DataGroups";
+import { watchSessionApp } from "./redux/Session";
 
 export default function* rootSagas() {
-  yield all([watchDataGroupsApp()]);
+  yield all([watchDataGroupsApp(), watchSessionApp()]);
 }

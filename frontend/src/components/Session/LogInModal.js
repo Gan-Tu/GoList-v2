@@ -13,15 +13,20 @@
 // limitations under the License.
 
 import { motion } from "framer-motion";
-import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
 import Modal from "../Utilities/Modal";
 
 function LogInButton({ logo, textColor, bgColor, buttonText }) {
+  const dispatch = useDispatch();
+  const onLogIn = () => {
+    dispatch({ type: "LOG_IN" });
+  };
+
   return (
     <button
       style={{ minWidth: "225px" }}
       className={`flex pl-5 py-3 gap-4 text-justify text-sm font-medium rounded-lg hover:shadow-lg ${textColor} ${bgColor}`}
-      onClick={() => toast.error("Sign in not implemented yet")}
+      onClick={onLogIn}
     >
       <img src={logo} className="h-5 w-5" alt="Logo" />
       <span className="flex-1 whitespace-nowrap">{buttonText}</span>
