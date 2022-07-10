@@ -163,7 +163,7 @@ function SignInWithEmailForm({ onCancel, onSignIn }) {
 
 function LogInModal({ isOpen, onClose }) {
   const dispatch = useDispatch();
-  const [isEmailLogin, setIsEmailLogin] = useState(true);
+  const [isEmailLogin, setIsEmailLogin] = useState(false);
 
   const handleLogIn = (loginType) => {
     if (loginType === "EMAIL") {
