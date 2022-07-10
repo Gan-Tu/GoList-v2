@@ -12,15 +12,71 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useState } from "react";
+import { useUpdateEffect } from "react-use";
+import DeleteConfirmation from "./DeleteConfirmation";
+import ItemEditForm from "./ItemEditForm";
 import ItemSnippet from "./ItemSnippet";
-import ItemControls from "./ItemControls";
-import { useItemlink } from "../../hooks/data";
+import Modal from "../Utilities/Modal";
+import { PencilEditIcon, TrashIcon } from "../Utilities/SvgIcons";
+import { useItemlink, useItemData } from "../../hooks/data";
 
 function fixUrl(url) {
   if (!url?.startsWith("http")) {
     url = `http://${url}`;
   }
   return url;
+}
+
+function ItemControls({ id, groupId }) {
+  const itemData = useItemData(id);
+  const [editMode, setEditMode] = useState(false);
+  const [deleteMode, setDeleteMode] = useState(false);
+
+  // Whenever source item data is updated, close the edit/delete modals.
+  useUpdateEffect(() => {
+    const timer = setTimeout(() => {
+      setEditMode(false);
+      setDeleteMode(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [itemData]);
+
+  return (
+    <>
+      <Modal
+        title="Edit Item Details"
+        isOpen={editMode}
+        onClose={() => setEditMode(false)}
+      >
+        <ItemEditForm
+          itemId={id}
+          groupId={groupId}
+          toastIfNoUpdatesMade={true}
+        />
+      </Modal>
+      <DeleteConfirmation
+        itemId={id}
+        groupId={groupId}
+        isOpen={deleteMode}
+        onClose={() => setDeleteMode(false)}
+      />
+      <div className="pt-2 space-x-4">
+        <button
+          className="inline-flex items-center text-xs text-blue-500 font-normal hover:underline dark:text-gray-400"
+          onClick={() => setEditMode(!editMode)}
+        >
+          <PencilEditIcon className="w-4 h-4" /> Edit
+        </button>
+        <button
+          className="inline-flex items-center text-xs text-blue-500 font-normal hover:underline dark:text-gray-400"
+          onClick={() => setDeleteMode(!deleteMode)}
+        >
+          <TrashIcon className="w-4 h-4" /> Delete
+        </button>
+      </div>
+    </>
+  );
 }
 
 export default function ItemView({ id, groupId, showControls }) {
