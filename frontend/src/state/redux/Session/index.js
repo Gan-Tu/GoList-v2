@@ -17,39 +17,43 @@ import { call, put, takeLatest } from "redux-saga/effects";
 import {
   getAuth,
   signInWithPopup,
-  GoogleAuthProvider,
   signOut,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  TwitterAuthProvider,
+  GithubAuthProvider,
 } from "firebase/auth";
 
 function* logIn({ loginType }) {
   const auth = getAuth();
+  let provider;
   switch (loginType) {
-    case "GOOGLE": {
-      const provider = new GoogleAuthProvider();
-      try {
-        const { user } = yield call(signInWithPopup, auth, provider);
-        yield put({ type: "SET_SESSION_USER", user });
-        toast.success("Successfully signed in with Google");
-      } catch (error) {
-        toast.error("Failed to sign in with Google");
-        console.error(error);
-      }
-      return;
-    }
+    case "GOOGLE":
+      provider = new GoogleAuthProvider();
+      break;
     case "FACEBOOK":
+      provider = new FacebookAuthProvider();
       break;
     case "TWITTER":
+      provider = new TwitterAuthProvider();
       break;
     case "GITHUB":
+      provider = new GithubAuthProvider();
       break;
     case "EMAIL":
-      break;
     case "GUEST":
-      break;
     default:
-      break;
+      toast.error("Log in is not implemented yet");
+      return;
   }
-  toast.error("Log in is not implemented yet");
+  try {
+    const { user } = yield call(signInWithPopup, auth, provider);
+    yield put({ type: "SET_SESSION_USER", user });
+    toast.success("Successfully logged in.");
+  } catch (error) {
+    toast.error("Log In Failed.");
+    console.error(error);
+  }
 }
 
 function* logOut() {
