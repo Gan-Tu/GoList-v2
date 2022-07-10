@@ -13,85 +13,87 @@
 // limitations under the License.
 
 import { motion } from "framer-motion";
+import toast from "react-hot-toast";
 import Modal from "../Utilities/Modal";
+
+function LogInButton({ logo, textColor, bgColor, buttonText }) {
+  return (
+    <button
+      style={{ minWidth: "225px" }}
+      className={`flex pl-5 py-3 gap-4 text-justify text-sm font-medium rounded-lg hover:shadow-lg ${textColor} ${bgColor}`}
+      onClick={() => toast.error("Sign in not implemented yet")}
+    >
+      <img src={logo} className="h-5 w-5" alt="Logo" />
+      <span className="flex-1 whitespace-nowrap">{buttonText}</span>
+    </button>
+  );
+}
 
 function LogInModal({ isOpen, onClose }) {
   return (
     <motion.div layout>
       <Modal title={"Sign In"} isOpen={isOpen} onClose={onClose}>
         <div className="grid grid-cols-1 justify-items-center">
-          <ul className="my-4 space-y-3">
+          <ul className="my-5 space-y-3">
             <li>
-              <button className="flex px-5 py-3 text-sm text-gray-900 bg-gray-50 rounded-lg">
-                <img
-                  src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-                  className="mr-3 h-5 "
-                  alt="Google Logo"
-                />
-                <span className="flex-1 ml-3 whitespace-nowrap">
-                  Sign in with Google
-                </span>
-              </button>
+              <LogInButton
+                logo={
+                  "https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                }
+                textColor="text-gray-900"
+                bgColor="bg-gray-100"
+                buttonText={"Sign in with Google"}
+              />
             </li>
             <li>
-              <button className="flex px-5 py-3 text-sm text-white bg-facebook-blue rounded-lg">
-                <img
-                  src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/facebook.svg"
-                  className="mr-3 h-5 "
-                  alt="Facebook Logo"
-                />
-                <span className="flex-1 ml-3 whitespace-nowrap">
-                  Sign in with Facebook
-                </span>
-              </button>
+              <LogInButton
+                logo={
+                  "https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/facebook.svg"
+                }
+                textColor="text-white"
+                bgColor="bg-facebook-blue"
+                buttonText={"Sign in with Facebook"}
+              />
             </li>
             <li>
-              <button className="flex px-5 py-3 text-sm text-white bg-twitter-blue rounded-lg">
-                <img
-                  src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/twitter.svg"
-                  className="mr-3 h-5 "
-                  alt="Twitter Logo"
-                />
-                <span className="flex-1 ml-3 whitespace-nowrap">
-                  Sign in with Twitter
-                </span>
-              </button>
+              <LogInButton
+                logo={
+                  "https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/twitter.svg"
+                }
+                textColor="text-white"
+                bgColor="bg-twitter-blue"
+                buttonText={"Sign in with Twitter"}
+              />
             </li>
             <li>
-              <button className="flex px-5 py-3 text-sm text-white bg-github-black rounded-lg">
-                <img
-                  src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/github.svg"
-                  className="mr-3 h-5 "
-                  alt="GitHub Logo"
-                />
-                <span className="flex-1 ml-3 whitespace-nowrap">
-                  Sign in with GitHub
-                </span>
-              </button>
+              <LogInButton
+                logo={
+                  "https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/github.svg"
+                }
+                textColor="text-white"
+                bgColor="bg-github-black"
+                buttonText={"Sign in with GitHub"}
+              />
             </li>
             <li>
-              <button className="flex px-5 py-3 text-sm text-white bg-google-red rounded-lg">
-                <img
-                  src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/mail.svg"
-                  className="mr-3 h-5 "
-                  alt="Mail Logo"
-                />
-                <span className="flex-1 ml-3 whitespace-nowrap">
-                  Sign in with Email
-                </span>
-              </button>
+              <LogInButton
+                logo={
+                  "https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/mail.svg"
+                }
+                textColor="text-white"
+                bgColor="bg-google-red"
+                buttonText={"Sign in with Email"}
+              />
             </li>
             <li>
-              <button className="flex px-5 py-3 text-sm text-white bg-google-yellow rounded-lg">
-                <img
-                  src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/anonymous.png"
-                  className="mr-3 h-5 "
-                  alt="Anonymous Logo"
-                />
-                <span className="flex-1 ml-3 whitespace-nowrap">
-                  Sign in as Guest
-                </span>
-              </button>
+              <LogInButton
+                logo={
+                  "https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/anonymous.png"
+                }
+                textColor="text-white"
+                bgColor="bg-google-green"
+                buttonText={"Sign in as Guest"}
+              />
             </li>
           </ul>
         </div>
