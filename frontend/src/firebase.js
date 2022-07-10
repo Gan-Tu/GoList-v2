@@ -4,6 +4,7 @@ import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import { getFunctions } from "firebase/functions";
+import { getAuth } from "firebase/auth";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -23,11 +24,12 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const appCheck = initializeAppCheck(app, {
-  provider: new ReCaptchaV3Provider('6LcjdWEgAAAAALv8OzKlJgNklv2kpL4iAXFNuRuZ'),
-  isTokenAutoRefreshEnabled: true
+  provider: new ReCaptchaV3Provider("6LcjdWEgAAAAALv8OzKlJgNklv2kpL4iAXFNuRuZ"),
+  isTokenAutoRefreshEnabled: true,
 });
 const analytics = getAnalytics(app);
 const db = getFirestore(app);
 const functions = getFunctions(app);
+const auth = getAuth(app);
 
-export { app, appCheck, analytics, db, functions };
+export { app, appCheck, analytics, db, functions, auth };
