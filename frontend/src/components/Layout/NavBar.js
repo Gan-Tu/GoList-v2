@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from "react";
 import LogInModal from "../Session/LogInModal";
+import { useState } from "react";
 
 function NavBar() {
   const [signInModalOpen, setSignInModalOpen] = useState(false);
@@ -27,7 +27,7 @@ function NavBar() {
         isOpen={signInModalOpen}
         onClose={() => setSignInModalOpen(false)}
       />
-      <div className="flex flex-wrap justify-between items-center m-4 max-w-screen-xl px-6 py-2.5">
+      <div className="flex flex-wrap justify-between items-center m-4 px-6 py-2.5">
         <a type="button" href="/" className="flex items-center">
           <img
             src="/logo192.png"
