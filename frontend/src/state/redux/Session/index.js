@@ -13,13 +13,15 @@
 // limitations under the License.
 
 import toast from "react-hot-toast";
-import { call, delay, put, takeLatest } from "redux-saga/effects";
+import { call, put, takeLatest } from "redux-saga/effects";
 import {
   getAuth,
+  signOut,
   signInWithPopup,
   signInAnonymously,
+  signInWithEmailLink,
   sendSignInLinkToEmail,
-  signOut,
+  isSignInWithEmailLink,
   GoogleAuthProvider,
   FacebookAuthProvider,
   TwitterAuthProvider,
@@ -52,10 +54,10 @@ function* logIn({ loginType, email }) {
         return;
       }
       try {
-        // yield call(sendSignInLinkToEmail, auth, email, {
-        //   url: "https://goli.st/verifyEmail",
-        //   handleCodeInApp: true,
-        // });
+        yield call(sendSignInLinkToEmail, auth, email, {
+          url: "https://goli.st/verifyEmail",
+          handleCodeInApp: true,
+        });
         window.localStorage.setItem("emailForSignIn", email);
         toast.success("A sign-in link is sent to your email!");
         yield put({ type: "SET_EMAIL_FOR_SIGN_IN", emailForSignIn: email });
@@ -88,8 +90,24 @@ function* logOut() {
 }
 
 function* verifyEmail() {
-  yield delay(2000);
-  yield put({ type: "SET_EMAIL_VERIFICATION_FAILED" });
+  const auth = getAuth();
+  if (isSignInWithEmailLink(auth, window.location.href)) {
+    let email = window.localStorage.getItem("emailForSignIn");
+    if (!email) {
+      // User opened the link on a different device. To prevent session fixation
+      // attacks, ask the user to provide the associated email again. For example:
+      email = window.prompt("Please provide your email for confirmation");
+    }
+    try {
+      yield call(signInWithEmailLink, auth, email, window.location.href);
+      toast.success("Email Verification Success!");
+      yield put({ type: "SET_EMAIL_VERIFICATION_SUCCESS" });
+    } catch (error) {
+      console.error(error);
+      toast.error("Email Verification Failed");
+      yield put({ type: "SET_EMAIL_VERIFICATION_FAILED" });
+    }
+  }
 }
 
 export function* watchSessionApp() {

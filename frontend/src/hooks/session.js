@@ -22,8 +22,17 @@ function useEmailForSignIn() {
   return useSelector((store) => store.SessionReducer.emailForSignIn);
 }
 
+function useEmailVerificationSuccess() {
+  return useSelector((store) => store.SessionReducer.emailVerificationSuccess);
+}
+
 function useEmailVerificationFailed() {
   return useSelector((store) => store.SessionReducer.emailVerificationFailed);
 }
 
-export { useLoggedInUser, useEmailForSignIn, useEmailVerificationFailed };
+export {
+  useLoggedInUser,
+  useEmailForSignIn,
+  useEmailVerificationSuccess,
+  useEmailVerificationFailed,
+};

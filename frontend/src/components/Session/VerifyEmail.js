@@ -15,24 +15,32 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { CircleX, LoaderIcon } from "../Utilities/SvgIcons";
-import { useEmailVerificationFailed } from "../../hooks/session";
-import toast from "react-hot-toast";
+import {
+  useEmailVerificationFailed,
+  useEmailVerificationSuccess,
+} from "../../hooks/session";
 
 export default function VerifyEmail() {
   const dispatch = useDispatch();
   const failed = useEmailVerificationFailed();
+  const verified = useEmailVerificationSuccess();
 
   useEffect(() => {
     dispatch({ type: "VERIFY_EMAIL" });
   });
 
-  useEffect(() => {
-    if (failed) {
-      toast.error("Email Verification Failed");
-    }
-  }, [failed]);
-
-  if (failed) {
+  if (verified) {
+    return (
+      <button
+        disabled
+        type="button"
+        className="py-2.5 gap-2 px-5 mr-2 text-sm font-medium text-green-500 bg-white inline-flex items-center"
+      >
+        <CircleX className="w-6 h-6" />
+        Verification Success!
+      </button>
+    );
+  } else if (failed) {
     return (
       <button
         disabled
