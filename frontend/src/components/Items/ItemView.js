@@ -14,7 +14,7 @@
 
 import { useState } from "react";
 import { useUpdateEffect } from "react-use";
-import DeleteConfirmation from "./DeleteConfirmation";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import ItemEditForm from "./ItemEditForm";
 import ItemSnippet from "./ItemSnippet";
 import Modal from "../Utilities/Modal";
@@ -55,7 +55,7 @@ function ItemControls({ id, groupId }) {
           toastIfNoUpdatesMade={true}
         />
       </Modal>
-      <DeleteConfirmation
+      <DeleteConfirmationModal
         itemId={id}
         groupId={groupId}
         isOpen={deleteMode}

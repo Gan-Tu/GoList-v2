@@ -17,7 +17,7 @@ import Modal from "../Utilities/Modal";
 import { TrashIcon } from "../Utilities/SvgIcons";
 import { useDispatch } from "react-redux";
 
-export default function DeleteConfirmation(props) {
+export default function DeleteConfirmationModal(props) {
   const dispatch = useDispatch();
   const { itemId, groupId, isOpen, onClose } = props;
 
