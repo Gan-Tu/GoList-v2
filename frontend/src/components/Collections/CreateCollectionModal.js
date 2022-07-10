@@ -16,9 +16,9 @@ import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
-import TextInput from "./Utilities/TextInput";
-import Modal from "./Utilities/Modal";
-import { useGroupUpdateStatus } from "../hooks/data";
+import TextInput from "../Utilities/TextInput";
+import Modal from "../Utilities/Modal";
+import { useGroupUpdateStatus } from "../../hooks/data";
 import { useNavigate } from "react-router-dom";
 
 export default function CreateCollectionModal() {

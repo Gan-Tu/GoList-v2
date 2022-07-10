@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { Link, useParams } from "react-router-dom";
-import { useGroupInfo } from "../hooks/data";
+import { useGroupInfo } from "../../hooks/data";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 

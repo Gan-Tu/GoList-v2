@@ -16,8 +16,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import NavBar from "./components/Layout/NavBar";
 import Footer from "./components/Layout/Footer";
-import CollectionView from "./components/CollectionView";
-import CreateCollectionModal from "./components/CreateCollectionModal";
+import CollectionView from "./components/Collections/CollectionView";
+import CreateCollectionModal from "./components/Collections/CreateCollectionModal";
 
 function Home() {
   return (

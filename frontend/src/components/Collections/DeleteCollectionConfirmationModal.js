@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Modal from "./Utilities/Modal";
-import { TrashIcon } from "./Utilities/SvgIcons";
+import Modal from "../Utilities/Modal";
+import { TrashIcon } from "../Utilities/SvgIcons";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 

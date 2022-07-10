@@ -17,18 +17,18 @@ import {
   useGroupTitle,
   useGroupItemIds,
   useGroupUpdateStatus,
-} from "../hooks/data";
+} from "../../hooks/data";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
-import ItemCard from "./Items/ItemCard";
+import ItemCard from "../Items/ItemCard";
 import {
   AdjustmentIcon,
   PlusCircleIcon,
   TrashIcon,
   LoaderIcon,
-} from "./Utilities/SvgIcons";
-import CreateItemModal from "./Items/CreateItemModal";
+} from "../Utilities/SvgIcons";
+import CreateItemModal from "../Items/CreateItemModal";
 import DeleteCollectionConfirmationModal from "./DeleteCollectionConfirmationModal";
 import toast from "react-hot-toast";
 import { Helmet } from "react-helmet";
