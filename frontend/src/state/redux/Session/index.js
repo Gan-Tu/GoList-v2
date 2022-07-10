@@ -13,10 +13,37 @@
 // limitations under the License.
 
 import toast from "react-hot-toast";
-import { put, takeLatest } from "redux-saga/effects";
+import { call, put, takeLatest } from "redux-saga/effects";
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
-function* login() {
-  yield put({ type: "SIGN_IN_USER" });
+function* login({ loginType }) {
+  const auth = getAuth();
+  switch (loginType) {
+    case "GOOGLE": {
+      const provider = new GoogleAuthProvider();
+      try {
+        const { user } = yield call(signInWithPopup, auth, provider);
+        yield put({ type: "SIGN_IN_USER", user });
+        toast.success("Successfully signed in with Google");
+      } catch (error) {
+        toast.error("Failed to sign in with Google");
+        console.error(error);
+      }
+      return;
+    }
+    case "FACEBOOK":
+      break;
+    case "TWITTER":
+      break;
+    case "GITHUB":
+      break;
+    case "EMAIL":
+      break;
+    case "GUEST":
+      break;
+    default:
+      break;
+  }
   toast.error("Log in is not implemented yet");
 }
 

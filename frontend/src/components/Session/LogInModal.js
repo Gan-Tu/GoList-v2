@@ -16,10 +16,10 @@ import { motion } from "framer-motion";
 import { useDispatch } from "react-redux";
 import Modal from "../Utilities/Modal";
 
-function LogInButton({ logo, textColor, bgColor, buttonText }) {
+function LogInButton({ logo, textColor, bgColor, buttonText, loginType }) {
   const dispatch = useDispatch();
   const onLogIn = () => {
-    dispatch({ type: "LOG_IN" });
+    dispatch({ type: "LOG_IN", loginType });
   };
 
   return (
@@ -47,7 +47,8 @@ function LogInModal({ isOpen, onClose }) {
                 }
                 textColor="text-gray-900"
                 bgColor="bg-gray-100"
-                buttonText={"Sign in with Google"}
+                buttonText="Sign in with Google"
+                loginType="GOOGLE"
               />
             </li>
             <li>
@@ -57,7 +58,8 @@ function LogInModal({ isOpen, onClose }) {
                 }
                 textColor="text-white"
                 bgColor="bg-facebook-blue"
-                buttonText={"Sign in with Facebook"}
+                buttonText="Sign in with Facebook"
+                loginType="FACEBOOK"
               />
             </li>
             <li>
@@ -67,7 +69,8 @@ function LogInModal({ isOpen, onClose }) {
                 }
                 textColor="text-white"
                 bgColor="bg-twitter-blue"
-                buttonText={"Sign in with Twitter"}
+                buttonText="Sign in with Twitter"
+                loginType="TWITTER"
               />
             </li>
             <li>
@@ -77,7 +80,8 @@ function LogInModal({ isOpen, onClose }) {
                 }
                 textColor="text-white"
                 bgColor="bg-github-black"
-                buttonText={"Sign in with GitHub"}
+                buttonText="Sign in with GitHub"
+                loginType="GITHUB"
               />
             </li>
             <li>
@@ -87,7 +91,8 @@ function LogInModal({ isOpen, onClose }) {
                 }
                 textColor="text-white"
                 bgColor="bg-google-red"
-                buttonText={"Sign in with Email"}
+                buttonText="Sign in with Email"
+                loginType="EMAIL"
               />
             </li>
             <li>
@@ -97,7 +102,8 @@ function LogInModal({ isOpen, onClose }) {
                 }
                 textColor="text-white"
                 bgColor="bg-google-green"
-                buttonText={"Sign in as Guest"}
+                buttonText="Sign in as Guest"
+                loginType="GUEST"
               />
             </li>
           </ul>

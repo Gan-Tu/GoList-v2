@@ -14,10 +14,12 @@
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import NavBar from "./components/Layout/NavBar";
 import Footer from "./components/Layout/Footer";
 import CollectionView from "./components/Collections/CollectionView";
 import CreateCollectionModal from "./components/Collections/CreateCollectionModal";
+import { useDispatch } from "react-redux";
 
 function Home() {
   return (
@@ -28,6 +30,12 @@ function Home() {
 }
 
 function App() {
+  const dispatch = useDispatch();
+  const auth = getAuth();
+  onAuthStateChanged(auth, (user) => {
+    dispatch({ type: "SIGN_IN_USER", user });
+  });
+
   return (
     <div className="grid grid-cols-1 justify-items-between min-h-screen">
       <div className="grid items-start">

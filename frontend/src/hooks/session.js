@@ -12,16 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const initialState = {
-  user: null,
-};
+import { useSelector } from "react-redux";
 
-export default function reducer(state = initialState, action) {
-  switch (action.type) {
-    case "SIGN_IN_USER":
-      console.log(action.user);
-      return { ...state, user: action.user };
-    default:
-      return { ...state };
-  }
+function useLoggedInUser() {
+  return useSelector((store) => store.SessionReducer.user);
 }
+
+export { useLoggedInUser };

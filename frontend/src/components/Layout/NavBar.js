@@ -14,9 +14,41 @@
 
 import LogInModal from "../Session/LogInModal";
 import { useState } from "react";
+import { useLoggedInUser } from "../../hooks/session";
+
+function UserProfile({ user, onLogin }) {
+  if (user == null) {
+    return (
+      <button className="text-sm hover:underline" onClick={onLogin}>
+        Login
+      </button>
+    );
+  } else if (user?.photoURL) {
+    console.log(user.photoURL);
+    return (
+      <button>
+        <img
+          src={user.photoURL}
+          className="w-10 h-10 rounded-full"
+          alt={user.displayName}
+        />
+      </button>
+    );
+  } else {
+    return (
+      <button>
+        <p className="text-sm">
+          {user?.displayName ? user.displayName : "Signed In"}
+        </p>
+      </button>
+    );
+  }
+}
 
 function NavBar() {
   const [signInModalOpen, setSignInModalOpen] = useState(false);
+  const user = useLoggedInUser();
+
   const onLogin = () => {
     setSignInModalOpen(true);
   };
@@ -39,9 +71,7 @@ function NavBar() {
           </span>
         </a>
         <div className="flex items-center">
-          <button className="text-sm hover:underline" onClick={onLogin}>
-            Login
-          </button>
+          <UserProfile user={user} onLogin={onLogin} />
         </div>
       </div>
     </nav>
