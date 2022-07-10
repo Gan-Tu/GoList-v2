@@ -29,7 +29,7 @@ import {
   LoaderIcon,
 } from "./Utilities/SvgIcons";
 import CreateItemModal from "./Items/CreateItemModal";
-import DeleteCollectionConfirmation from "./DeleteCollectionConfirmation";
+import DeleteCollectionConfirmationModal from "./DeleteCollectionConfirmationModal";
 import toast from "react-hot-toast";
 import { Helmet } from "react-helmet";
 
@@ -105,7 +105,7 @@ export default function CollectionView() {
           {title}
         </h5>
 
-        <DeleteCollectionConfirmation
+        <DeleteCollectionConfirmationModal
           groupId={id}
           isOpen={deleteMode}
           onClose={() => {

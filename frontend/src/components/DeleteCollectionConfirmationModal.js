@@ -17,7 +17,7 @@ import { TrashIcon } from "./Utilities/SvgIcons";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-export default function DeleteCollectionConfirmation(props) {
+export default function DeleteCollectionConfirmationModal(props) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { groupId, isOpen, onClose } = props;
