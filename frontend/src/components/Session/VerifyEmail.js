@@ -14,19 +14,27 @@
 
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { CircleX, LoaderIcon } from "../Utilities/SvgIcons";
+import { CircleCheck, CircleX, LoaderIcon } from "../Utilities/SvgIcons";
 import {
   useEmailVerificationFailed,
   useEmailVerificationSuccess,
 } from "../../hooks/session";
+import { getAuth, isSignInWithEmailLink } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 export default function VerifyEmail() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const failed = useEmailVerificationFailed();
   const verified = useEmailVerificationSuccess();
 
   useEffect(() => {
-    dispatch({ type: "VERIFY_EMAIL" });
+    const auth = getAuth();
+    if (isSignInWithEmailLink(auth, window.location.href)) {
+      dispatch({ type: "VERIFY_EMAIL" });
+    } else {
+      navigate("/");
+    }
   });
 
   if (verified) {
@@ -36,7 +44,7 @@ export default function VerifyEmail() {
         type="button"
         className="py-2.5 gap-2 px-5 mr-2 text-sm font-medium text-green-500 bg-white inline-flex items-center"
       >
-        <CircleX className="w-6 h-6" />
+        <CircleCheck className="w-6 h-6" />
         Verification Success!
       </button>
     );
