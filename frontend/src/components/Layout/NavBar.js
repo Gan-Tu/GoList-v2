@@ -42,7 +42,7 @@ function UserProfile({ user, onLogin }) {
       <div className="flex items-center gap-4">
         <button onClick={() => dispatch({ type: "LOG_OUT" })}>
           <p className="text-sm">
-            {user?.displayName ? user.displayName : "Signed In"}
+            {user?.displayName || user?.email || "Signed In"}
           </p>
         </button>
       </div>
