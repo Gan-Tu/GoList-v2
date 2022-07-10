@@ -15,8 +15,10 @@
 import LogInModal from "../Session/LogInModal";
 import { useState } from "react";
 import { useLoggedInUser } from "../../hooks/session";
+import { useDispatch } from "react-redux";
 
 function UserProfile({ user, onLogin }) {
+  const dispatch = useDispatch();
   if (user == null) {
     return (
       <button className="text-sm hover:underline" onClick={onLogin}>
@@ -26,7 +28,7 @@ function UserProfile({ user, onLogin }) {
   } else if (user?.photoURL) {
     return (
       <div className="flex items-center gap-4">
-        <button>
+        <button onClick={() => dispatch({ type: "LOG_OUT" })}>
           <img
             src={user.photoURL}
             className="w-10 h-10 rounded-full"
@@ -38,7 +40,7 @@ function UserProfile({ user, onLogin }) {
   } else {
     return (
       <div className="flex items-center gap-4">
-        <button>
+        <button onClick={() => dispatch({ type: "LOG_OUT" })}>
           <p className="text-sm">
             {user?.displayName ? user.displayName : "Signed In"}
           </p>
