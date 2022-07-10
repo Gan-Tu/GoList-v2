@@ -14,10 +14,18 @@
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import Home from "./components/Home";
 import NavBar from "./components/Layout/NavBar";
 import Footer from "./components/Layout/Footer";
 import CollectionView from "./components/CollectionView";
+import CreateCollectionFlow from "./components/CreateCollectionFlow";
+
+function Home() {
+  return (
+    <div className="grid sm:grid-cols-1 lg:grid-cols-1 gap-5">
+      <CreateCollectionFlow />
+    </div>
+  );
+}
 
 function App() {
   return (
