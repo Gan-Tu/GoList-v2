@@ -17,7 +17,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { motion } from "framer-motion";
 import { CloseIcon } from "./SvgIcons";
 
-export default function Modal({ title, isOpen, onClose, children }) {
+export default function Modal({ title, isOpen, onClose, children, maxWidth }) {
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-10" onClose={onClose}>
@@ -44,7 +44,11 @@ export default function Modal({ title, isOpen, onClose, children }) {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+              <Dialog.Panel
+                className={`w-full transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all ${
+                  maxWidth || "max-w-md"
+                }`}
+              >
                 <Dialog.Title
                   as="h3"
                   className="flex justify-between text-lg font-medium leading-6 text-gray-900 truncate text-ellipsis overflow-hidden"
