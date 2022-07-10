@@ -14,7 +14,12 @@
 
 import toast from "react-hot-toast";
 import { call, put, takeLatest } from "redux-saga/effects";
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import {
+  getAuth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut,
+} from "firebase/auth";
 
 function* logIn({ loginType }) {
   const auth = getAuth();
@@ -48,7 +53,12 @@ function* logIn({ loginType }) {
 }
 
 function* logOut() {
-  yield put({ type: "SET_SESSION_USER", user: null });
+  try {
+    yield call(signOut, getAuth());
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to sign out");
+  }
 }
 
 export function* watchSessionApp() {
