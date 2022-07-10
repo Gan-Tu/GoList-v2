@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import toast from "react-hot-toast";
-import { call, put, takeLatest } from "redux-saga/effects";
+import { call, delay, put, takeLatest } from "redux-saga/effects";
 import {
   getAuth,
   signInWithPopup,
@@ -87,7 +87,13 @@ function* logOut() {
   }
 }
 
+function* verifyEmail() {
+  yield delay(2000);
+  yield put({ type: "SET_EMAIL_VERIFICATION_FAILED" });
+}
+
 export function* watchSessionApp() {
   yield takeLatest("LOG_IN", logIn);
   yield takeLatest("LOG_OUT", logOut);
+  yield takeLatest("VERIFY_EMAIL", verifyEmail);
 }

@@ -12,17 +12,47 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LoaderIcon } from "../Utilities/SvgIcons";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { CircleX, LoaderIcon } from "../Utilities/SvgIcons";
+import { useEmailVerificationFailed } from "../../hooks/session";
+import toast from "react-hot-toast";
 
 export default function VerifyEmail() {
-  return (
-    <button
-      disabled
-      type="button"
-      className="py-2.5 px-5 mr-2 text-sm font-medium text-gray-900 bg-white dark:bg-gray-800 dark:text-gray-400 inline-flex items-center"
-    >
-      <LoaderIcon className="inline w-4 h-4 mr-2 text-gray-200 animate-spin dark:text-gray-600" />
-      Verifying...
-    </button>
-  );
+  const dispatch = useDispatch();
+  const failed = useEmailVerificationFailed();
+
+  useEffect(() => {
+    dispatch({ type: "VERIFY_EMAIL" });
+  });
+
+  useEffect(() => {
+    if (failed) {
+      toast.error("Email Verification Failed");
+    }
+  }, [failed]);
+
+  if (failed) {
+    return (
+      <button
+        disabled
+        type="button"
+        className="py-2.5 gap-2 px-5 mr-2 text-sm font-medium text-red-500 bg-white inline-flex items-center"
+      >
+        <CircleX className="w-6 h-6" />
+        Verification Failed.
+      </button>
+    );
+  } else {
+    return (
+      <button
+        disabled
+        type="button"
+        className="py-2.5 px-5 mr-2 text-sm font-medium text-gray-900 bg-white dark:bg-gray-800 dark:text-gray-400 inline-flex items-center"
+      >
+        <LoaderIcon className="inline w-4 h-4 mr-2 text-gray-200 animate-spin dark:text-gray-600" />
+        Verifying...
+      </button>
+    );
+  }
 }

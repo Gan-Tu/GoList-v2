@@ -15,6 +15,7 @@
 const initialState = {
   user: null,
   emailForSignIn: null,
+  emailVerificationFailed: false,
 };
 
 export default function reducer(state = initialState, action) {
@@ -26,6 +27,8 @@ export default function reducer(state = initialState, action) {
       return { ...state, user: action.user };
     case "SET_EMAIL_FOR_SIGN_IN":
       return { ...state, emailForSignIn: action.emailForSignIn };
+    case "SET_EMAIL_VERIFICATION_FAILED":
+      return { ...state, emailVerificationFailed: true };
     default:
       return { ...state };
   }
