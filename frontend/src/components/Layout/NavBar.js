@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { motion } from "framer-motion";
-import Modal from "./Utilities/Modal";
+import Modal from "../Utilities/Modal";
 import { useState } from "react";
 
 function LoginModal({ isOpen, onClose }) {
