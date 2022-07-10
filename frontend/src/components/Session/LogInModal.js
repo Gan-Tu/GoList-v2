@@ -13,20 +13,16 @@
 // limitations under the License.
 
 import { motion } from "framer-motion";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import Modal from "../Utilities/Modal";
 
-function LogInButton({ logo, textColor, bgColor, buttonText, loginType }) {
-  const dispatch = useDispatch();
-  const onLogIn = () => {
-    dispatch({ type: "LOG_IN", loginType });
-  };
-
+function LogInButton({ logo, textColor, bgColor, buttonText, onClick }) {
   return (
     <button
       style={{ minWidth: "225px" }}
       className={`flex pl-5 py-3 gap-4 text-justify text-sm font-medium rounded-lg hover:shadow-lg ${textColor} ${bgColor}`}
-      onClick={onLogIn}
+      onClick={onClick}
     >
       <img src={logo} className="h-5 w-5" alt="Logo" />
       <span className="flex-1 whitespace-nowrap">{buttonText}</span>
@@ -35,8 +31,22 @@ function LogInButton({ logo, textColor, bgColor, buttonText, loginType }) {
 }
 
 function LogInModal({ isOpen, onClose }) {
+  const dispatch = useDispatch();
+  const [isEmailLogin, setIsEmailLogin] = useState(true);
+
+  const handleLogIn = (loginType) => {
+    dispatch({ type: "LOG_IN", loginType });
+  };
+
   return (
     <motion.div layout>
+      <Modal
+        title={"Sign in with Email"}
+        isOpen={isEmailLogin}
+        onClose={() => setIsEmailLogin(false)}
+      >
+        <p>Hi</p>
+      </Modal>
       <Modal title={"Sign In"} isOpen={isOpen} onClose={onClose}>
         <div className="grid grid-cols-1 justify-items-center">
           <ul className="my-5 space-y-3">
@@ -48,7 +58,7 @@ function LogInModal({ isOpen, onClose }) {
                 textColor="text-gray-900"
                 bgColor="bg-gray-100"
                 buttonText="Sign in with Google"
-                loginType="GOOGLE"
+                onClick={() => handleLogIn("GOOGLE")}
               />
             </li>
             <li>
@@ -59,7 +69,7 @@ function LogInModal({ isOpen, onClose }) {
                 textColor="text-white"
                 bgColor="bg-facebook-blue"
                 buttonText="Sign in with Facebook"
-                loginType="FACEBOOK"
+                onClick={() => handleLogIn("FACEBOOK")}
               />
             </li>
             <li>
@@ -70,7 +80,7 @@ function LogInModal({ isOpen, onClose }) {
                 textColor="text-white"
                 bgColor="bg-twitter-blue"
                 buttonText="Sign in with Twitter"
-                loginType="TWITTER"
+                onClick={() => handleLogIn("TWITTER")}
               />
             </li>
             <li>
@@ -81,7 +91,7 @@ function LogInModal({ isOpen, onClose }) {
                 textColor="text-white"
                 bgColor="bg-github-black"
                 buttonText="Sign in with GitHub"
-                loginType="GITHUB"
+                onClick={() => handleLogIn("GITHUB")}
               />
             </li>
             <li>
@@ -92,7 +102,7 @@ function LogInModal({ isOpen, onClose }) {
                 textColor="text-white"
                 bgColor="bg-google-red"
                 buttonText="Sign in with Email"
-                loginType="EMAIL"
+                onClick={() => setIsEmailLogin(true)}
               />
             </li>
             <li>
@@ -103,7 +113,7 @@ function LogInModal({ isOpen, onClose }) {
                 textColor="text-white"
                 bgColor="bg-google-green"
                 buttonText="Sign in as Guest"
-                loginType="GUEST"
+                onClick={() => handleLogIn("GUEST")}
               />
             </li>
           </ul>
