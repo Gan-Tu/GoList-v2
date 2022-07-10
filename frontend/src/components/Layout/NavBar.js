@@ -24,7 +24,6 @@ function UserProfile({ user, onLogin }) {
       </button>
     );
   } else if (user?.photoURL) {
-    console.log(user.photoURL);
     return (
       <button>
         <img
