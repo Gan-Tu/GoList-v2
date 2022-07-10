@@ -14,12 +14,13 @@
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import { useDispatch } from "react-redux";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import NavBar from "./components/Layout/NavBar";
 import Footer from "./components/Layout/Footer";
 import CollectionView from "./components/Collections/CollectionView";
 import CreateCollectionModal from "./components/Collections/CreateCollectionModal";
-import { useDispatch } from "react-redux";
+import VerifyEmail from "./components/Session/VerifyEmail";
 
 function Home() {
   return (
@@ -46,6 +47,7 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/verifyEmail" element={<VerifyEmail />} />
               <Route path="/:id" element={<CollectionView />} />
             </Routes>
           </BrowserRouter>
