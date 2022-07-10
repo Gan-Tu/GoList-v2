@@ -33,7 +33,7 @@ function App() {
   const dispatch = useDispatch();
   const auth = getAuth();
   onAuthStateChanged(auth, (user) => {
-    dispatch({ type: "SIGN_IN_USER", user });
+    dispatch({ type: "SET_SESSION_USER", user });
   });
 
   return (

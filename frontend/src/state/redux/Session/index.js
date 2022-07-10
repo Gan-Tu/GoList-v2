@@ -23,7 +23,7 @@ function* login({ loginType }) {
       const provider = new GoogleAuthProvider();
       try {
         const { user } = yield call(signInWithPopup, auth, provider);
-        yield put({ type: "SIGN_IN_USER", user });
+        yield put({ type: "SET_SESSION_USER", user });
         toast.success("Successfully signed in with Google");
       } catch (error) {
         toast.error("Failed to sign in with Google");

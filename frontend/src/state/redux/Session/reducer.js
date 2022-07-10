@@ -18,8 +18,7 @@ const initialState = {
 
 export default function reducer(state = initialState, action) {
   switch (action.type) {
-    case "SIGN_IN_USER":
-      console.log(action.user);
+    case "SET_SESSION_USER":
       return { ...state, user: action.user };
     default:
       return { ...state };
