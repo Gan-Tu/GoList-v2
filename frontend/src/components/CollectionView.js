@@ -21,7 +21,7 @@ import {
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
-import ItemView from "./Items/ItemView";
+import ItemCard from "./Items/ItemCard";
 import {
   AdjustmentIcon,
   PlusCircleIcon,
@@ -157,7 +157,7 @@ export default function CollectionView() {
           {itemIds
             ? itemIds.map((itemId) => (
                 <motion.li layout key={`item-${itemId}`}>
-                  <ItemView id={itemId} groupId={id} showControls={editMode} />
+                  <ItemCard id={itemId} groupId={id} showControls={editMode} />
                 </motion.li>
               ))
             : null}

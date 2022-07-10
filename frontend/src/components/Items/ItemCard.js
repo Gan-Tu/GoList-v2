@@ -79,7 +79,7 @@ function ItemControls({ id, groupId }) {
   );
 }
 
-export default function ItemView({ id, groupId, showControls }) {
+export default function ItemCard({ id, groupId, showControls }) {
   const link = useItemlink(id);
   if (showControls) {
     return (
