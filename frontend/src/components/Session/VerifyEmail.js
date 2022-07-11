@@ -40,13 +40,13 @@ export default function VerifyEmail() {
 
   useEffect(() => {
     if (verified) {
-      toast.success("Email Verification Success!");
+      toast.success("Successfully signed in!");
     }
   }, [verified]);
 
   useEffect(() => {
     if (!verified && failed) {
-      toast.error("Email Verification Failed");
+      toast.error("Sign In Verification Failed.");
     }
   }, [verified, failed]);
 
