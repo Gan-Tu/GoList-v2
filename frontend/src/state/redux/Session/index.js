@@ -55,7 +55,7 @@ function* logIn({ loginType, email }) {
       }
       try {
         yield call(sendSignInLinkToEmail, auth, email, {
-          url: "https://goli.st/verifyEmail",
+          url: "https://goli.st/_/verifyEmail",
           handleCodeInApp: true,
         });
         window.localStorage.setItem("emailForSignIn", email);

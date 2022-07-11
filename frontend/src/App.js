@@ -47,7 +47,7 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/verifyEmail" element={<VerifyEmail />} />
+              <Route path="/_/verifyEmail" element={<VerifyEmail />} />
               <Route path="/:id" element={<CollectionView />} />
             </Routes>
           </BrowserRouter>
