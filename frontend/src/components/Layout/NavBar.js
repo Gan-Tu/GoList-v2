@@ -71,7 +71,7 @@ function NavBar() {
         onClose={() => setSignInModalOpen(false)}
       />
       <div className="flex flex-wrap justify-between items-center px-6 py-2.5">
-        <a type="button" href="/" className="flex items-center">
+        <a href="/" className="flex items-center">
           <img
             src="/logo192.png"
             className="mr-3 h-6 sm:h-9"
