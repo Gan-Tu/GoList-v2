@@ -21,6 +21,8 @@ import Modal from "../Utilities/Modal";
 import { useGroupUpdateStatus } from "../../hooks/data";
 import { useNavigate } from "react-router-dom";
 
+const SHORT_URL_REGEX = /^[a-zA-Z0-9-+]*$/;
+
 export default function CreateCollectionModal() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -65,8 +67,10 @@ export default function CreateCollectionModal() {
       toast.error("Title is empty but required.");
     } else if (!shortUrl) {
       toast.error("Collection URL is empty but required.");
+    } else if (!shortUrl.match(SHORT_URL_REGEX)) {
+      toast.error("Only alphanumeric characters, - and + are allowed.");
     } else {
-      dispatch({ type: "CREATE_GROUP", groupId: shortUrl, title, urls });
+      // dispatch({ type: "CREATE_GROUP", groupId: shortUrl, title, urls });
     }
   };
 
@@ -90,23 +94,30 @@ export default function CreateCollectionModal() {
           <div className="space-y-4">
             <label
               htmlFor="shortUrl"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+              className="block text-sm font-medium text-gray-900 dark:text-gray-300"
             >
-              Collection URL
+              Collection URL (case sensitive)
             </label>
-            <div className="flex">
-              <span className="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border border-r-0 border-gray-300 rounded-l-md dark:bg-gray-600 dark:text-gray-400 dark:border-gray-600">
-                https://goli.st/
-              </span>
-              <input
-                type="text"
-                id="shortUrl"
-                className="rounded-none rounded-r-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder={shortUrl}
-                value={shortUrl}
-                onChange={(e) => setShortUrl(e.target.value)}
-                required={true}
-              />
+            <div>
+              <div className="flex">
+                <span className="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border border-r-0 border-gray-300 rounded-l-md dark:bg-gray-600 dark:text-gray-400 dark:border-gray-600">
+                  https://goli.st/
+                </span>
+                <input
+                  type="text"
+                  id="shortUrl"
+                  className="rounded-none rounded-r-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  placeholder={shortUrl}
+                  value={shortUrl}
+                  onChange={(e) => setShortUrl(e.target.value)}
+                  required={true}
+                />
+              </div>
+              {!shortUrl.match(SHORT_URL_REGEX) && (
+                <p className="mt-2 text-sm text-red-600 dark:text-red-500">
+                  Only alphanumeric characters, - and + are allowed.
+                </p>
+              )}
             </div>
 
             <TextInput
@@ -117,7 +128,6 @@ export default function CreateCollectionModal() {
               isDisabled={false}
               isRequired={true}
             />
-
             <label
               htmlFor="urls"
               className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-300 flex justify-between"
