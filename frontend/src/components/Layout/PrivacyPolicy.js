@@ -311,9 +311,9 @@ function PrivacyPolicy({ isOpen, onClose }) {
             contact us using the following details:{" "}
           </p>
           <p className="text-base leading-relaxed text-gray-700">
-            Gan Tu
+            GoList Developers
             <br />
-            dev@tugan.io{" "}
+            golist-developers@googlegroups.com{" "}
           </p>
         </div>
       </Modal>
