@@ -17,10 +17,14 @@ import { Dialog, Transition } from "@headlessui/react";
 import { motion } from "framer-motion";
 import { CloseIcon } from "./SvgIcons";
 
-export default function Modal({ title, isOpen, onClose, children, maxWidth }) {
+function noop() {}
+
+export default function Modal(props) {
+  const { title, isOpen, onClose, children, maxWidth } = props;
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-10" onClose={onClose}>
+      <Dialog as="div" className="relative z-10" onClose={onClose || noop}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -54,13 +58,15 @@ export default function Modal({ title, isOpen, onClose, children, maxWidth }) {
                   className="flex justify-between text-lg font-medium leading-6 text-gray-900 truncate text-ellipsis overflow-hidden"
                 >
                   {title}
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    onClick={onClose}
-                    className="text-sm font-medium text-black"
-                  >
-                    <CloseIcon className="w-6 h-6" />
-                  </motion.button>
+                  {onClose && (
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      onClick={onClose || noop}
+                      className="text-sm font-medium text-black"
+                    >
+                      <CloseIcon className="w-6 h-6" />
+                    </motion.button>
+                  )}
                 </Dialog.Title>
                 {children}
               </Dialog.Panel>

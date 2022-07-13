@@ -21,6 +21,7 @@ import Footer from "./components/Layout/Footer";
 import CollectionView from "./components/Collections/CollectionView";
 import CreateCollectionModal from "./components/Collections/CreateCollectionModal";
 import VerifyEmail from "./components/Session/VerifyEmail";
+import PrivacyPolicy from "./components/Layout/PrivacyPolicy";
 
 function Home() {
   return (
@@ -47,6 +48,10 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route
+                path="/privacy"
+                element={<PrivacyPolicy isOpen={true} onClose={null} />}
+              />
               <Route path="/_/verifyEmail" element={<VerifyEmail />} />
               <Route path="/:id" element={<CollectionView />} />
             </Routes>
