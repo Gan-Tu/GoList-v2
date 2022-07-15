@@ -31,6 +31,7 @@ export default function CreateCollectionModal() {
   const [urls, setUrls] = useState("");
   const [createMode, setCreateMode] = useState(false);
   const [urlCount, setUrlCount] = useState(0);
+  const [shortUrlValidationError, setShortUrlValidationError] = useState("");
 
   const status = useGroupUpdateStatus(shortUrl);
   const isUpdating =
@@ -50,6 +51,22 @@ export default function CreateCollectionModal() {
   }, [urls]);
 
   useEffect(() => {
+    if (!shortUrl) {
+      setShortUrlValidationError("Collection URL is empty but required.");
+    } else if (shortUrl?.length < 6) {
+      setShortUrlValidationError(
+        "Collection URL must be at least 6 characters."
+      );
+    } else if (!SHORT_URL_REGEX.test(shortUrl)) {
+      setShortUrlValidationError(
+        "Only alphanumeric characters, - and + are allowed."
+      );
+    } else {
+      setShortUrlValidationError("");
+    }
+  }, [shortUrl]);
+
+  useEffect(() => {
     if (!isUpdating && newGroupId) {
       const timer = setTimeout(() => {
         navigate(`/${newGroupId}`);
@@ -65,12 +82,8 @@ export default function CreateCollectionModal() {
       toast.error("A max of 10 item URLs are allowed per collection.");
     } else if (!title) {
       toast.error("Title is empty but required.");
-    } else if (!shortUrl) {
-      toast.error("Collection URL is empty but required.");
-    } else if (shortUrl?.length <= 6) {
-      toast.error("Collection URL must be at least 6 characters.");
-    } else if (!shortUrl.match(SHORT_URL_REGEX)) {
-      toast.error("Only alphanumeric characters, - and + are allowed.");
+    } else if (shortUrlValidationError) {
+      toast.error(shortUrlValidationError);
     } else {
       dispatch({ type: "CREATE_GROUP", groupId: shortUrl, title, urls });
     }
@@ -115,9 +128,9 @@ export default function CreateCollectionModal() {
                   required={true}
                 />
               </div>
-              {!shortUrl.match(SHORT_URL_REGEX) && (
+              {shortUrl && shortUrlValidationError && (
                 <p className="mt-2 text-sm text-red-600 dark:text-red-500">
-                  Only alphanumeric characters, - and + are allowed.
+                  {shortUrlValidationError}
                 </p>
               )}
             </div>
