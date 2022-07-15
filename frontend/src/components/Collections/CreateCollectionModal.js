@@ -70,7 +70,7 @@ export default function CreateCollectionModal() {
     } else if (!shortUrl.match(SHORT_URL_REGEX)) {
       toast.error("Only alphanumeric characters, - and + are allowed.");
     } else {
-      // dispatch({ type: "CREATE_GROUP", groupId: shortUrl, title, urls });
+      dispatch({ type: "CREATE_GROUP", groupId: shortUrl, title, urls });
     }
   };
 
