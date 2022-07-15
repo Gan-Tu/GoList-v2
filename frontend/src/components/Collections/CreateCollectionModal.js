@@ -76,14 +76,14 @@ export default function CreateCollectionModal() {
   }, [dispatch, navigate, isUpdating, newGroupId]);
 
   const onCreate = () => {
-    if (urlCount <= 0) {
+    if (shortUrlValidationError) {
+      toast.error(shortUrlValidationError);
+    } else if (!title) {
+      toast.error("Title is empty but required.");
+    } else if (urlCount <= 0) {
       toast.error("Item URLs are empty but required.");
     } else if (urlCount > 10) {
       toast.error("A max of 10 item URLs are allowed per collection.");
-    } else if (!title) {
-      toast.error("Title is empty but required.");
-    } else if (shortUrlValidationError) {
-      toast.error(shortUrlValidationError);
     } else {
       dispatch({ type: "CREATE_GROUP", groupId: shortUrl, title, urls });
     }
