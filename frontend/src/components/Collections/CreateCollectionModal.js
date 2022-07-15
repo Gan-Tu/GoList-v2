@@ -67,6 +67,8 @@ export default function CreateCollectionModal() {
       toast.error("Title is empty but required.");
     } else if (!shortUrl) {
       toast.error("Collection URL is empty but required.");
+    } else if (shortUrl?.length <= 6) {
+      toast.error("Collection URL must be at least 6 characters.");
     } else if (!shortUrl.match(SHORT_URL_REGEX)) {
       toast.error("Only alphanumeric characters, - and + are allowed.");
     } else {
