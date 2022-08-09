@@ -57,7 +57,7 @@ function* fetchDataGroup({ groupId }) {
   }
 }
 
-function* createGroup({ groupId, title, urls }) {
+function* createGroup({ groupId, title, urls, uid }) {
   // Start group creation
   yield put({
     type: "SET_GROUP_UPDATE_STATUS",
@@ -87,6 +87,9 @@ function* createGroup({ groupId, title, urls }) {
     title: title,
     items: itemsData,
   };
+  if (uid) {
+    data.ownerId = uid;
+  }
 
   // Save to firestore
   const docRef = doc(db, "DataGroups", groupId);

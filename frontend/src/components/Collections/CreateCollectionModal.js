@@ -20,6 +20,7 @@ import TextInput from "../Utilities/TextInput";
 import Modal from "../Utilities/Modal";
 import { useGroupUpdateStatus } from "../../hooks/data";
 import { useNavigate } from "react-router-dom";
+import { useLoggedInUserId } from "../../hooks/session";
 
 const SHORT_URL_REGEX = /^[a-zA-Z0-9-+]*$/;
 
@@ -32,6 +33,7 @@ export default function CreateCollectionModal() {
   const [createMode, setCreateMode] = useState(false);
   const [urlCount, setUrlCount] = useState(0);
   const [shortUrlValidationError, setShortUrlValidationError] = useState("");
+  const uid = useLoggedInUserId();
 
   const status = useGroupUpdateStatus(shortUrl);
   const isUpdating =
@@ -85,7 +87,7 @@ export default function CreateCollectionModal() {
     } else if (urlCount > 10) {
       toast.error("A max of 10 item URLs are allowed per collection.");
     } else {
-      dispatch({ type: "CREATE_GROUP", groupId: shortUrl, title, urls });
+      dispatch({ type: "CREATE_GROUP", groupId: shortUrl, title, urls, uid });
     }
   };
 
