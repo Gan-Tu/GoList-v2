@@ -17,6 +17,7 @@ import {
   useGroupTitle,
   useGroupItemIds,
   useGroupUpdateStatus,
+  useIsOwner,
 } from "../../hooks/data";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -32,6 +33,7 @@ import CreateItemModal from "../Items/CreateItemModal";
 import DeleteCollectionConfirmationModal from "./DeleteCollectionConfirmationModal";
 import toast from "react-hot-toast";
 import { Helmet } from "react-helmet";
+import { useLoggedInUserId } from "../../hooks/session";
 
 export default function CollectionView() {
   const dispatch = useDispatch();
@@ -40,6 +42,8 @@ export default function CollectionView() {
   const title = useGroupTitle(id);
   const itemIds = useGroupItemIds(id);
   const status = useGroupUpdateStatus(id);
+  const uid = useLoggedInUserId();
+  const isOwner = useIsOwner(id, uid);
 
   const [editMode, setEditMode] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
@@ -75,36 +79,10 @@ export default function CollectionView() {
     );
   }
 
-  return (
-    <motion.div
-      layout
-      className="p-5 min-w-m bg-white rounded-lg border shadow-md sm:p-8 dark:bg-gray-800 dark:border-gray-700"
-    >
-      {title && (
-        <Helmet>
-          <title>{title}</title>
-        </Helmet>
-      )}
-      <CreateItemModal
-        groupId={id}
-        isOpen={createMode}
-        onClose={() => {
-          setCreateMode(false);
-          dispatch({
-            type: "SET_GROUP_UPDATE_STATUS",
-            id: id,
-            status: {
-              isUpdating: false,
-              newItemId: null,
-            },
-          });
-        }}
-      />
-      <div className="flex justify-between items-center text-center h-15 pl-4 pr-4 pb-4 space-y-2">
-        <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white">
-          {title}
-        </h5>
-
+  let editPanel = null;
+  if (isOwner) {
+    editPanel = (
+      <>
         <DeleteCollectionConfirmationModal
           groupId={id}
           isOpen={deleteMode}
@@ -146,6 +124,83 @@ export default function CollectionView() {
             </motion.button>
           </div>
         )}
+      </>
+    );
+  }
+
+  return (
+    <motion.div
+      layout
+      className="p-5 min-w-m bg-white rounded-lg border shadow-md sm:p-8 dark:bg-gray-800 dark:border-gray-700"
+    >
+      {title && (
+        <Helmet>
+          <title>{title}</title>
+        </Helmet>
+      )}
+      <CreateItemModal
+        groupId={id}
+        isOpen={createMode}
+        onClose={() => {
+          setCreateMode(false);
+          dispatch({
+            type: "SET_GROUP_UPDATE_STATUS",
+            id: id,
+            status: {
+              isUpdating: false,
+              newItemId: null,
+            },
+          });
+        }}
+      />
+      <div className="flex justify-between items-center text-center h-15 pl-4 pr-4 pb-4 space-y-2">
+        <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white">
+          {title}
+        </h5>
+
+        {editPanel}
+
+        {/* <DeleteCollectionConfirmationModal
+          groupId={id}
+          isOpen={deleteMode}
+          onClose={() => {
+            setDeleteMode(false);
+          }}
+        />
+
+        {editMode ? (
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            onClick={() => setEditMode(!editMode)}
+            className="text-sm font-medium text-black flex space-y-4 items-center"
+          >
+            <p className="w-6 h-6 font-bold">Done</p>
+          </motion.button>
+        ) : (
+          <div className="flex items-center space-x-4">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              onClick={() => setEditMode(!editMode)}
+              className="text-sm font-medium text-black flex space-y-4 items-center"
+            >
+              <AdjustmentIcon className="w-6 h-6" />
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              onClick={() => setDeleteMode(!deleteMode)}
+              className="text-sm font-medium text-black flex space-y-4 -mr-4 items-center"
+            >
+              <TrashIcon className="w-6 h-6" />
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              onClick={() => setCreateMode(!createMode)}
+              className="text-sm font-medium text-black flex space-y-4 -mr-4 items-center"
+            >
+              <PlusCircleIcon className="w-6 h-6" />
+            </motion.button>
+          </div>
+        )} */}
       </div>
       <div>
         <ul

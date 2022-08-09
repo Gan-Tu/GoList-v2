@@ -18,6 +18,14 @@ function useGroupInfo(id) {
   return useSelector((store) => store.DataGroupsReducer.groupInfo.get(id));
 }
 
+function useIsOwner(id, uid) {
+  return (
+    useSelector(
+      (store) => store.DataGroupsReducer.groupInfo.get(id)?.ownerId
+    ) === uid
+  );
+}
+
 function useGroupTitle(id) {
   return useSelector(
     (store) => store.DataGroupsReducer.groupInfo.get(id)?.title
@@ -54,6 +62,7 @@ function useItemIsUpdating(id) {
 
 export {
   useGroupInfo,
+  useIsOwner,
   useGroupTitle,
   useGroupItemIds,
   useGroupUpdateStatus,

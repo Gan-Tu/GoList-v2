@@ -18,6 +18,10 @@ function useLoggedInUser() {
   return useSelector((store) => store.SessionReducer.user);
 }
 
+function useLoggedInUserId() {
+  return useSelector((store) => store.SessionReducer.user?.uid);
+}
+
 function useEmailForSignIn() {
   return useSelector((store) => store.SessionReducer.emailForSignIn);
 }
@@ -32,6 +36,7 @@ function useEmailVerificationFailed() {
 
 export {
   useLoggedInUser,
+  useLoggedInUserId,
   useEmailForSignIn,
   useEmailVerificationSuccess,
   useEmailVerificationFailed,
