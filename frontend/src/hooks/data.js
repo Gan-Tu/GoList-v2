@@ -51,7 +51,7 @@ function useItemIsUpdating(id) {
 }
 
 export {
-  useGroupInfo, // used once
+  useGroupInfo,
   useGroupUpdateStatus,
   useItemData,
   useItemIsUpdating, // used once
