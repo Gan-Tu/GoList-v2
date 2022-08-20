@@ -13,39 +13,25 @@
 // limitations under the License.
 
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  useGroupTitle,
-  useGroupItemIds,
-  useGroupUpdateStatus,
-  useIsOwner
-} from "../../hooks/data";
+import { useGroupUpdateStatus, useCollectionViewData } from "../../hooks/data";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
 import ItemCard from "../Items/ItemCard";
-import {
-  AdjustmentIcon,
-  PlusCircleIcon,
-  TrashIcon,
-  LoaderIcon
-} from "../Utilities/SvgIcons";
+import * as Icons from "../Utilities/SvgIcons";
 import CreateItemModal from "../Items/CreateItemModal";
 import DeleteCollectionConfirmationModal from "./DeleteCollectionConfirmationModal";
 import toast from "react-hot-toast";
 import { Helmet } from "react-helmet";
-import { useLoggedInUserId } from "../../hooks/session";
 
 export default function CollectionView() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
-  const title = useGroupTitle(id);
-  const itemIds = useGroupItemIds(id);
   const status = useGroupUpdateStatus(id);
-  const uid = useLoggedInUserId();
-  const isOwner = useIsOwner(id, uid);
   const [mode, setMode] = useState(null);
-  
+  const { title, itemIds, isOwner } = useCollectionViewData(id);
+
   useEffect(() => {
     dispatch({ type: "FETCH_GROUP", groupId: id });
   }, [dispatch, id]);
@@ -70,7 +56,7 @@ export default function CollectionView() {
         type="button"
         className="py-2.5 px-5 mr-2 text-sm font-medium text-gray-900 bg-white dark:bg-gray-800 dark:text-gray-400 inline-flex items-center"
       >
-        <LoaderIcon className="inline w-4 h-4 mr-2 text-gray-200 animate-spin dark:text-gray-600" />
+        <Icons.LoaderIcon className="inline w-4 h-4 mr-2 text-gray-200 animate-spin dark:text-gray-600" />
         Loading...
       </button>
     );
@@ -103,21 +89,21 @@ export default function CollectionView() {
               onClick={() => setMode("edit")}
               className="text-sm font-medium text-black flex space-y-4 items-center"
             >
-              <AdjustmentIcon className="w-6 h-6" />
+              <Icons.AdjustmentIcon className="w-6 h-6" />
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.1 }}
               onClick={() => setMode("delete")}
               className="text-sm font-medium text-black flex space-y-4 -mr-4 items-center"
             >
-              <TrashIcon className="w-6 h-6" />
+              <Icons.TrashIcon className="w-6 h-6" />
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.1 }}
               onClick={() => setMode("create")}
               className="text-sm font-medium text-black flex space-y-4 -mr-4 items-center"
             >
-              <PlusCircleIcon className="w-6 h-6" />
+              <Icons.PlusCircleIcon className="w-6 h-6" />
             </motion.button>
           </div>
         )}

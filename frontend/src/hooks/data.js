@@ -18,26 +18,16 @@ function useGroupInfo(id) {
   return useSelector((store) => store.DataGroupsReducer.groupInfo.get(id));
 }
 
-function useIsOwner(id, uid) {
-  return (
-    useSelector(
-      (store) => store.DataGroupsReducer.groupInfo.get(id)?.ownerId
-    ) === uid
+function useCollectionViewData(id) {
+  const uid = useSelector((store) => store.SessionReducer.user?.uid);
+  const data = useSelector((store) =>
+    store.DataGroupsReducer.groupInfo.get(id)
   );
-}
-
-function useGroupTitle(id) {
-  return useSelector(
-    (store) => store.DataGroupsReducer.groupInfo.get(id)?.title
-  );
-}
-
-function useGroupItemIds(id) {
-  let itemIds = useSelector(
-    (store) => store.DataGroupsReducer.groupInfo.get(id)?.itemIds || []
-  );
-  itemIds.sort();
-  return itemIds;
+  return {
+    title: data?.title,
+    itemIds: (data?.itemIds || []).slice(0).sort(),
+    isOwner: data?.ownerId === uid
+  };
 }
 
 function useGroupUpdateStatus(id) {
@@ -61,12 +51,10 @@ function useItemIsUpdating(id) {
 }
 
 export {
-  useGroupInfo,
-  useIsOwner,
-  useGroupTitle,
-  useGroupItemIds,
+  useGroupInfo, // used once
   useGroupUpdateStatus,
   useItemData,
-  useItemIsUpdating,
-  useItemlink,
+  useItemIsUpdating, // used once
+  useItemlink, // used once
+  useCollectionViewData
 };
