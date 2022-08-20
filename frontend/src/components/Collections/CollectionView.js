@@ -68,7 +68,7 @@ export default function CollectionView() {
       <>
         <DeleteCollectionConfirmationModal
           groupId={id}
-          isOpen={mode == "delete"}
+          isOpen={mode === "delete"}
           onClose={() => {
             setMode(null);
           }}
