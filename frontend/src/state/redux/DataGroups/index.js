@@ -20,7 +20,7 @@ import {
   getDoc,
   updateDoc,
   setDoc,
-  deleteDoc,
+  deleteDoc
 } from "firebase/firestore";
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
@@ -35,25 +35,30 @@ function fixUrl(url) {
 
 function* fetchDataGroup({ groupId }) {
   const docRef = doc(db, "DataGroups", groupId);
-  const documentSnapshot = yield call(getDoc, docRef);
-  const data = documentSnapshot.data();
-  if (!!data) {
-    for (const [itemId, itemData] of Object.entries(data.items)) {
-      yield put({ type: "SET_ITEM_DATA", id: itemId, data: itemData });
+  try {
+    const documentSnapshot = yield call(getDoc, docRef);
+    const data = documentSnapshot.data();
+    if (!!data) {
+      for (const [itemId, itemData] of Object.entries(data.items)) {
+        yield put({ type: "SET_ITEM_DATA", id: itemId, data: itemData });
+      }
+      data.itemIds = Object.keys(data.items);
+      delete data.items;
+      yield put({ type: "SET_GROUP_DATA", id: groupId, data });
+    } else {
+      yield put({
+        type: "SET_GROUP_UPDATE_STATUS",
+        id: groupId,
+        status: {
+          mode: "fetch",
+          dataType: "group",
+          notFound: true
+        }
+      });
     }
-    data.itemIds = Object.keys(data.items);
-    delete data.items;
-    yield put({ type: "SET_GROUP_DATA", id: groupId, data });
-  } else {
-    yield put({
-      type: "SET_GROUP_UPDATE_STATUS",
-      id: groupId,
-      status: {
-        mode: "fetch",
-        dataType: "group",
-        notFound: true,
-      },
-    });
+  } catch (error) {
+    toast.error(`Failed to get data.`);
+    console.error(`Failed to get data: ${error}`);
   }
 }
 
@@ -66,8 +71,8 @@ function* createGroup({ groupId, title, urls, uid }) {
       mode: "create",
       dataType: "group",
       isUpdating: true,
-      newGroupId: groupId,
-    },
+      newGroupId: groupId
+    }
   });
   let toastId = toast.loading("Creating new collection...", { duration: 5000 });
 
@@ -78,14 +83,14 @@ function* createGroup({ groupId, title, urls, uid }) {
       const itemId = uuidv4();
       itemsData[itemId] = {
         id: itemId,
-        link: fixUrl(url),
+        link: fixUrl(url)
       };
     }
   }
   let data = {
     id: groupId,
     title: title,
-    items: itemsData,
+    items: itemsData
   };
   if (uid) {
     data.ownerId = uid;
@@ -93,12 +98,28 @@ function* createGroup({ groupId, title, urls, uid }) {
 
   // Save to firestore
   const docRef = doc(db, "DataGroups", groupId);
-  yield call(setDoc, docRef, data);
+  try {
+    yield call(setDoc, docRef, data);
+  } catch (error) {
+    toast.error('Failed to save data.');
+    console.error(`Failed to save data: ${error}`);
+    yield put({
+      type: "SET_GROUP_UPDATE_STATUS",
+      id: groupId,
+      status: {
+        mode: "create",
+        dataType: "group",
+        isUpdating: false,
+        newGroupId: groupId
+      }
+    });
+    return;
+  }
 
   // Try populate all the url metadata
   toastId = toast.loading("Auto-populating metadata...", {
     id: toastId,
-    duration: 10000,
+    duration: 10000
   });
   try {
     const result = yield call(
@@ -122,16 +143,21 @@ function* createGroup({ groupId, title, urls, uid }) {
       mode: "create",
       dataType: "group",
       isUpdating: false,
-      newGroupId: groupId,
-    },
+      newGroupId: groupId
+    }
   });
 }
 
 function* deleteGroup({ groupId }) {
   const docRef = doc(db, "DataGroups", groupId);
-  yield call(deleteDoc, docRef);
-  yield put({ type: "DELETE_GROUP_DATA", id: groupId });
-  toast.success("Group deleted successfuly.");
+  try {
+    yield call(deleteDoc, docRef);
+    yield put({ type: "DELETE_GROUP_DATA", id: groupId });
+    toast.success("Group deleted successfuly.");
+  } catch (error) {
+    toast.error(`Failed to delete data.`);
+    console.error(`Failed to delete data: ${error}`);
+  }
 }
 
 function* createItem({ groupId, url }) {
@@ -146,8 +172,8 @@ function* createItem({ groupId, url }) {
       mode: "create",
       dataType: "item",
       isUpdating: true,
-      newItemId: itemId,
-    },
+      newItemId: itemId
+    }
   });
   let toastId = toast.loading("Creating new item...", { duration: 5000 });
 
@@ -156,7 +182,7 @@ function* createItem({ groupId, url }) {
     link: url,
     title: "URL",
     snippet: "",
-    imageUrl: "https://picsum.photos/48",
+    imageUrl: "https://picsum.photos/48"
   };
 
   // Try fetching url metadata
@@ -182,7 +208,7 @@ function* createItem({ groupId, url }) {
         metadata?.data?.twitterImage ||
         metadata?.data?.ogImage ||
         metadata?.data?.icon ||
-        "",
+        ""
     };
   } catch (error) {
     console.error(`Failed to fetch url metadata: ${error}`);
@@ -192,19 +218,30 @@ function* createItem({ groupId, url }) {
   const docRef = doc(db, "DataGroups", groupId);
   let update = {};
   update[`items.${itemId}`] = itemData;
-  yield call(updateDoc, docRef, update);
-  yield put({
-    type: "SET_ITEM_DATA",
-    id: itemId,
-    data: itemData,
-  });
-  yield put({ type: "ADD_ITEM_ID_TO_GROUP", groupId, itemId });
+
+  let success = false;
+  try {
+    yield call(updateDoc, docRef, update);
+    yield put({
+      type: "SET_ITEM_DATA",
+      id: itemId,
+      data: itemData
+    });
+    yield put({ type: "ADD_ITEM_ID_TO_GROUP", groupId, itemId });
+    success = true;
+  } catch (error) {
+    console.error(`Failed to save data: ${error}`);
+  }
 
   // Clear any loading animations
   toast.dismiss(toastId);
 
   // End item update
-  toast.success("New item successfully created");
+  if (success) {
+    toast.success("New item successfully created");
+  } else {
+    toast.error("Failed to save data.");
+  }
   yield put({
     type: "SET_GROUP_UPDATE_STATUS",
     id: groupId,
@@ -212,8 +249,8 @@ function* createItem({ groupId, url }) {
       mode: "create",
       dataType: "item",
       isUpdating: false,
-      newItemId: itemId,
-    },
+      newItemId: itemId
+    }
   });
 }
 
@@ -223,8 +260,8 @@ function* updateItem({ itemId, groupId, data }) {
     type: "SET_ITEM_UPDATE_STATUS",
     id: itemId,
     status: {
-      isUpdating: true,
-    },
+      isUpdating: true
+    }
   });
 
   if (data?.link) {
@@ -245,25 +282,37 @@ function* updateItem({ itemId, groupId, data }) {
   const newData = { ...currentData, ...data };
   let update = {};
   update[`items.${itemId}`] = newData;
-  yield call(updateDoc, docRef, update);
-  yield put({
-    type: "SET_ITEM_DATA",
-    id: itemId,
-    data: newData,
-  });
+
+  let success = false;
+  try {
+    yield call(updateDoc, docRef, update);
+    yield put({
+      type: "SET_ITEM_DATA",
+      id: itemId,
+      data: newData
+    });
+    success = true;
+  } catch (error) {
+    console.error(`Failed to update data: ${error}`);
+  }
 
   // Clear any loading animations
   toast.dismiss(toastId);
   clearTimeout(timer);
 
   // End item update
-  toast.success("Updated item details successfully");
+  if (success) {
+    toast.success("Updated item details successfully");
+  } else {
+    toast.error("Failed to update data");
+  }
+
   yield put({
     type: "SET_ITEM_UPDATE_STATUS",
     id: itemId,
     status: {
-      isUpdating: false,
-    },
+      isUpdating: false
+    }
   });
 }
 
@@ -271,10 +320,15 @@ function* deleteItem({ groupId, itemId }) {
   const docRef = doc(db, "DataGroups", groupId);
   let update = {};
   update[`items.${itemId}`] = deleteField();
-  yield call(updateDoc, docRef, update);
-  yield put({ type: "SET_ITEM_DATA", id: itemId, data: null });
-  yield put({ type: "REMOVE_ITEM_ID_FROM_GROUP", groupId, itemId });
-  toast.success("Item deleted successfuly.");
+  try {
+    yield call(updateDoc, docRef, update);
+    yield put({ type: "SET_ITEM_DATA", id: itemId, data: null });
+    yield put({ type: "REMOVE_ITEM_ID_FROM_GROUP", groupId, itemId });
+    toast.success("Item deleted successfuly.");
+  } catch (error) {
+    toast.error("Failed to delete data.");
+    console.error(`Failed to delete data: ${error}`);
+  }
 }
 
 export function* watchDataGroupsApp() {
