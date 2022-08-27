@@ -62,54 +62,53 @@ export default function CollectionView() {
     );
   }
 
-  let editPanel = null;
-  if (isOwner) {
-    editPanel = (
-      <>
-        <DeleteCollectionConfirmationModal
-          groupId={id}
-          isOpen={mode === "delete"}
-          onClose={() => {
-            setMode(null);
-          }}
-        />
+  let editPanel = (
+    <>
+      <DeleteCollectionConfirmationModal
+        groupId={id}
+        isOpen={mode === "delete"}
+        onClose={() => {
+          setMode(null);
+        }}
+      />
 
-        {mode === "edit" ? (
+      {mode === "edit" ? (
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          onClick={() => setMode(null)}
+          className="text-sm font-medium text-black flex space-y-4 items-center"
+        >
+          <p className="w-6 h-6 font-bold">Done</p>
+        </motion.button>
+      ) : (
+        <div className="flex items-center space-x-4">
           <motion.button
             whileHover={{ scale: 1.1 }}
-            onClick={() => setMode(null)}
+            onClick={() => setMode("edit")}
             className="text-sm font-medium text-black flex space-y-4 items-center"
           >
-            <p className="w-6 h-6 font-bold">Done</p>
+            <Icons.AdjustmentIcon className="w-6 h-6" />
           </motion.button>
-        ) : (
-          <div className="flex items-center space-x-4">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              onClick={() => setMode("edit")}
-              className="text-sm font-medium text-black flex space-y-4 items-center"
-            >
-              <Icons.AdjustmentIcon className="w-6 h-6" />
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              onClick={() => setMode("delete")}
-              className="text-sm font-medium text-black flex space-y-4 -mr-4 items-center"
-            >
-              <Icons.TrashIcon className="w-6 h-6" />
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              onClick={() => setMode("create")}
-              className="text-sm font-medium text-black flex space-y-4 -mr-4 items-center"
-            >
-              <Icons.PlusCircleIcon className="w-6 h-6" />
-            </motion.button>
-          </div>
-        )}
-      </>
-    );
-  }
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            onClick={() => setMode("delete")}
+            className="text-sm font-medium text-black flex space-y-4 -mr-4 items-center"
+          >
+            <Icons.TrashIcon className="w-6 h-6" />
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            onClick={() => setMode("create")}
+            className="text-sm font-medium text-black flex space-y-4 -mr-4 items-center"
+          >
+            <Icons.PlusCircleIcon className="w-6 h-6" />
+          </motion.button>
+        </div>
+      )}
+    </>
+  );
+
+  console.log(id, id === "demo");
 
   return (
     <motion.div
@@ -140,7 +139,7 @@ export default function CollectionView() {
         <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white">
           {title}
         </h5>
-        {editPanel}
+        {isOwner || id === "demo" ? editPanel : null}
       </div>
       <div>
         <ul

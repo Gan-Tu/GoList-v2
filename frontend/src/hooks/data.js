@@ -26,7 +26,7 @@ function useCollectionViewData(id) {
   return {
     title: data?.title,
     itemIds: (data?.itemIds || []).slice(0).sort(),
-    isOwner: data?.ownerId === uid
+    isOwner: !!uid && data?.ownerId === uid
   };
 }
 
