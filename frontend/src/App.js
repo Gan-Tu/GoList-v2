@@ -16,12 +16,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import NavBar from "./components/Layout/NavBar";
-import Footer from "./components/Layout/Footer";
+import ApplicationUI from "./components/Layout/ApplicationUI";
 import CollectionView from "./components/Collections/CollectionView";
 import CreateCollectionModal from "./components/Collections/CreateCollectionModal";
-import VerifyEmail from "./components/Session/VerifyEmail";
 import PrivacyPolicy from "./components/Layout/PrivacyPolicy";
+import VerifyEmail from "./components/Session/VerifyEmail";
+
 
 function Home() {
   return (
@@ -39,30 +39,26 @@ function App() {
   });
 
   return (
-    <div className="grid grid-cols-1 justify-items-between min-h-screen">
-      <div className="sticky top-0">
-        <NavBar />
-      </div>
-      <div className="grid items-center">
-        <div className="mx-auto">
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route
-                path="/privacy"
-                element={<PrivacyPolicy isOpen={true} onClose={null} />}
-              />
-              <Route path="/_/verifyEmail" element={<VerifyEmail />} />
-              <Route path="/:id" element={<CollectionView />} />
-            </Routes>
-          </BrowserRouter>
-          <Toaster position="top-right" />
+    <ApplicationUI>
+      <div className="flex place-content-center">
+        <div className="grid items-center">
+          <div className="mx-auto">
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route
+                  path="/privacy"
+                  element={<PrivacyPolicy isOpen={true} onClose={null} />}
+                />
+                <Route path="/_/verifyEmail" element={<VerifyEmail />} />
+                <Route path="/:id" element={<CollectionView />} />
+              </Routes>
+            </BrowserRouter>
+            <Toaster position="top-right" />
+          </div>
         </div>
       </div>
-      <div className="grid items-end">
-        <Footer />
-      </div>
-    </div>
+    </ApplicationUI>
   );
 }
 
