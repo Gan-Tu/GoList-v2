@@ -22,7 +22,6 @@ import CreateCollectionModal from "./components/Collections/CreateCollectionModa
 import PrivacyPolicy from "./components/Layout/PrivacyPolicy";
 import VerifyEmail from "./components/Session/VerifyEmail";
 
-
 function Home() {
   return (
     <div className="grid sm:grid-cols-1 lg:grid-cols-1 gap-5">
@@ -39,11 +38,11 @@ function App() {
   });
 
   return (
-    <ApplicationUI>
-      <div className="flex place-content-center">
-        <div className="grid items-center">
-          <div className="mx-auto">
-            <BrowserRouter>
+    <BrowserRouter>
+      <ApplicationUI>
+        <div className="flex place-content-center">
+          <div className="grid items-center">
+            <div className="mx-auto">
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route
@@ -53,12 +52,12 @@ function App() {
                 <Route path="/_/verifyEmail" element={<VerifyEmail />} />
                 <Route path="/:id" element={<CollectionView />} />
               </Routes>
-            </BrowserRouter>
-            <Toaster position="top-right" />
+              <Toaster position="top-right" />
+            </div>
           </div>
         </div>
-      </div>
-    </ApplicationUI>
+      </ApplicationUI>
+    </BrowserRouter>
   );
 }
 

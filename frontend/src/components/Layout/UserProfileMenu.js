@@ -12,22 +12,91 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { useDispatch } from "react-redux";
 import classNames from "../Utilities/classNames";
+import LogInModal from "../Session/LogInModal";
+import { useLoggedInUser } from "../../hooks/session";
 import { useNavigate } from "react-router-dom";
 
-const userNavigation = [
-  // { name: "Your Profile", href: "#" },
-  // { name: "Settings", href: "#" },
-  { name: "Create List", href: "/" },
-  { name: "View Demo List", href: "/demo" },
-  { name: "Log out", href: "#" }
-];
+export default function UserProfileMenu({ isVertical }) {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const user = useLoggedInUser();
+  const [showLogin, setShowLogin] = useState(false);
 
-export function DesktopUserProfileMenu({ user }) {
-  if (!user) return null;
+  const userNavigation = [
+    { name: "Create List", onClick: () => navigate("/") },
+    { name: "View Demo List", onClick: () => navigate("/demo") },
+    { name: "Log out", onClick: () => dispatch({ type: "LOG_OUT" }) }
+  ];
+
+  useEffect(() => {
+    if (user) setShowLogin(false);
+  }, [user]);
+
+  if (!user) {
+    return (
+      <div>
+        <LogInModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
+        <button
+          className={classNames(
+            isVertical
+              ? "px-4 py-2 text-left w-screen font-medium text-gray-500 hover:text-gray-800"
+              : "",
+            "text-sm hover:bg-gray-100"
+          )}
+          onClick={() => setShowLogin(true)}
+        >
+          Login
+        </button>
+      </div>
+    );
+  }
+
+  if (isVertical) {
+    return (
+      <div className="pt-4 pb-3 border-t border-gray-200">
+        <div className="flex items-center px-4">
+          <div className="flex-shrink-0">
+            {user?.photoURL ? (
+              <img
+                className="h-10 w-10 rounded-full"
+                src={user?.photoURL}
+                alt={user.displayName || "You are signed In"}
+              />
+            ) : (
+              <p className="text-sm">
+                {user?.displayName || user?.email || "You are signed In"}
+              </p>
+            )}
+          </div>
+          <div className="ml-3">
+            <div className="text-sm font-medium text-gray-800">
+              {user?.displayName}
+            </div>
+            <div className="text-sm font-medium text-gray-500">
+              {user?.email}
+            </div>
+          </div>
+        </div>
+        <div className="mt-3 space-y-1">
+          {userNavigation.map((item) => (
+            <Disclosure.Button
+              key={item.name}
+              as="button"
+              onClick={item.onClick}
+              className="w-full text-left  block px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+            >
+              {item.name}
+            </Disclosure.Button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Menu as="div" className="ml-3 relative">
       <div>
@@ -59,62 +128,20 @@ export function DesktopUserProfileMenu({ user }) {
           {userNavigation.map((item) => (
             <Menu.Item key={item.name}>
               {({ active }) => (
-                <a
-                  href={item.href}
+                <button
+                  onClick={item.onClick}
                   className={classNames(
                     active ? "bg-gray-100" : "",
-                    "block px-4 py-2 text-sm text-gray-700"
+                    "w-full text-left block px-4 py-2 text-sm text-gray-700"
                   )}
                 >
                   {item.name}
-                </a>
+                </button>
               )}
             </Menu.Item>
           ))}
         </Menu.Items>
       </Transition>
     </Menu>
-  );
-}
-
-export function MobileUserProfileMenu({ user }) {
-  if (!user) return null;
-
-  return (
-    <div className="pt-4 pb-3 border-t border-gray-200">
-      <div className="flex items-center px-4">
-        <div className="flex-shrink-0">
-          {user?.photoURL ? (
-            <img
-              className="h-10 w-10 rounded-full"
-              src={user?.photoURL}
-              alt={user.displayName || "You are signed In"}
-            />
-          ) : (
-            <p className="text-sm">
-              {user?.displayName || user?.email || "You are signed In"}
-            </p>
-          )}
-        </div>
-        <div className="ml-3">
-          <div className="text-sm font-medium text-gray-800">
-            {user?.displayName}
-          </div>
-          <div className="text-sm font-medium text-gray-500">{user?.email}</div>
-        </div>
-      </div>
-      <div className="mt-3 space-y-1">
-        {userNavigation.map((item) => (
-          <Disclosure.Button
-            key={item.name}
-            as="a"
-            href={item.href}
-            className="block px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
-          >
-            {item.name}
-          </Disclosure.Button>
-        ))}
-      </div>
-    </div>
   );
 }
