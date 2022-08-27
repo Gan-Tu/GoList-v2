@@ -13,16 +13,18 @@
 // limitations under the License.
 
 import { Disclosure } from "@headlessui/react";
+import { useLocation } from "react-router-dom";
 import classNames from "../Utilities/classNames";
 
 const navigation = [
-  // { name: "Home", href: "/", current: false }
-  // { name: "Dashboard", href: "#", current: true },
-  // { name: "Team", href: "#", current: false },
-  // { name: "Projects", href: "#", current: false },
+  // { name: "Home", href: "/" }
+  // { name: "Dashboard", href: "#" },
+  // { name: "Team", href: "#" },
+  // { name: "Projects", href: "#" },
 ];
 
 export default function Navigation({ isVertical }) {
+  const pathname = useLocation().pathname;
   if (navigation.length === 0) return null;
 
   if (isVertical) {
@@ -34,12 +36,12 @@ export default function Navigation({ isVertical }) {
             as="a"
             href={item.href}
             className={classNames(
-              item.current
+              item.href === pathname
                 ? "bg-indigo-50 border-indigo-500 text-indigo-700"
                 : "border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800",
               "block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
             )}
-            aria-current={item.current ? "page" : undefined}
+            aria-current={item.href === pathname ? "page" : undefined}
           >
             {item.name}
           </Disclosure.Button>
@@ -54,12 +56,12 @@ export default function Navigation({ isVertical }) {
             key={item.name}
             href={item.href}
             className={classNames(
-              item.current
+              item.href === pathname
                 ? "border-indigo-500 text-gray-900"
                 : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
               "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
             )}
-            aria-current={item.current ? "page" : undefined}
+            aria-current={item.href === pathname ? "page" : undefined}
           >
             {item.name}
           </a>

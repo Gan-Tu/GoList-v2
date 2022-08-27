@@ -18,17 +18,17 @@ import { useDispatch } from "react-redux";
 import classNames from "../Utilities/classNames";
 import LogInModal from "../Session/LogInModal";
 import { useLoggedInUser } from "../../hooks/session";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 export default function UserProfileMenu({ isVertical }) {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useLoggedInUser();
   const [showLogin, setShowLogin] = useState(false);
 
   const userNavigation = [
-    { name: "Create List", onClick: () => navigate("/") },
-    { name: "View Demo List", onClick: () => navigate("/demo") },
+    // { name: "Create List", onClick: () => navigate("/") },
+    // { name: "View Demo List", onClick: () => navigate("/demo") },
     { name: "Log out", onClick: () => dispatch({ type: "LOG_OUT" }) }
   ];
 
