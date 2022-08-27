@@ -21,7 +21,11 @@ export default function ApplicationUI({ children }) {
       <div className="fixed top-0 w-screen">
         <NavBar />
       </div>
-      {children}
+      <div className="flex place-content-center">
+        <div className="grid items-center">
+          <div className="mx-auto">{children}</div>
+        </div>
+      </div>
       <div className="fixed bottom-0 w-screen">
         <Footer />
       </div>
