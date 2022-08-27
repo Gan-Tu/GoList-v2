@@ -18,7 +18,7 @@ import { useLoggedInUser } from "../../hooks/session";
 import { useDispatch } from "react-redux";
 import { Disclosure } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { DesktopNavigation, MobileNavigation } from "./Navigation";
+import Navigation from "./Navigation";
 import {
   MobileUserProfileMenu,
   DesktopUserProfileMenu
@@ -61,7 +61,7 @@ function NavBar() {
                     GoList
                   </span>
                 </a>
-                <DesktopNavigation />
+                <Navigation isVertical={false} />
               </div>
 
               <div className="hidden sm:ml-6 sm:flex sm:items-center">
@@ -90,7 +90,7 @@ function NavBar() {
 
           {/* Mobile navigation panel */}
           <Disclosure.Panel className="sm:hidden">
-            <MobileNavigation />
+            <Navigation isVertical={true} />
             {user ? (
               <MobileUserProfileMenu user={user} />
             ) : (
