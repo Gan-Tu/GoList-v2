@@ -16,18 +16,18 @@ import { Fragment } from "react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { useDispatch } from "react-redux";
 import classNames from "../Utilities/classNames";
+import { useNavigate } from "react-router-dom";
 
-export function DesktopUserProfileMenu({ user, onLogin, userNavigation }) {
-  // const dispatch = useDispatch();
-  // onClick={() => dispatch({ type: "LOG_OUT" })}
-  if (!user) {
-    return (
-      <button className="text-sm hover:underline" onClick={onLogin}>
-        Login
-      </button>
-    );
-  }
+const userNavigation = [
+  // { name: "Your Profile", href: "#" },
+  // { name: "Settings", href: "#" },
+  { name: "Create List", href: "/" },
+  { name: "View Demo List", href: "/demo" },
+  { name: "Log out", href: "#" }
+];
 
+export function DesktopUserProfileMenu({ user }) {
+  if (!user) return null;
   return (
     <Menu as="div" className="ml-3 relative">
       <div>
@@ -77,16 +77,8 @@ export function DesktopUserProfileMenu({ user, onLogin, userNavigation }) {
   );
 }
 
-export function MobileUserProfileMenu({ user, onLogin, userNavigation }) {
-  // const dispatch = useDispatch();
-  // onClick={() => dispatch({ type: "LOG_OUT" })}
-  if (!user) {
-    return (
-      <button className="text-sm hover:underline" onClick={onLogin}>
-        Login
-      </button>
-    );
-  }
+export function MobileUserProfileMenu({ user }) {
+  if (!user) return null;
 
   return (
     <div className="pt-4 pb-3 border-t border-gray-200">

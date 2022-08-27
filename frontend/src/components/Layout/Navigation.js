@@ -15,7 +15,16 @@
 import { Disclosure } from "@headlessui/react";
 import classNames from "../Utilities/classNames";
 
-export function DesktopNavigation({ navigation }) {
+const navigation = [
+  // { name: "Dashboard", href: "#", current: true },
+  // { name: "Team", href: "#", current: false },
+  // { name: "Projects", href: "#", current: false },
+  { name: "Home", href: "/", current: false }
+];
+
+export function DesktopNavigation() {
+  if (navigation.length === 0) return null;
+
   return (
     <div className="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
       {navigation.map((item) => (
@@ -37,7 +46,9 @@ export function DesktopNavigation({ navigation }) {
   );
 }
 
-export function MobileNavigation({ navigation }) {
+export function MobileNavigation() {
+  if (navigation.length === 0) return null;
+
   return (
     <div className="pt-2 pb-3 space-y-1">
       {navigation.map((item) => (

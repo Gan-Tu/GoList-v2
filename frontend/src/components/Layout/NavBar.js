@@ -24,31 +24,19 @@ import {
   DesktopUserProfileMenu
 } from "./UserProfileMenu";
 
-const navigation = [
-  // { name: "Dashboard", href: "#", current: true },
-  // { name: "Team", href: "#", current: false },
-  // { name: "Projects", href: "#", current: false },
-  // { name: "Calendar", href: "#", current: false }
-];
-const userNavigation = [
-  // { name: "Your Profile", href: "#" },
-  // { name: "Settings", href: "#" },
-  { name: "Log out", href: "#" }
-];
-
 function NavBar() {
   const [signInModalOpen, setSignInModalOpen] = useState(false);
-  const curUser = useLoggedInUser();
+  const user = useLoggedInUser();
 
   const onLogin = () => {
     setSignInModalOpen(true);
   };
 
   useEffect(() => {
-    if (curUser) {
+    if (user) {
       setSignInModalOpen(false);
     }
-  }, [curUser]);
+  }, [user]);
 
   return (
     <Disclosure as="nav" className="bg-white border-b border-gray-200">
@@ -73,17 +61,17 @@ function NavBar() {
                     GoList
                   </span>
                 </a>
-                {navigation?.length > 0 && (
-                  <DesktopNavigation navigation={navigation} />
-                )}
+                <DesktopNavigation />
               </div>
 
               <div className="hidden sm:ml-6 sm:flex sm:items-center">
-                <DesktopUserProfileMenu
-                  user={curUser}
-                  onLogin={onLogin}
-                  userNavigation={userNavigation}
-                />
+                {user ? (
+                  <DesktopUserProfileMenu user={user} />
+                ) : (
+                  <button className="text-sm hover:underline" onClick={onLogin}>
+                    Login
+                  </button>
+                )}
               </div>
 
               {/* Mobile menu button */}
@@ -102,14 +90,14 @@ function NavBar() {
 
           {/* Mobile navigation panel */}
           <Disclosure.Panel className="sm:hidden">
-            {navigation?.length > 0 && (
-              <MobileNavigation navigation={navigation} />
+            <MobileNavigation />
+            {user ? (
+              <MobileUserProfileMenu user={user} />
+            ) : (
+              <button className="text-sm hover:underline" onClick={onLogin}>
+                Login
+              </button>
             )}
-            <MobileUserProfileMenu
-              user={curUser}
-              onLogin={onLogin}
-              userNavigation={userNavigation}
-            />
           </Disclosure.Panel>
         </>
       )}
