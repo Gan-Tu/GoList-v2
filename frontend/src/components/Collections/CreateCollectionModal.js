@@ -108,6 +108,17 @@ export default function CreateCollectionModal() {
         onClose={() => setCreateMode(false)}
       >
         <form className="mt-5">
+          {!uid && (
+            <p className="block text-sm font-medium py-2 ">
+              <span className="text-red-600 dark:text-red-500">
+                You are not yet logged in.{" "}
+              </span>
+              <span className="text-cyan-600 dark:text-cyan-500">
+                You won't be able to edit this list in future, unless you are
+                logged in.
+              </span>
+            </p>
+          )}
           <div className="space-y-4">
             <label
               htmlFor="shortUrl"
