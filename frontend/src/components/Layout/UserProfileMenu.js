@@ -107,7 +107,7 @@ export default function UserProfileMenu({ isVertical }) {
             <img
               className="h-8 w-8 rounded-full"
               src={user?.photoURL}
-              alt={user.displayName || "Signed In"}
+              alt=""
             />
           ) : (
             <p className="text-sm">
