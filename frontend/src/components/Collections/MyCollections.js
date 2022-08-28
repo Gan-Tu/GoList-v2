@@ -12,29 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { useGroupsAccessible } from "../../hooks/data";
+import { useLoggedInUser } from "../../hooks/session";
 import { fixUrl } from "../Utilities/Helpers";
 import CreateCollectionModal from "./CreateCollectionModal";
 
-const people = [
-  {
-    url: "https://goli.st/demo",
-    destination: "/demo",
-    name: "Demo"
-  },
-  {
-    url: "https://goli.st/web-mobile",
-    destination: "/web-mobile",
-    name: "Web & Mobile Industry"
-  },
-  {
-    url: "https://goli.st/iceland",
-    destination: "/iceland",
-    name: "Iceland Itinerary"
-  }
-];
-
 export default function MyCollections() {
-  if (people.length <= 0) {
+  const dispatch = useDispatch();
+  const user = useLoggedInUser();
+  const docs = useGroupsAccessible();
+
+  useEffect(() => {
+    dispatch({ type: "FETCH_GROUP_ACCESSIBLE", uid: user?.uid });
+  }, [dispatch, user]);
+
+  if (docs.length <= 0) {
     return (
       <div>
         <p>You don't have any lists created yet.</p>
@@ -47,7 +41,7 @@ export default function MyCollections() {
 
   return (
     <ul className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {people.map((data) => (
+      {docs.map((data) => (
         <li
           key={data?.url}
           className="col-span-1 bg-white border rounded-lg divide-y divide-gray-200  hover:shadow-lg"
@@ -57,7 +51,7 @@ export default function MyCollections() {
               <div className="flex-1 truncate w-48">
                 <div className="flex items-center space-x-3">
                   <h3 className="text-gray-900 text-sm font-medium truncate">
-                    {data?.name || "No Name"}
+                    {data?.title || "No Title"}
                   </h3>
                 </div>
                 <p className="mt-1 inline-flex justify-between text-xs font-normal line-clamp-1 text-gray-600 text-ellipsis overflow-hidden">

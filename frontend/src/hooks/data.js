@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import { useSelector } from "react-redux";
+import { useLoggedInUserId } from "./session";
 
 function useGroupInfo(id) {
   return useSelector((store) => store.DataGroupsReducer.groupInfo.get(id));
@@ -36,6 +37,13 @@ function useGroupUpdateStatus(id) {
   );
 }
 
+function useGroupsAccessible() {
+  const uid = useLoggedInUserId();
+  return useSelector((store) => store.SessionReducer.domainData).filter(
+    (doc) => doc?.ownerId === "PUBLIC" || doc?.ownerId === uid
+  );
+}
+
 function useItemData(id) {
   return useSelector((store) => store.DataGroupsReducer.items.get(id));
 }
@@ -56,5 +64,6 @@ export {
   useItemData,
   useItemIsUpdating, // used once
   useItemlink, // used once
-  useCollectionViewData
+  useCollectionViewData,
+  useGroupsAccessible
 };

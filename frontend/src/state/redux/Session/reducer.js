@@ -14,9 +14,10 @@
 
 const initialState = {
   user: null,
+  domainData: [],
   emailForSignIn: null,
   emailVerificationSuccess: false,
-  emailVerificationFailed: false,
+  emailVerificationFailed: false
 };
 
 export default function reducer(state = initialState, action) {
@@ -31,6 +32,8 @@ export default function reducer(state = initialState, action) {
         );
       }
       return { ...state, user: action.user };
+    case "SET_DOMAIN_DATA":
+      return { ...state, domainData: action.domainData };
     case "SET_EMAIL_FOR_SIGN_IN":
       return { ...state, emailForSignIn: action.emailForSignIn };
     case "SET_EMAIL_VERIFICATION_SUCCESS":

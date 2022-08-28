@@ -13,24 +13,17 @@
 // limitations under the License.
 
 import { call, put, select, takeEvery, takeLatest } from "redux-saga/effects";
+import * as fs from "firebase/firestore";
 import { db, functions } from "../../../firebase";
-import {
-  doc,
-  deleteField,
-  getDoc,
-  updateDoc,
-  setDoc,
-  deleteDoc
-} from "firebase/firestore";
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
 import { httpsCallable } from "firebase/functions";
 import { fixUrl } from "../../../components/Utilities/Helpers";
 
 function* fetchDataGroup({ groupId }) {
-  const docRef = doc(db, "DataGroups", groupId);
+  const docRef = fs.doc(db, "DataGroups", groupId);
   try {
-    const documentSnapshot = yield call(getDoc, docRef);
+    const documentSnapshot = yield call(fs.getDoc, docRef);
     const data = documentSnapshot.data();
     if (!!data) {
       for (const [itemId, itemData] of Object.entries(data.items)) {
@@ -53,6 +46,42 @@ function* fetchDataGroup({ groupId }) {
   } catch (error) {
     toast.error(`Failed to get data.`);
     console.error(`Failed to get data: ${error}`);
+  }
+}
+
+function* fetchDataGroupDomainInfoByUserId({ uid }) {
+  try {
+    if (!uid) {
+      yield put({
+        type: "SET_DOMAIN_DATA",
+        domainData: []
+      });
+      return;
+    }
+    const querySnapshot = yield call(
+      fs.getDocs,
+      fs.query(
+        fs.collection(db, "Domains"),
+        fs.where("ownerId", "in", [uid, "PUBLIC"])
+      )
+    );
+    const domainData = querySnapshot.docs.map((doc) => {
+      let data = doc.data();
+      return {
+        id: doc.id,
+        title: data.title,
+        url: `goli.st/${doc.id}`,
+        destination: `/${doc.id}`,
+        ownerId: data.ownerId
+      };
+    });
+    yield put({
+      type: "SET_DOMAIN_DATA",
+      domainData: domainData
+    });
+  } catch (error) {
+    toast.error(`Failed to get user lists.`);
+    console.error(`Failed to get user lists: ${error}`);
   }
 }
 
@@ -91,9 +120,9 @@ function* createGroup({ groupId, title, urls, uid }) {
   }
 
   // Save to firestore
-  const docRef = doc(db, "DataGroups", groupId);
+  const docRef = fs.doc(db, "DataGroups", groupId);
   try {
-    yield call(setDoc, docRef, data);
+    yield call(fs.setDoc, docRef, data);
   } catch (error) {
     toast.error("Failed to save data.");
     console.error(`Failed to save data: ${error}`);
@@ -143,9 +172,9 @@ function* createGroup({ groupId, title, urls, uid }) {
 }
 
 function* deleteGroup({ groupId }) {
-  const docRef = doc(db, "DataGroups", groupId);
+  const docRef = fs.doc(db, "DataGroups", groupId);
   try {
-    yield call(deleteDoc, docRef);
+    yield call(fs.deleteDoc, docRef);
     yield put({ type: "DELETE_GROUP_DATA", id: groupId });
     toast.success("Group deleted successfuly.");
   } catch (error) {
@@ -209,13 +238,13 @@ function* createItem({ groupId, url }) {
   }
 
   // Create date remotely and locally
-  const docRef = doc(db, "DataGroups", groupId);
+  const docRef = fs.doc(db, "DataGroups", groupId);
   let update = {};
   update[`items.${itemId}`] = itemData;
 
   let success = false;
   try {
-    yield call(updateDoc, docRef, update);
+    yield call(fs.updateDoc, docRef, update);
     yield put({
       type: "SET_ITEM_DATA",
       id: itemId,
@@ -269,7 +298,7 @@ function* updateItem({ itemId, groupId, data }) {
   }, 1000);
 
   // Update date remotely and locally
-  const docRef = doc(db, "DataGroups", groupId);
+  const docRef = fs.doc(db, "DataGroups", groupId);
   const currentData = yield select(
     (store) => store.DataGroupsReducer.items.get(itemId) || {}
   );
@@ -279,7 +308,7 @@ function* updateItem({ itemId, groupId, data }) {
 
   let success = false;
   try {
-    yield call(updateDoc, docRef, update);
+    yield call(fs.updateDoc, docRef, update);
     yield put({
       type: "SET_ITEM_DATA",
       id: itemId,
@@ -311,11 +340,11 @@ function* updateItem({ itemId, groupId, data }) {
 }
 
 function* deleteItem({ groupId, itemId }) {
-  const docRef = doc(db, "DataGroups", groupId);
+  const docRef = fs.doc(db, "DataGroups", groupId);
   let update = {};
-  update[`items.${itemId}`] = deleteField();
+  update[`items.${itemId}`] = fs.deleteField();
   try {
-    yield call(updateDoc, docRef, update);
+    yield call(fs.updateDoc, docRef, update);
     yield put({ type: "SET_ITEM_DATA", id: itemId, data: null });
     yield put({ type: "REMOVE_ITEM_ID_FROM_GROUP", groupId, itemId });
     toast.success("Item deleted successfuly.");
@@ -332,4 +361,5 @@ export function* watchDataGroupsApp() {
   yield takeLatest("CREATE_ITEM", createItem);
   yield takeLatest("UPDATE_ITEM", updateItem);
   yield takeLatest("DELETE_ITEM", deleteItem);
+  yield takeLatest("FETCH_GROUP_ACCESSIBLE", fetchDataGroupDomainInfoByUserId);
 }
