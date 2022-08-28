@@ -21,7 +21,7 @@ const cheerio = require("cheerio");
 // https://firebase.google.com/docs/functions/write-firebase-functions
 
 admin.initializeApp();
-const db = admin.firestore();
+const db = admin.firestore().settings({ ignoreUndefinedProperties: true });
 
 async function getUrlMetadataImpl(url) {
   if (!url) {
@@ -144,7 +144,7 @@ exports.createDomainDocument = functions.firestore
       .doc(`Domains/${groupId}`)
       .create({
         title: docData?.title || "No Title",
-        ownerId: docData?.ownerId
+        ownerId: docData?.ownerId || ""
       })
       .catch((err) => {
         throw new functions.https.HttpsError(
