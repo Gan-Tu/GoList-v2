@@ -33,7 +33,7 @@ function NavBar() {
                     alt="GoList Logo"
                   />
                   <span className="self-center text-xl font-semibold whitespace-nowrap dark:text-white">
-                    GoList
+                    GoList <span className="text-xs font-light">Beta</span>
                   </span>
                 </a>
                 <Navigation isVertical={false} />
