@@ -21,6 +21,7 @@ import CollectionView from "./components/Collections/CollectionView";
 import CreateCollectionModal from "./components/Collections/CreateCollectionModal";
 import PrivacyPolicy from "./components/Layout/PrivacyPolicy";
 import VerifyEmail from "./components/Session/VerifyEmail";
+import MyCollections from "./components/Collections/MyCollections";
 
 function Home() {
   return (
@@ -47,6 +48,7 @@ function App() {
             element={<PrivacyPolicy isOpen={true} onClose={null} />}
           />
           <Route path="/_/verifyEmail" element={<VerifyEmail />} />
+          <Route path="/_/myList" element={<MyCollections />} />
           <Route path="/:id" element={<CollectionView />} />
         </Routes>
         <Toaster position="top-right" />

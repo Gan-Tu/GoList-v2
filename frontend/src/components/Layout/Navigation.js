@@ -14,7 +14,7 @@
 
 import { Disclosure } from "@headlessui/react";
 import { useLocation } from "react-router-dom";
-import classNames from "../Utilities/classNames";
+import { classNames } from "../Utilities/Helpers";
 
 const navigation = [
   // { name: "Home", href: "/" }

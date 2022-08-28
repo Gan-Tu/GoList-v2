@@ -12,6 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export default function classNames(...classes) {
+export function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
+}
+
+export function fixUrl(url) {
+  if (!url?.startsWith("http")) {
+    url = `http://${url}`;
+  }
+  return url;
 }

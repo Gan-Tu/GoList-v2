@@ -25,13 +25,7 @@ import {
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
 import { httpsCallable } from "firebase/functions";
-
-function fixUrl(url) {
-  if (!url?.startsWith("http")) {
-    url = `http://${url}`;
-  }
-  return url;
-}
+import { fixUrl } from "../../../components/Utilities/Helpers";
 
 function* fetchDataGroup({ groupId }) {
   const docRef = doc(db, "DataGroups", groupId);
@@ -101,7 +95,7 @@ function* createGroup({ groupId, title, urls, uid }) {
   try {
     yield call(setDoc, docRef, data);
   } catch (error) {
-    toast.error('Failed to save data.');
+    toast.error("Failed to save data.");
     console.error(`Failed to save data: ${error}`);
     yield put({
       type: "SET_GROUP_UPDATE_STATUS",

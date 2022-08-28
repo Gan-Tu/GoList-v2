@@ -20,13 +20,7 @@ import ItemSnippet from "./ItemSnippet";
 import Modal from "../Utilities/Modal";
 import { PencilEditIcon, TrashIcon } from "../Utilities/SvgIcons";
 import { useItemlink, useItemData } from "../../hooks/data";
-
-function fixUrl(url) {
-  if (!url?.startsWith("http")) {
-    url = `http://${url}`;
-  }
-  return url;
-}
+import { fixUrl } from "../Utilities/Helpers";
 
 function ItemControls({ id, groupId }) {
   const itemData = useItemData(id);

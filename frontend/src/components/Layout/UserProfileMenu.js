@@ -15,13 +15,13 @@
 import { Fragment, useEffect, useState } from "react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { useDispatch } from "react-redux";
-import classNames from "../Utilities/classNames";
+import { classNames } from "../Utilities/Helpers";
 import LogInModal from "../Session/LogInModal";
 import { useLoggedInUser } from "../../hooks/session";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function UserProfileMenu({ isVertical }) {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useLoggedInUser();
   const [showLogin, setShowLogin] = useState(false);
@@ -29,6 +29,7 @@ export default function UserProfileMenu({ isVertical }) {
   const userNavigation = [
     // { name: "Create List", onClick: () => navigate("/") },
     // { name: "View Demo List", onClick: () => navigate("/demo") },
+    { name: "My Lists", onClick: () => navigate("/_/myList") },
     { name: "Log out", onClick: () => dispatch({ type: "LOG_OUT" }) }
   ];
 
@@ -64,7 +65,7 @@ export default function UserProfileMenu({ isVertical }) {
               <img
                 className="h-10 w-10 rounded-full"
                 src={user?.photoURL}
-                alt={user.displayName || "You are signed In"}
+                alt=""
               />
             ) : (
               <p className="text-sm">
