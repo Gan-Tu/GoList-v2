@@ -23,8 +23,8 @@ const people = [
   },
   {
     url: "https://goli.st/web-mobile",
-    destination: "/web",
-    name: "Web & Mobile Industry af af afafaf a"
+    destination: "/web-mobile",
+    name: "Web & Mobile Industry"
   },
   {
     url: "https://goli.st/iceland",
@@ -54,7 +54,7 @@ export default function MyCollections() {
         >
           <a href={data?.destination || fixUrl(data?.url) || "#"}>
             <div className="w-full flex items-center justify-between p-6 space-x-6">
-              <div className="flex-1 truncate">
+              <div className="flex-1 truncate w-48">
                 <div className="flex items-center space-x-3">
                   <h3 className="text-gray-900 text-sm font-medium truncate">
                     {data?.name || "No Name"}
