@@ -25,7 +25,7 @@ import {
   GoogleAuthProvider,
   FacebookAuthProvider,
   TwitterAuthProvider,
-  GithubAuthProvider,
+  GithubAuthProvider
 } from "firebase/auth";
 
 function* logIn({ loginType, email }) {
@@ -56,7 +56,7 @@ function* logIn({ loginType, email }) {
       try {
         yield call(sendSignInLinkToEmail, auth, email, {
           url: "https://goli.st/_/verifyEmail",
-          handleCodeInApp: true,
+          handleCodeInApp: true
         });
         window.localStorage.setItem("emailForSignIn", email);
         toast.success("A sign-in link is sent to your email!");
@@ -73,7 +73,7 @@ function* logIn({ loginType, email }) {
   }
   try {
     yield call(signInWithPopup, auth, provider);
-    toast.success("Successfully logged in.");
+    toast.success("Successfully logged in.", { duration: 1000 });
   } catch (error) {
     toast.error("Log In Failed.");
     console.error(error);
