@@ -21,7 +21,8 @@ const cheerio = require("cheerio");
 // https://firebase.google.com/docs/functions/write-firebase-functions
 
 admin.initializeApp();
-const db = admin.firestore().settings({ ignoreUndefinedProperties: true });
+const db = admin.firestore();
+db.settings({ ignoreUndefinedProperties: true });
 
 async function getUrlMetadataImpl(url) {
   if (!url) {
@@ -144,7 +145,7 @@ exports.createDomainDocument = functions.firestore
       .doc(`Domains/${groupId}`)
       .create({
         title: docData?.title || "No Title",
-        ownerId: docData?.ownerId || ""
+        ownerId: docData?.ownerId || "NO_OWNER"
       })
       .catch((err) => {
         throw new functions.https.HttpsError(
@@ -158,5 +159,13 @@ exports.deleteDomainDocument = functions.firestore
   .document("DataGroups/{groupId}")
   .onDelete((snap, context) => {
     const groupId = context.params.groupId;
-    return db.doc(`Domains/${groupId}`).delete();
+    return db
+      .doc(`Domains/${groupId}`)
+      .delete()
+      .catch((err) => {
+        throw new functions.https.HttpsError(
+          "internal",
+          `Fail to delete domain document for /${groupId}: ${err}`
+        );
+      });
   });
