@@ -108,8 +108,6 @@ export default function CollectionView() {
     </>
   );
 
-  console.log(id, id === "demo");
-
   return (
     <motion.div
       layout
@@ -139,7 +137,7 @@ export default function CollectionView() {
         <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white">
           {title}
         </h5>
-        {isOwner || id === "demo" ? editPanel : null}
+        {isOwner && editPanel}
       </div>
       <div>
         <ul
