@@ -17,16 +17,14 @@ import Footer from "./Footer";
 
 export default function ApplicationUI({ children }) {
   return (
-    <div className="flex items-center justify-center h-screen">
+    <div className="flex justify-center h-screen overflow-scroll">
       <div className="fixed top-0 w-screen">
         <NavBar />
       </div>
-      <div className="flex place-content-center">
-        <div className="grid items-center">
-          <div className="mx-auto">{children}</div>
-        </div>
+      <div className="grid items-center px-3">
+        <div className="mx-auto">{children}</div>
       </div>
-      <div className="fixed bottom-0 w-screen">
+      <div className="fixed bottom-0 bg-white w-screen">
         <Footer />
       </div>
     </div>

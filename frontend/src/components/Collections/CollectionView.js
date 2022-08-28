@@ -111,7 +111,7 @@ export default function CollectionView() {
   return (
     <motion.div
       layout
-      className="p-5 min-w-m bg-white rounded-lg border shadow-md sm:p-8 dark:bg-gray-800 dark:border-gray-700"
+      className="p-5 min-w-m bg-white rounded-lg border shadow-md sm:p-8 dark:bg-gray-800 dark:border-gray-700 mt-[10vh] mb-[5vh] lg:my-0"
     >
       {title && (
         <Helmet>
