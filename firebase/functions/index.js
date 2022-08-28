@@ -47,7 +47,7 @@ async function getUrlMetadataImpl(url) {
         twitterDescription: $("meta[name='twitter:description']").attr(
           "content"
         ),
-        twitterImage: $("meta[name='twitter:image']").attr("content"),
+        twitterImage: $("meta[name='twitter:image']").attr("content")
       };
       const origin = new URL(url).origin;
       if (origin && origin !== "null") {
@@ -118,7 +118,7 @@ exports.populateUrlMetadata = functions.https.onCall(async (path) => {
               metadata?.twitterImage ||
               metadata?.ogImage ||
               metadata?.icon ||
-              "",
+              ""
           };
         }
       }
@@ -134,3 +134,29 @@ exports.populateUrlMetadata = functions.https.onCall(async (path) => {
       );
     });
 });
+
+exports.createDomainDocument = functions.firestore
+  .document("DataGroups/{groupId}")
+  .onCreate((snap, context) => {
+    const docData = snap.data();
+    const groupId = context.params.groupId;
+    return db
+      .doc(`Domains/${groupId}`)
+      .create({
+        title: docData?.title || "No Title",
+        ownerId: docData?.ownerId
+      })
+      .catch((err) => {
+        throw new functions.https.HttpsError(
+          "internal",
+          `Fail to create domain document for /${groupId}: ${err}`
+        );
+      });
+  });
+
+exports.deleteDomainDocument = functions.firestore
+  .document("DataGroups/{groupId}")
+  .onDelete((snap, context) => {
+    const groupId = context.params.groupId;
+    return db.doc(`Domains/${groupId}`).delete();
+  });
