@@ -9,9 +9,13 @@ module.exports = {
         "google-yellow": "#F4B400",
         "google-green": "#0F9D58",
         "facebook-blue": "#4267B2",
-        "github-black": "#171515",
-      },
-    },
+        "github-black": "#171515"
+      }
+    }
   },
-  plugins: [require("flowbite/plugin"), require("@tailwindcss/line-clamp")],
+  plugins: [
+    require("flowbite/plugin"),
+    require("@tailwindcss/line-clamp"),
+    require("@tailwindcss/forms")
+  ]
 };
