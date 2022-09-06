@@ -17,7 +17,7 @@ import { useDispatch } from "react-redux";
 import { useGroupsAccessible } from "../../hooks/data";
 import { useLoggedInUser } from "../../hooks/session";
 import { fixUrl } from "../Utilities/Helpers";
-import SearchBox from "../Utilities/SearchBox";
+// import SearchBox from "../Utilities/SearchBox";
 import CreateCollectionModal from "./CreateCollectionModal";
 
 export default function MyCollections() {
