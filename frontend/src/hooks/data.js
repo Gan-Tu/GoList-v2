@@ -21,13 +21,19 @@ function useGroupInfo(id) {
 
 function useCollectionViewData(id) {
   const uid = useSelector((store) => store.SessionReducer.user?.uid);
-  const data = useSelector((store) =>
-    store.DataGroupsReducer.groupInfo.get(id)
+  const title = useSelector(
+    (store) => store.DataGroupsReducer.groupInfo.get(id)?.title
+  );
+  const itemIds = useSelector(
+    (store) => store.DataGroupsReducer.groupInfo.get(id)?.itemIds || []
+  );
+  const ownerId = useSelector(
+    (store) => store.DataGroupsReducer.groupInfo.get(id)?.ownerId
   );
   return {
-    title: data?.title,
-    itemIds: (data?.itemIds || []).slice(0).sort(),
-    isOwner: (!!uid && data?.ownerId === uid) || data?.ownerId === "PUBLIC"
+    title,
+    itemIds: itemIds.slice(0).sort(),
+    isOwner: (!!uid && ownerId === uid) || ownerId === "PUBLIC"
   };
 }
 

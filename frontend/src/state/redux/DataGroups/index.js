@@ -345,8 +345,8 @@ function* deleteItem({ groupId, itemId }) {
   update[`items.${itemId}`] = fs.deleteField();
   try {
     yield call(fs.updateDoc, docRef, update);
-    yield put({ type: "SET_ITEM_DATA", id: itemId, data: null });
     yield put({ type: "REMOVE_ITEM_ID_FROM_GROUP", groupId, itemId });
+    yield put({ type: "SET_ITEM_DATA", id: itemId, data: null });
     toast.success("Item deleted successfuly.");
   } catch (error) {
     toast.error("Failed to delete data.");

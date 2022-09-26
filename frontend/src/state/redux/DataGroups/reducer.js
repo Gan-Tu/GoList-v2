@@ -16,7 +16,7 @@ const initialState = {
   groupInfo: new Map(),
   groupUpdateStatus: new Map(),
   items: new Map(),
-  itemsUpdateStatus: new Map(),
+  itemsUpdateStatus: new Map()
 };
 
 function removeItemOnce(arr, value) {
@@ -34,7 +34,7 @@ export default function reducer(state = initialState, action) {
       newGroupInfo.set(action.id, action.data);
       return {
         ...state,
-        groupInfo: newGroupInfo,
+        groupInfo: newGroupInfo
       };
     }
     case "DELETE_GROUP_DATA": {
@@ -50,7 +50,7 @@ export default function reducer(state = initialState, action) {
       return {
         ...state,
         groupInfo: newGroupInfo,
-        items: newItems,
+        items: newItems
       };
     }
     case "SET_GROUP_UPDATE_STATUS": {
@@ -58,7 +58,7 @@ export default function reducer(state = initialState, action) {
       newStatus.set(action.id, action.status);
       return {
         ...state,
-        groupUpdateStatus: newStatus,
+        groupUpdateStatus: newStatus
       };
     }
     case "SET_ITEM_DATA": {
@@ -70,7 +70,7 @@ export default function reducer(state = initialState, action) {
       }
       return {
         ...state,
-        items: newItems,
+        items: newItems
       };
     }
     case "SET_ITEM_UPDATE_STATUS": {
@@ -78,7 +78,7 @@ export default function reducer(state = initialState, action) {
       newStatus.set(action.id, action.status);
       return {
         ...state,
-        itemsUpdateStatus: newStatus,
+        itemsUpdateStatus: newStatus
       };
     }
     case "ADD_ITEM_ID_TO_GROUP": {
@@ -90,7 +90,7 @@ export default function reducer(state = initialState, action) {
       }
       return {
         ...state,
-        groupInfo: newGroupInfo,
+        groupInfo: newGroupInfo
       };
     }
     case "REMOVE_ITEM_ID_FROM_GROUP": {
@@ -98,11 +98,12 @@ export default function reducer(state = initialState, action) {
       let newGroup = newGroupInfo.get(action.groupId);
       if (newGroup) {
         newGroup.itemIds = [...(newGroup?.itemIds || [])];
-        removeItemOnce(newGroup.itemIds, action.itemId);
+        newGroup.itemIds = removeItemOnce(newGroup.itemIds, action.itemId);
       }
+      newGroupInfo.set(action.groupId, newGroup);
       return {
         ...state,
-        groupInfo: newGroupInfo,
+        groupInfo: newGroupInfo
       };
     }
     default:
