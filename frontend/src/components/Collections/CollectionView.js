@@ -111,7 +111,7 @@ export default function CollectionView() {
   return (
     <motion.div
       layout
-      className="p-5 min-w-m bg-white rounded-lg border shadow-md sm:p-8 dark:bg-gray-800 dark:border-gray-700 mt-[10vh] mb-[5vh] lg:my-0"
+      className="p-5 min-w-m bg-white rounded-lg border shadow-md sm:p-8 dark:bg-gray-800 dark:border-gray-700 mt-[10vh] mb-[5vh] overflow-scroll"
     >
       {title && (
         <Helmet>
@@ -143,7 +143,7 @@ export default function CollectionView() {
         <ul
           className={`grid sm:grid-cols-1 ${
             // Only show 2 column row layout if at least 4 items
-            itemIds?.length >= 4 ? "lg:grid-cols-2" : ""
+            itemIds?.length >= 4 ? "lg:grid-cols-2 xl:grid-cols-3" : ""
           } gap-4`}
         >
           {itemIds
