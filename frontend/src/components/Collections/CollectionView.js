@@ -31,6 +31,7 @@ export default function CollectionView() {
   const status = useGroupUpdateStatus(id);
   const [mode, setMode] = useState(null);
   const { title, itemIds, isOwner } = useCollectionViewData(id);
+  const [newTitle, setNewTitle] = useState(null);
 
   useEffect(() => {
     dispatch({ type: "FETCH_GROUP", groupId: id });
@@ -75,13 +76,16 @@ export default function CollectionView() {
       {mode === "edit" ? (
         <motion.button
           whileHover={{ scale: 1.1 }}
-          onClick={() => setMode(null)}
+          onClick={() => {
+            setMode(null);
+            setNewTitle(null);
+          }}
           className="text-sm font-medium text-black flex space-y-4 items-center"
         >
           <p className="w-6 h-6 font-bold">Done</p>
         </motion.button>
       ) : (
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 md:space-x-4">
           <motion.button
             whileHover={{ scale: 1.1 }}
             onClick={() => setMode("edit")}
@@ -134,9 +138,43 @@ export default function CollectionView() {
         }}
       />
       <div className="flex justify-between items-center text-center h-15 pl-4 pr-4 pb-4 space-y-2">
-        <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white">
-          {title}
-        </h5>
+        <div className="flex space-x-2 items-center">
+          {newTitle ? (
+            <input
+              type="text"
+              value={newTitle}
+              placeholder={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              className="rounded-md text-xl font-bold leading-none text-gray-900 dark:text-white"
+            />
+          ) : (
+            <h5 className="text-xl font-bold leading-none text-gray-900 dark:text-white">
+              {title}
+            </h5>
+          )}
+          {mode === "edit" ? (
+            newTitle ? (
+              <button
+                className="inline-flex items-center text-xs text-blue-500 font-normal hover:underline dark:text-gray-400"
+                onClick={() => {
+                  toast.error("List title cannot be edited right now.");
+                  setNewTitle(null);
+                }}
+              >
+                <Icons.SaveIcon className="w-4 h-4 mr-1" />{" "}
+                <span className="hidden sm:inline-flex">Save</span>
+              </button>
+            ) : (
+              <button
+                className="inline-flex items-center text-xs text-blue-500 font-normal hover:underline dark:text-gray-400"
+                onClick={() => setNewTitle(title)}
+              >
+                <Icons.PencilEditIcon className="w-4 h-4 mr-1" />{" "}
+                <span className="hidden sm:inline-flex">Edit</span>
+              </button>
+            )
+          ) : null}
+        </div>
         {isOwner && editPanel}
       </div>
       <div>
