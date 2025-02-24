@@ -12,10 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import NavBar from "./NavBar";
+import Intercom from "@intercom/messenger-js-sdk";
 import Footer from "./Footer";
+import NavBar from "./NavBar";
 
 export default function ApplicationUI({ children }) {
+  Intercom({
+    app_id: "od46lrxi"
+  });
+
   return (
     <div className="flex justify-center h-screen overflow-scroll">
       <div className="fixed top-0 w-screen">
