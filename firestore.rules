@@ -1,0 +1,137 @@
+rules_version = '2';
+
+// Copyright 2022 Gan Tu
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Data model
+// ----------
+// DataGroups/{groupId} — one document per collection ("list"):
+//   { id, title, ownerId, items: { <itemId>: { id, link, title, snippet, imageUrl, order } } }
+//
+// Domains/{groupId} — denormalized mirror used for the "My Lists" query. It is
+//   maintained exclusively by Cloud Functions triggers running with Admin SDK
+//   privileges, which bypass these rules. Clients may read but never write.
+//
+// Ownership
+// ---------
+// Every list has an ownerId. The client signs in anonymously when no account is
+// present, so an owner always exists and lists stay editable within a session.
+// The sentinel "PUBLIC" marks demo lists that anyone signed in may edit; they
+// are deliberately NOT deletable, so a demo cannot be griefed away.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- helpers ----------
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function callerUid() {
+      return request.auth.uid;
+    }
+
+    // Short URLs are the product's namespace. Keep the charset in lockstep with
+    // SHORT_URL_REGEX in the web client so a create can never pass rules but
+    // fail validation (or vice versa).
+    function isValidGroupId(groupId) {
+      return groupId.matches('^[a-zA-Z0-9+-]{6,64}$');
+    }
+
+    function isPublic(data) {
+      return data.ownerId == 'PUBLIC';
+    }
+
+    // The caller may mutate a list if they own it, or if it is a shared demo.
+    function canWrite(data) {
+      return isSignedIn() && (data.ownerId == callerUid() || isPublic(data));
+    }
+
+    // Bound the document so a single list cannot be inflated toward Firestore's
+    // 1 MiB ceiling, and so a malicious client cannot cost the owner a
+    // pathological read on every page view.
+    function isWellFormed(data) {
+      return data.keys().hasAll(['id', 'title', 'ownerId', 'items'])
+        && data.id is string
+        && data.title is string
+        && data.title.size() > 0
+        && data.title.size() <= 200
+        && data.ownerId is string
+        && data.ownerId.size() > 0
+        && data.ownerId.size() <= 128
+        && data.items is map
+        && data.items.size() <= 50;
+    }
+
+    // A create must attribute the list to the caller. Writing someone else's
+    // uid into ownerId is the whole attack this blocks.
+    function isOwnedByCaller(data) {
+      return data.ownerId == callerUid();
+    }
+
+    // Ownership and identity are immutable after creation; everything else
+    // (title, items) is fair game for whoever passes canWrite().
+    function preservesIdentity(before, after) {
+      return after.ownerId == before.ownerId && after.id == before.id;
+    }
+
+    // ---------- DataGroups ----------
+
+    match /DataGroups/{groupId} {
+      // Lists are readable by URL — that is the entire point of the product.
+      allow get: if true;
+
+      // But they are not enumerable. Without this, `list` would let anyone
+      // scrape every collection in the project.
+      allow list: if false;
+
+      // `create` (rather than `write`) is what makes short URLs claim-once:
+      // Firestore rejects a create against an existing document, so an
+      // attacker cannot clobber someone else's list by re-using its id.
+      allow create: if isSignedIn()
+        && isValidGroupId(groupId)
+        && isWellFormed(request.resource.data)
+        && isOwnedByCaller(request.resource.data)
+        && request.resource.data.id == groupId;
+
+      allow update: if canWrite(resource.data)
+        && isWellFormed(request.resource.data)
+        && preservesIdentity(resource.data, request.resource.data);
+
+      // Demo lists are shared, so anyone could delete them. Owners only.
+      allow delete: if isSignedIn() && resource.data.ownerId == callerUid();
+    }
+
+    // ---------- Domains ----------
+
+    match /Domains/{groupId} {
+      // Scoped so the client's `where('ownerId', 'in', [uid, 'PUBLIC'])` query
+      // is satisfiable while an unscoped listing is not.
+      allow read: if isSignedIn()
+        && (resource.data.ownerId == callerUid() || isPublic(resource.data));
+
+      // Trigger-maintained only. Admin SDK writes bypass rules entirely.
+      allow write: if false;
+    }
+
+    // ---------- default deny ----------
+
+    // Anything not matched above — including collections added later — is
+    // denied rather than silently inheriting a permissive default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -12,101 +12,162 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// State is plain objects rather than Maps so it stays serializable — Redux
+// DevTools time-travel and the store's serializableCheck both depend on that.
+
 const initialState = {
-  groupInfo: new Map(),
-  groupUpdateStatus: new Map(),
-  items: new Map(),
-  itemsUpdateStatus: new Map()
+  // groupId -> { id, title, ownerId, itemIds: [] }
+  groups: {},
+  // itemId -> { id, link, title, snippet, imageUrl, order }
+  items: {},
+  // groupId -> "loading" | "ready" | "notFound" | "error"
+  groupStatus: {},
+  // groupId -> boolean, true while a create is in flight
+  creating: {},
+  // itemId -> boolean, true while a save is in flight
+  savingItems: {},
+  // Set when a create succeeds so the form can navigate to the new collection.
+  // Sagas have no router access, so the intent is parked here and the
+  // component consumes it — rather than the old fixed 1-second setTimeout.
+  lastCreatedId: null
 };
 
-function removeItemOnce(arr, value) {
-  var index = arr.indexOf(value);
-  if (index > -1) {
-    arr.splice(index, 1);
-  }
-  return arr;
+/**
+ * Orders items by their explicit `order` field.
+ *
+ * Lists created before ordering existed have no `order`, and the previous code
+ * sorted by UUID — which is to say, randomly, and differently every time an
+ * item was added. Those fall back to a stable alphabetical order by title.
+ */
+export function sortItemIds(items) {
+  return Object.values(items || {})
+    .slice()
+    .sort((a, b) => {
+      const aOrder = Number.isFinite(a?.order) ? a.order : Number.MAX_SAFE_INTEGER;
+      const bOrder = Number.isFinite(b?.order) ? b.order : Number.MAX_SAFE_INTEGER;
+      if (aOrder !== bOrder) return aOrder - bOrder;
+
+      const byTitle = String(a?.title || "").localeCompare(String(b?.title || ""));
+      if (byTitle !== 0) return byTitle;
+
+      return String(a?.id || "").localeCompare(String(b?.id || ""));
+    })
+    .map((item) => item.id);
 }
 
 export default function reducer(state = initialState, action) {
   switch (action.type) {
-    case "SET_GROUP_DATA": {
-      let newGroupInfo = new Map(state.groupInfo);
-      newGroupInfo.set(action.id, action.data);
+    case "collections/loading": {
       return {
         ...state,
-        groupInfo: newGroupInfo
+        groupStatus: { ...state.groupStatus, [action.groupId]: "loading" }
       };
     }
-    case "DELETE_GROUP_DATA": {
-      let groupData = state.groupInfo.get(action.id);
-      let newGroupInfo = new Map(state.groupInfo);
-      let newItems = new Map(state.items);
-      if (groupData) {
-        for (const itemId of groupData.itemIds) {
-          newItems.delete(itemId);
-        }
+
+    case "collections/snapshot": {
+      const { groupId, data } = action;
+      const itemsById = data.items || {};
+
+      return {
+        ...state,
+        groups: {
+          ...state.groups,
+          [groupId]: {
+            id: groupId,
+            title: data.title || "",
+            ownerId: data.ownerId || null,
+            itemIds: sortItemIds(itemsById)
+          }
+        },
+        items: { ...state.items, ...itemsById },
+        groupStatus: { ...state.groupStatus, [groupId]: "ready" }
+      };
+    }
+
+    case "collections/notFound": {
+      return {
+        ...state,
+        groupStatus: { ...state.groupStatus, [action.groupId]: "notFound" }
+      };
+    }
+
+    case "collections/error": {
+      return {
+        ...state,
+        groupStatus: { ...state.groupStatus, [action.groupId]: "error" }
+      };
+    }
+
+    case "collections/removed": {
+      const groups = { ...state.groups };
+      const groupStatus = { ...state.groupStatus };
+      const items = { ...state.items };
+
+      for (const itemId of groups[action.groupId]?.itemIds || []) {
+        delete items[itemId];
       }
-      newGroupInfo.delete(action.id);
+      delete groups[action.groupId];
+      delete groupStatus[action.groupId];
+
+      return { ...state, groups, items, groupStatus };
+    }
+
+    case "collections/createStarted": {
       return {
         ...state,
-        groupInfo: newGroupInfo,
-        items: newItems
+        creating: { ...state.creating, [action.groupId]: true }
       };
     }
-    case "SET_GROUP_UPDATE_STATUS": {
-      let newStatus = new Map(state.groupUpdateStatus);
-      newStatus.set(action.id, action.status);
+
+    case "collections/createFinished": {
+      const creating = { ...state.creating };
+      delete creating[action.groupId];
       return {
         ...state,
-        groupUpdateStatus: newStatus
+        creating,
+        lastCreatedId: action.ok ? action.groupId : state.lastCreatedId
       };
     }
-    case "SET_ITEM_DATA": {
-      let newItems = new Map(state.items);
-      if (!!action.data) {
-        newItems.set(action.id, action.data);
+
+    case "collections/consumeCreated": {
+      return { ...state, lastCreatedId: null };
+    }
+
+    case "collections/itemSaving": {
+      const savingItems = { ...state.savingItems };
+      if (action.saving) {
+        savingItems[action.itemId] = true;
       } else {
-        newItems.delete(action.id);
+        delete savingItems[action.itemId];
       }
+      return { ...state, savingItems };
+    }
+
+    // Applied immediately on drag so the list does not snap back while the
+    // write is in flight; the next snapshot confirms it.
+    case "collections/reorderOptimistic": {
+      const group = state.groups[action.groupId];
+      if (!group) return state;
+
+      const items = { ...state.items };
+      action.itemIds.forEach((itemId, index) => {
+        if (items[itemId]) items[itemId] = { ...items[itemId], order: index };
+      });
+
       return {
         ...state,
-        items: newItems
+        items,
+        groups: {
+          ...state.groups,
+          [action.groupId]: { ...group, itemIds: action.itemIds }
+        }
       };
     }
-    case "SET_ITEM_UPDATE_STATUS": {
-      let newStatus = new Map(state.itemsUpdateStatus);
-      newStatus.set(action.id, action.status);
-      return {
-        ...state,
-        itemsUpdateStatus: newStatus
-      };
-    }
-    case "ADD_ITEM_ID_TO_GROUP": {
-      let newGroupInfo = new Map(state.groupInfo);
-      let newGroup = newGroupInfo.get(action.groupId);
-      if (newGroup) {
-        newGroup.itemIds = [...(newGroup?.itemIds || []), action.itemId];
-        newGroup.itemIds.sort();
-      }
-      return {
-        ...state,
-        groupInfo: newGroupInfo
-      };
-    }
-    case "REMOVE_ITEM_ID_FROM_GROUP": {
-      let newGroupInfo = new Map(state.groupInfo);
-      let newGroup = newGroupInfo.get(action.groupId);
-      if (newGroup) {
-        newGroup.itemIds = [...(newGroup?.itemIds || [])];
-        newGroup.itemIds = removeItemOnce(newGroup.itemIds, action.itemId);
-      }
-      newGroupInfo.set(action.groupId, newGroup);
-      return {
-        ...state,
-        groupInfo: newGroupInfo
-      };
-    }
+
+    // Returning `state` — not a fresh object — is what lets useSelector skip
+    // re-rendering. The previous `{ ...state }` default made every subscriber
+    // re-run on every dispatched action in the app.
     default:
-      return { ...state };
+      return state;
   }
 }

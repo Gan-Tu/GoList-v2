@@ -14,33 +14,39 @@
 
 const initialState = {
   user: null,
-  domainData: [],
+  // False until Firebase has told us whether a session exists. Without this the
+  // UI cannot distinguish "signed out" from "still checking", and flashes the
+  // signed-out state on every load.
+  authResolved: false,
+  domains: [],
+  domainsStatus: "idle",
   emailForSignIn: null,
-  emailVerificationSuccess: false,
-  emailVerificationFailed: false
+  emailVerification: "idle"
 };
 
 export default function reducer(state = initialState, action) {
   switch (action.type) {
-    case "SET_SESSION_USER":
-      if (action.user?.uid) {
-        console.log(
-          "Logged in with uid:",
-          action.user?.uid,
-          "and email:",
-          action.user?.email
-        );
-      }
-      return { ...state, user: action.user };
-    case "SET_DOMAIN_DATA":
-      return { ...state, domainData: action.domainData };
-    case "SET_EMAIL_FOR_SIGN_IN":
-      return { ...state, emailForSignIn: action.emailForSignIn };
-    case "SET_EMAIL_VERIFICATION_SUCCESS":
-      return { ...state, emailVerificationSuccess: true };
-    case "SET_EMAIL_VERIFICATION_FAILED":
-      return { ...state, emailVerificationFailed: true };
+    case "session/userChanged":
+      // The previous implementation console.logged the uid and email of every
+      // user on every auth state change.
+      return { ...state, user: action.user || null, authResolved: true };
+
+    case "session/domainsLoading":
+      return { ...state, domainsStatus: "loading" };
+
+    case "session/domainsLoaded":
+      return { ...state, domains: action.domains, domainsStatus: "ready" };
+
+    case "session/domainsError":
+      return { ...state, domainsStatus: "error" };
+
+    case "session/emailForSignIn":
+      return { ...state, emailForSignIn: action.email };
+
+    case "session/emailVerification":
+      return { ...state, emailVerification: action.status };
+
     default:
-      return { ...state };
+      return state;
   }
 }

@@ -12,32 +12,53 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useEffect } from "react";
 import { useSelector } from "react-redux";
 
-function useLoggedInUser() {
-  return useSelector((store) => store.SessionReducer.user);
+export function useLoggedInUser() {
+  return useSelector((store) => store.session.user);
 }
 
-function useLoggedInUserId() {
-  return useSelector((store) => store.SessionReducer.user?.uid);
+export function useLoggedInUserId() {
+  return useSelector((store) => store.session.user?.uid);
 }
 
-function useEmailForSignIn() {
-  return useSelector((store) => store.SessionReducer.emailForSignIn);
+/**
+ * True only for a real account. Anonymous sessions exist so that every list
+ * has an owner, but they should not make the UI claim the visitor is signed in.
+ */
+export function useHasAccount() {
+  return useSelector(
+    (store) => Boolean(store.session.user) && !store.session.user.isAnonymous
+  );
 }
 
-function useEmailVerificationSuccess() {
-  return useSelector((store) => store.SessionReducer.emailVerificationSuccess);
+/** False until Firebase has restored (or ruled out) a persisted session. */
+export function useAuthResolved() {
+  return useSelector((store) => store.session.authResolved);
 }
 
-function useEmailVerificationFailed() {
-  return useSelector((store) => store.SessionReducer.emailVerificationFailed);
+export function useEmailForSignIn() {
+  return useSelector((store) => store.session.emailForSignIn);
 }
 
-export {
-  useLoggedInUser,
-  useLoggedInUserId,
-  useEmailForSignIn,
-  useEmailVerificationSuccess,
-  useEmailVerificationFailed,
-};
+export function useEmailVerificationStatus() {
+  return useSelector((store) => store.session.emailVerification);
+}
+
+/**
+ * Sets the document title, replacing react-helmet.
+ *
+ * Collection pages get their real title server-side from renderCollection, so
+ * all this needs to do is keep the tab in step during client-side navigation.
+ */
+export function useDocumentTitle(title) {
+  useEffect(() => {
+    if (!title) return undefined;
+    const previous = document.title;
+    document.title = title;
+    return () => {
+      document.title = previous;
+    };
+  }, [title]);
+}

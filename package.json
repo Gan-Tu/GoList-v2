@@ -1,0 +1,30 @@
+{
+  "name": "golist-v2",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Quickly browse a collection of links or files with one short URL.",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "install:all": "npm install && npm --prefix frontend install && npm --prefix functions install",
+    "build": "npm --prefix frontend run build",
+    "lint": "npm --prefix frontend run lint && npm --prefix functions run lint",
+    "demo": "./scripts/demo.sh",
+    "emulators": "firebase emulators:start --only auth,firestore,functions",
+    "seed": "node scripts/seed-emulator.mjs",
+    "test:rules": "firebase emulators:exec --only firestore --project golist-v2-test \"vitest run --config tests/vitest.config.js\"",
+    "test:frontend": "npm --prefix frontend run test",
+    "test": "npm run test:rules && npm run test:frontend",
+    "deploy:rules": "firebase deploy --only firestore:rules,firestore:indexes",
+    "deploy:functions": "firebase deploy --only functions",
+    "deploy:hosting": "npm run build && firebase deploy --only hosting",
+    "deploy:preview": "npm run build && firebase hosting:channel:deploy preview --expires 7d"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.1",
+    "firebase": "^12.0.0",
+    "vitest": "^2.1.8"
+  }
+}

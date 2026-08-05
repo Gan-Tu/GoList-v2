@@ -1,0 +1,36 @@
+name: Preview Channel
+
+on:
+  pull_request:
+    # A fork's PR cannot read repository secrets, so the deploy would fail
+    # noisily rather than being skipped.
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    name: Deploy preview
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm --prefix frontend ci
+      - run: npm --prefix frontend run build
+
+      # Posts a throwaway URL on the pull request so a change can be clicked
+      # through before it reaches goli.st.
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GOLIST_V2 }}
+          projectId: golist-v2
+          expires: 7d

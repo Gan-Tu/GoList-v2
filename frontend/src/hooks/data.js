@@ -13,63 +13,65 @@
 // limitations under the License.
 
 import { useSelector } from "react-redux";
-import { useLoggedInUserId } from "./session";
 
-function useGroupInfo(id) {
-  return useSelector((store) => store.DataGroupsReducer.groupInfo.get(id));
+// useSelector compares results by reference. Returning a fresh `[]` from a
+// selector — as `... || []` does — looks like a new value on every store read
+// and re-renders the component forever. One shared constant fixes it.
+const EMPTY_ARRAY = Object.freeze([]);
+
+export function useGroup(groupId) {
+  return useSelector((store) => store.collections.groups[groupId]);
 }
 
-function useCollectionViewData(id) {
-  const uid = useSelector((store) => store.SessionReducer.user?.uid);
-  const title = useSelector(
-    (store) => store.DataGroupsReducer.groupInfo.get(id)?.title
-  );
-  const itemIds = useSelector(
-    (store) => store.DataGroupsReducer.groupInfo.get(id)?.itemIds || []
-  );
-  const ownerId = useSelector(
-    (store) => store.DataGroupsReducer.groupInfo.get(id)?.ownerId
-  );
-  return {
-    title,
-    itemIds: itemIds.slice(0).sort(),
-    isOwner: (!!uid && ownerId === uid) || ownerId === "PUBLIC"
-  };
+export function useGroupStatus(groupId) {
+  return useSelector((store) => store.collections.groupStatus[groupId]);
 }
 
-function useGroupUpdateStatus(id) {
-  return useSelector((store) =>
-    store.DataGroupsReducer.groupUpdateStatus.get(id)
-  );
+export function useIsCreating(groupId) {
+  return useSelector((store) => Boolean(store.collections.creating[groupId]));
 }
 
-function useGroupsAccessible() {
-  const uid = useLoggedInUserId();
-  return useSelector((store) => store.SessionReducer.domainData).filter(
-    (doc) => doc?.ownerId === "PUBLIC" || doc?.ownerId === uid
-  );
+export function useLastCreatedId() {
+  return useSelector((store) => store.collections.lastCreatedId);
 }
 
-function useItemData(id) {
-  return useSelector((store) => store.DataGroupsReducer.items.get(id));
-}
-
-function useItemlink(id) {
-  return useSelector((store) => store.DataGroupsReducer.items.get(id)?.link);
-}
-
-function useItemIsUpdating(id) {
+export function useItemIds(groupId) {
   return useSelector(
-    (store) => store.DataGroupsReducer.itemsUpdateStatus.get(id)?.isUpdating
+    (store) => store.collections.groups[groupId]?.itemIds || EMPTY_ARRAY
   );
 }
 
-export {
-  useGroupInfo,
-  useGroupUpdateStatus,
-  useItemData,
-  useItemIsUpdating, // used once
-  useItemlink, // used once
-  useCollectionViewData,
-  useGroupsAccessible
-};
+export function useItemData(itemId) {
+  return useSelector((store) => store.collections.items[itemId]);
+}
+
+export function useItemLink(itemId) {
+  return useSelector((store) => store.collections.items[itemId]?.link);
+}
+
+export function useItemIsSaving(itemId) {
+  return useSelector((store) => Boolean(store.collections.savingItems[itemId]));
+}
+
+/**
+ * Whether the signed-in user may edit this collection.
+ *
+ * This only drives what the UI offers — Firestore rules are what actually
+ * enforce it. Hiding a button is a courtesy, not a control.
+ */
+export function useCanEdit(groupId) {
+  return useSelector((store) => {
+    const uid = store.session.user?.uid;
+    const ownerId = store.collections.groups[groupId]?.ownerId;
+    if (!ownerId) return false;
+    return ownerId === "PUBLIC" || (Boolean(uid) && ownerId === uid);
+  });
+}
+
+export function useMyCollections() {
+  return useSelector((store) => store.session.domains || EMPTY_ARRAY);
+}
+
+export function useMyCollectionsStatus() {
+  return useSelector((store) => store.session.domainsStatus);
+}

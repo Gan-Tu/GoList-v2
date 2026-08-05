@@ -182,3 +182,20 @@ node_modules/
 
 # Credentials
 golist-v2-firebase-adminsdk.json
+
+# --- GoList v2 ---
+
+# The frontend .env holds only the public Firebase web config (it is visible in
+# any browser's network tab), and committing it means a fresh clone runs with
+# no setup. Real secrets belong in .env.local, which stays ignored above.
+!frontend/.env
+
+# Generated at build time by scripts/sync-shell.js from frontend/dist.
+functions/shell.html
+
+# Stale create-react-app output, superseded by frontend/dist.
+frontend/build/
+
+# Firebase CLI and emulator debug output.
+*-debug.log
+firebase-debug.*.log

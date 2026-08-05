@@ -1,5 +1,10 @@
-module.exports = {
-  content: ["./src/**/*.{js,jsx,ts,tsx}", "./node_modules/flowbite/**/*.js"],
+import forms from "@tailwindcss/forms";
+
+export default {
+  // Flowbite's plugin and its node_modules content glob are gone: none of its
+  // JS components were used, and scanning that directory slowed every build.
+  // @tailwindcss/line-clamp is gone too — line-clamp-* ships in Tailwind 3.3+.
+  content: ["./index.html", "./src/**/*.{js,jsx}"],
   theme: {
     extend: {
       colors: {
@@ -13,9 +18,5 @@ module.exports = {
       }
     }
   },
-  plugins: [
-    require("flowbite/plugin"),
-    require("@tailwindcss/line-clamp"),
-    require("@tailwindcss/forms")
-  ]
+  plugins: [forms]
 };

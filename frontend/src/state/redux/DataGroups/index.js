@@ -12,52 +12,90 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { call, put, select, takeEvery, takeLatest } from "redux-saga/effects";
+import {
+  call,
+  fork,
+  put,
+  race,
+  select,
+  take,
+  takeEvery,
+  takeLatest
+} from "redux-saga/effects";
+import { eventChannel } from "redux-saga";
 import * as fs from "firebase/firestore";
-import { db, functions } from "../../../firebase";
+import { httpsCallable } from "firebase/functions";
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
-import { httpsCallable } from "firebase/functions";
-import { fixUrl } from "../../../components/Utilities/Helpers";
+import { db, functions } from "../../../firebase";
+import { fixUrl, validateShortUrl } from "../../../components/Utilities/Helpers";
+import { ensureSignedIn } from "../Session/index";
 
-function* fetchDataGroup({ groupId }) {
-  const docRef = fs.doc(db, "DataGroups", groupId);
+const COLLECTION = "DataGroups";
+
+/**
+ * Turns Firestore's onSnapshot listener into a saga channel.
+ *
+ * Reads used to be one-shot getDoc calls, so a collection open in two tabs (or
+ * edited on a phone while open on a laptop) silently diverged until reload.
+ */
+function createGroupChannel(groupId) {
+  return eventChannel((emit) => {
+    const unsubscribe = fs.onSnapshot(
+      fs.doc(db, COLLECTION, groupId),
+      (snapshot) => {
+        emit(
+          snapshot.exists()
+            ? { kind: "data", data: snapshot.data() }
+            : { kind: "missing" }
+        );
+      },
+      (error) => emit({ kind: "error", error })
+    );
+    return unsubscribe;
+  });
+}
+
+function* streamGroup(groupId) {
+  const channel = yield call(createGroupChannel, groupId);
   try {
-    const documentSnapshot = yield call(fs.getDoc, docRef);
-    const data = documentSnapshot.data();
-    if (!!data) {
-      for (const [itemId, itemData] of Object.entries(data.items)) {
-        yield put({ type: "SET_ITEM_DATA", id: itemId, data: itemData });
+    while (true) {
+      const event = yield take(channel);
+      if (event.kind === "data") {
+        yield put({ type: "collections/snapshot", groupId, data: event.data });
+      } else if (event.kind === "missing") {
+        yield put({ type: "collections/notFound", groupId });
+      } else {
+        console.error(`Snapshot error for /${groupId}:`, event.error);
+        yield put({ type: "collections/error", groupId });
       }
-      data.itemIds = Object.keys(data.items);
-      delete data.items;
-      yield put({ type: "SET_GROUP_DATA", id: groupId, data });
-    } else {
-      yield put({
-        type: "SET_GROUP_UPDATE_STATUS",
-        id: groupId,
-        status: {
-          mode: "fetch",
-          dataType: "group",
-          notFound: true
-        }
-      });
     }
-  } catch (error) {
-    toast.error(`Failed to get data.`);
-    console.error(`Failed to get data: ${error}`);
+  } finally {
+    channel.close();
   }
 }
 
-function* fetchDataGroupDomainInfoByUserId({ uid }) {
+function* subscribeGroup({ groupId }) {
+  yield put({ type: "collections/loading", groupId });
+  // The listener lives until the view unsubscribes, then the channel's
+  // finally-block detaches it. Without this the listener leaked per navigation.
+  yield race({
+    stream: call(streamGroup, groupId),
+    cancelled: take(
+      (action) =>
+        action.type === "collections/unsubscribe" && action.groupId === groupId
+    )
+  });
+}
+
+function* fetchAccessibleGroups({ uid }) {
+  if (!uid) {
+    yield put({ type: "session/domainsLoaded", domains: [] });
+    return;
+  }
+
+  yield put({ type: "session/domainsLoading" });
   try {
-    if (!uid) {
-      yield put({
-        type: "SET_DOMAIN_DATA",
-        domainData: []
-      });
-      return;
-    }
     const querySnapshot = yield call(
       fs.getDocs,
       fs.query(
@@ -65,301 +103,272 @@ function* fetchDataGroupDomainInfoByUserId({ uid }) {
         fs.where("ownerId", "in", [uid, "PUBLIC"])
       )
     );
-    const domainData = querySnapshot.docs.map((doc) => {
-      let data = doc.data();
+    const domains = querySnapshot.docs.map((docSnapshot) => {
+      const data = docSnapshot.data();
       return {
-        id: doc.id,
+        id: docSnapshot.id,
         title: data.title,
-        url: `goli.st/${doc.id}`,
-        destination: `/${doc.id}`,
+        url: `goli.st/${docSnapshot.id}`,
+        destination: `/${docSnapshot.id}`,
         ownerId: data.ownerId
       };
     });
-    yield put({
-      type: "SET_DOMAIN_DATA",
-      domainData: domainData
-    });
+    yield put({ type: "session/domainsLoaded", domains });
   } catch (error) {
-    toast.error(`Failed to get user lists.`);
-    console.error(`Failed to get user lists: ${error}`);
+    console.error("Failed to load your lists:", error);
+    yield put({ type: "session/domainsError" });
+    toast.error("Could not load your lists.");
   }
 }
 
-function* createGroup({ groupId, title, urls, uid }) {
-  // Start group creation
-  yield put({
-    type: "SET_GROUP_UPDATE_STATUS",
-    id: groupId,
-    status: {
-      mode: "create",
-      dataType: "group",
-      isUpdating: true,
-      newGroupId: groupId
-    }
-  });
-  let toastId = toast.loading("Creating new collection...", { duration: 5000 });
-
-  // Prepare firestore document
-  let itemsData = {};
-  for (const url of urls.trim().split("\n")) {
-    if (url.length > 0) {
-      const itemId = uuidv4();
-      itemsData[itemId] = {
-        id: itemId,
-        link: fixUrl(url)
-      };
-    }
-  }
-  let data = {
-    id: groupId,
-    title: title,
-    items: itemsData
-  };
-  if (uid) {
-    data.ownerId = uid;
-  }
-
-  // Save to firestore
-  const docRef = fs.doc(db, "DataGroups", groupId);
+/**
+ * Kicks off server-side metadata backfill without blocking the UI.
+ *
+ * Creation used to await this, so the user stared at "Auto-populating
+ * metadata..." before their list appeared. Now the list is created, the user
+ * navigates immediately, and previews stream in over the snapshot listener.
+ */
+function* backfillMetadata(groupId) {
   try {
-    yield call(fs.setDoc, docRef, data);
+    yield call(httpsCallable(functions, "populateUrlMetadata"), { groupId });
   } catch (error) {
-    toast.error("Failed to save data.");
-    console.error(`Failed to save data: ${error}`);
-    yield put({
-      type: "SET_GROUP_UPDATE_STATUS",
-      id: groupId,
-      status: {
-        mode: "create",
-        dataType: "group",
-        isUpdating: false,
-        newGroupId: groupId
-      }
-    });
+    console.error(`Metadata backfill failed for /${groupId}:`, error);
+    toast("Some link previews could not be loaded.", { icon: "⚠️" });
+  }
+}
+
+function* createGroup({ groupId, title, urls }) {
+  const validationError = validateShortUrl(groupId);
+  if (validationError) {
+    toast.error(validationError);
     return;
   }
 
-  // Try populate all the url metadata
-  toastId = toast.loading("Auto-populating metadata...", {
-    id: toastId,
-    duration: 10000
-  });
-  try {
-    const result = yield call(
-      httpsCallable(functions, "populateUrlMetadata"),
-      `DataGroups/${groupId}`
-    );
-    if (result?.data?.items) {
-      data.items = result.data.items;
-    }
-  } catch (error) {
-    toast.error("Failed to auto populate metadata.", { id: toastId });
-    console.error(`Failed to populate all the url metadata: ${error}`);
+  const uid = yield call(ensureSignedIn);
+  if (!uid) {
+    toast.error("Could not start a session. Please try again.");
+    return;
   }
 
-  // End group creation
-  toast.success("Group created successfuly.", { id: toastId, duration: 1000 });
-  yield put({
-    type: "SET_GROUP_UPDATE_STATUS",
-    id: groupId,
-    status: {
-      mode: "create",
-      dataType: "group",
-      isUpdating: false,
-      newGroupId: groupId
-    }
+  yield put({ type: "collections/createStarted", groupId });
+  const toastId = toast.loading("Creating your collection...");
+
+  const links = String(urls || "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+
+  const items = {};
+  links.forEach((link, index) => {
+    const itemId = uuidv4();
+    items[itemId] = {
+      id: itemId,
+      link: fixUrl(link),
+      title: "",
+      snippet: "",
+      imageUrl: "",
+      // Preserves the order the user typed them in.
+      order: index
+    };
   });
+
+  const data = { id: groupId, title: title.trim(), ownerId: uid, items };
+
+  try {
+    // A transaction makes claiming a short URL atomic. The previous code called
+    // setDoc() unconditionally, so creating a list at an id that already
+    // existed destroyed the original.
+    yield call(fs.runTransaction, db, async (tx) => {
+      const ref = fs.doc(db, COLLECTION, groupId);
+      const existing = await tx.get(ref);
+      if (existing.exists()) {
+        const conflict = new Error("TAKEN");
+        conflict.code = "TAKEN";
+        throw conflict;
+      }
+      tx.set(ref, data);
+    });
+  } catch (error) {
+    yield put({ type: "collections/createFinished", groupId, ok: false });
+    if (error?.code === "TAKEN") {
+      toast.error(`goli.st/${groupId} is already taken. Try another URL.`, {
+        id: toastId
+      });
+    } else {
+      console.error("Failed to create collection:", error);
+      toast.error("Could not create your collection.", { id: toastId });
+    }
+    return;
+  }
+
+  toast.success("Collection created.", { id: toastId, duration: 1500 });
+  yield put({ type: "collections/createFinished", groupId, ok: true });
+
+  // Non-blocking: the user is already looking at their list.
+  yield fork(backfillMetadata, groupId);
+}
+
+function* renameGroup({ groupId, title }) {
+  const trimmed = String(title || "").trim();
+  if (!trimmed) {
+    toast.error("A collection needs a title.");
+    return;
+  }
+
+  yield call(ensureSignedIn);
+
+  try {
+    yield call(fs.updateDoc, fs.doc(db, COLLECTION, groupId), {
+      title: trimmed
+    });
+    toast.success("Title updated.");
+  } catch (error) {
+    console.error("Failed to rename collection:", error);
+    toast.error("Could not rename this collection.");
+  }
 }
 
 function* deleteGroup({ groupId }) {
-  const docRef = fs.doc(db, "DataGroups", groupId);
+  yield call(ensureSignedIn);
   try {
-    yield call(fs.deleteDoc, docRef);
-    yield put({ type: "DELETE_GROUP_DATA", id: groupId });
-    toast.success("Group deleted successfuly.");
+    yield call(fs.deleteDoc, fs.doc(db, COLLECTION, groupId));
+    yield put({ type: "collections/removed", groupId });
+    toast.success("Collection deleted.");
   } catch (error) {
-    toast.error(`Failed to delete data.`);
-    console.error(`Failed to delete data: ${error}`);
+    console.error("Failed to delete collection:", error);
+    toast.error("Could not delete this collection.");
   }
 }
 
 function* createItem({ groupId, url }) {
+  const link = fixUrl(url);
+  if (!link) {
+    toast.error("A link is required.");
+    return;
+  }
+
+  yield call(ensureSignedIn);
+
   const itemId = uuidv4();
-  url = fixUrl(url);
+  const existingIds = yield select(
+    (store) => store.collections.groups[groupId]?.itemIds || []
+  );
 
-  // Start item update
-  yield put({
-    type: "SET_GROUP_UPDATE_STATUS",
-    id: groupId,
-    status: {
-      mode: "create",
-      dataType: "item",
-      isUpdating: true,
-      newItemId: itemId
-    }
-  });
-  let toastId = toast.loading("Creating new item...", { duration: 5000 });
-
-  let itemData = {
+  const itemData = {
     id: itemId,
-    link: url,
-    title: "URL",
+    link,
+    title: "",
     snippet: "",
-    imageUrl: "https://picsum.photos/48"
+    imageUrl: "",
+    order: existingIds.length
   };
 
-  // Try fetching url metadata
-  try {
-    const metadata = yield call(
-      httpsCallable(functions, "getUrlMetadata"),
-      url
-    );
-    itemData = {
-      ...itemData,
-      title:
-        metadata?.data?.twitterTitle ||
-        metadata?.data?.ogTitle ||
-        metadata?.data?.title ||
-        metadata?.data?.twitterSite ||
-        "",
-      snippet:
-        metadata?.data?.twitterDescription ||
-        metadata?.data?.ogDescription ||
-        metadata?.data?.description ||
-        "",
-      imageUrl:
-        metadata?.data?.twitterImage ||
-        metadata?.data?.ogImage ||
-        metadata?.data?.icon ||
-        ""
-    };
-  } catch (error) {
-    console.error(`Failed to fetch url metadata: ${error}`);
-  }
+  const toastId = toast.loading("Adding link...");
+  yield put({ type: "collections/itemSaving", itemId, saving: true });
 
-  // Create date remotely and locally
-  const docRef = fs.doc(db, "DataGroups", groupId);
-  let update = {};
-  update[`items.${itemId}`] = itemData;
-
-  let success = false;
   try {
-    yield call(fs.updateDoc, docRef, update);
-    yield put({
-      type: "SET_ITEM_DATA",
-      id: itemId,
-      data: itemData
+    yield call(fs.updateDoc, fs.doc(db, COLLECTION, groupId), {
+      [`items.${itemId}`]: itemData
     });
-    yield put({ type: "ADD_ITEM_ID_TO_GROUP", groupId, itemId });
-    success = true;
   } catch (error) {
-    console.error(`Failed to save data: ${error}`);
+    console.error("Failed to add item:", error);
+    toast.error("Could not add that link.", { id: toastId });
+    yield put({ type: "collections/itemSaving", itemId, saving: false });
+    return;
   }
 
-  // Clear any loading animations
-  toast.dismiss(toastId);
+  toast.success("Link added.", { id: toastId, duration: 1500 });
 
-  // End item update
-  if (success) {
-    toast.success("New item successfully created");
-  } else {
-    toast.error("Failed to save data.");
-  }
-  yield put({
-    type: "SET_GROUP_UPDATE_STATUS",
-    id: groupId,
-    status: {
-      mode: "create",
-      dataType: "item",
-      isUpdating: false,
-      newItemId: itemId
+  // The card is already on screen via the snapshot listener; the preview fills
+  // itself in a moment later rather than holding up the write.
+  try {
+    const response = yield call(
+      httpsCallable(functions, "getUrlMetadata"),
+      { url: link }
+    );
+    const metadata = response?.data || {};
+    if (metadata.title || metadata.snippet || metadata.imageUrl) {
+      yield call(fs.updateDoc, fs.doc(db, COLLECTION, groupId), {
+        [`items.${itemId}`]: {
+          ...itemData,
+          title: metadata.title || "",
+          snippet: metadata.snippet || "",
+          imageUrl: metadata.imageUrl || ""
+        }
+      });
     }
-  });
+  } catch (error) {
+    // A missing preview is cosmetic — the link itself already saved.
+    console.warn("Could not load a preview for that link:", error);
+  } finally {
+    yield put({ type: "collections/itemSaving", itemId, saving: false });
+  }
 }
 
 function* updateItem({ itemId, groupId, data }) {
-  // Start item update
-  yield put({
-    type: "SET_ITEM_UPDATE_STATUS",
-    id: itemId,
-    status: {
-      isUpdating: true
-    }
-  });
+  yield call(ensureSignedIn);
+  yield put({ type: "collections/itemSaving", itemId, saving: true });
 
-  if (data?.link) {
-    data.link = fixUrl(data.link);
-  }
+  const current = yield select((store) => store.collections.items[itemId] || {});
+  const next = { ...current, ...data };
+  if (next.link) next.link = fixUrl(next.link);
 
-  // Show saving in progress notification after 1 second.
-  let toastId;
-  const timer = setTimeout(() => {
-    toastId = toast.loading("Still saving the data...");
-  }, 1000);
-
-  // Update date remotely and locally
-  const docRef = fs.doc(db, "DataGroups", groupId);
-  const currentData = yield select(
-    (store) => store.DataGroupsReducer.items.get(itemId) || {}
-  );
-  const newData = { ...currentData, ...data };
-  let update = {};
-  update[`items.${itemId}`] = newData;
-
-  let success = false;
   try {
-    yield call(fs.updateDoc, docRef, update);
-    yield put({
-      type: "SET_ITEM_DATA",
-      id: itemId,
-      data: newData
+    yield call(fs.updateDoc, fs.doc(db, COLLECTION, groupId), {
+      [`items.${itemId}`]: next
     });
-    success = true;
+    toast.success("Saved.", { duration: 1500 });
   } catch (error) {
-    console.error(`Failed to update data: ${error}`);
+    console.error("Failed to update item:", error);
+    toast.error("Could not save your changes.");
+  } finally {
+    yield put({ type: "collections/itemSaving", itemId, saving: false });
   }
-
-  // Clear any loading animations
-  toast.dismiss(toastId);
-  clearTimeout(timer);
-
-  // End item update
-  if (success) {
-    toast.success("Updated item details successfully");
-  } else {
-    toast.error("Failed to update data");
-  }
-
-  yield put({
-    type: "SET_ITEM_UPDATE_STATUS",
-    id: itemId,
-    status: {
-      isUpdating: false
-    }
-  });
 }
 
 function* deleteItem({ groupId, itemId }) {
-  const docRef = fs.doc(db, "DataGroups", groupId);
-  let update = {};
-  update[`items.${itemId}`] = fs.deleteField();
+  yield call(ensureSignedIn);
   try {
-    yield call(fs.updateDoc, docRef, update);
-    yield put({ type: "REMOVE_ITEM_ID_FROM_GROUP", groupId, itemId });
-    yield put({ type: "SET_ITEM_DATA", id: itemId, data: null });
-    toast.success("Item deleted successfuly.");
+    yield call(fs.updateDoc, fs.doc(db, COLLECTION, groupId), {
+      [`items.${itemId}`]: fs.deleteField()
+    });
+    toast.success("Link removed.", { duration: 1500 });
   } catch (error) {
-    toast.error("Failed to delete data.");
-    console.error(`Failed to delete data: ${error}`);
+    console.error("Failed to delete item:", error);
+    toast.error("Could not remove that link.");
+  }
+}
+
+function* reorderItems({ groupId, itemIds }) {
+  yield call(ensureSignedIn);
+  // Reflect the drop immediately, then persist. Waiting for the round-trip
+  // makes the card visibly snap back to its old position first.
+  yield put({ type: "collections/reorderOptimistic", groupId, itemIds });
+
+  const items = yield select((store) => store.collections.items);
+  const update = {};
+  itemIds.forEach((itemId, index) => {
+    if (items[itemId]) {
+      update[`items.${itemId}`] = { ...items[itemId], order: index };
+    }
+  });
+
+  try {
+    yield call(fs.updateDoc, fs.doc(db, COLLECTION, groupId), update);
+  } catch (error) {
+    console.error("Failed to save the new order:", error);
+    toast.error("Could not save the new order.");
   }
 }
 
 export function* watchDataGroupsApp() {
-  yield takeEvery("FETCH_GROUP", fetchDataGroup);
-  yield takeLatest("CREATE_GROUP", createGroup);
-  yield takeLatest("DELETE_GROUP", deleteGroup);
-  yield takeLatest("CREATE_ITEM", createItem);
-  yield takeLatest("UPDATE_ITEM", updateItem);
-  yield takeLatest("DELETE_ITEM", deleteItem);
-  yield takeLatest("FETCH_GROUP_ACCESSIBLE", fetchDataGroupDomainInfoByUserId);
+  yield takeEvery("collections/subscribe", subscribeGroup);
+  yield takeLatest("collections/create", createGroup);
+  yield takeLatest("collections/rename", renameGroup);
+  yield takeLatest("collections/delete", deleteGroup);
+  yield takeEvery("collections/createItem", createItem);
+  yield takeEvery("collections/updateItem", updateItem);
+  yield takeEvery("collections/deleteItem", deleteItem);
+  yield takeLatest("collections/reorder", reorderItems);
+  yield takeLatest("session/fetchDomains", fetchAccessibleGroups);
 }

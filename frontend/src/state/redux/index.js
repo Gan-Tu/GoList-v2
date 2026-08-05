@@ -13,12 +13,12 @@
 // limitations under the License.
 
 import { combineReducers } from "redux";
-import DataGroupsReducer from "./DataGroups/reducer";
-import SessionReducer from "./Session/reducer";
+import collections from "./DataGroups/reducer";
+import session from "./Session/reducer";
 
 const reducers = combineReducers({
-  DataGroupsReducer,
-  SessionReducer,
+  collections,
+  session
 });
 
 export default reducers;

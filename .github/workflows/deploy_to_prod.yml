@@ -6,25 +6,76 @@ on:
       - main
 
 concurrency:
-  group: ${{ github.ref }}
+  group: deploy-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  deploy_frontend:
+  deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./frontend
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install && npm run build
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm --prefix frontend ci
+          npm --prefix functions ci
+
+      # Deploying an untested build is how a broken bundle reaches goli.st.
+      - name: Verify
+        run: |
+          npm --prefix frontend run lint
+          npm --prefix frontend test
+          npm --prefix functions run lint
+          npm --prefix functions test
+
+      - name: Build
+        run: npm --prefix frontend run build
+
+      - uses: actions/setup-java@v4
         with:
-          entrypoint: "./frontend"
-          repoToken: "${{ secrets.GITHUB_TOKEN }}"
-          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_GOLIST_V2 }}"
+          distribution: temurin
+          java-version: 17
+
+      - name: Test security rules
+        run: |
+          npm install -g firebase-tools@13
+          npm run test:rules
+
+      # Rules, indexes and functions were previously never deployed by CI at
+      # all — only hosting was. They drifted from the repository and had to be
+      # pushed by hand, which is exactly how a project ends up with no rules
+      # under version control.
+      #
+      # The service account needs Firebase Admin plus Cloud Functions Developer
+      # to deploy functions; the hosting-only account used below is not enough.
+      - name: Authenticate for admin deploys
+        run: |
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/service-account.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/service-account.json" >> "$GITHUB_ENV"
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GOLIST_V2 }}
+
+      - name: Deploy rules, indexes and functions
+        run: |
+          npm install -g firebase-tools@13
+          firebase deploy \
+            --only firestore:rules,firestore:indexes,functions \
+            --project golist-v2 \
+            --non-interactive
+
+      - name: Remove credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/service-account.json"
+
+      - name: Deploy hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GOLIST_V2 }}
           projectId: golist-v2
           channelId: live
