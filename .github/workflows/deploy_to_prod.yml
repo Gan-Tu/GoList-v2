@@ -39,7 +39,7 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
 
       # Installed once and reused by both the rules test and the deploy below.
       # `--loglevel=error` hides the deprecation warnings npm prints for
