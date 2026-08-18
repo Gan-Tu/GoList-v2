@@ -65,12 +65,18 @@ jobs:
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GOLIST_V2 }}
 
+      # `--force` does two things here: it sets the Artifact Registry cleanup
+      # policy (without it the deploy exits non-zero once images start piling
+      # up), and it stops the CLI asking before removing functions that no
+      # longer exist in index.js. The repository is the source of truth for
+      # what is deployed, so a function deleted from source should leave prod.
       - name: Deploy rules, indexes and functions
         run: |
           firebase deploy \
             --only firestore:rules,firestore:indexes,functions \
             --project golist-v2 \
-            --non-interactive
+            --non-interactive \
+            --force
 
       - name: Remove credentials
         if: always()
