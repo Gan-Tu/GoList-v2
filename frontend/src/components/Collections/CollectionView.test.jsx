@@ -301,27 +301,31 @@ describe("layout", () => {
     }
   });
 
-  it("switches to a list and remembers it for the next visit", async () => {
+  it("starts as a list and remembers a switch to the grid", async () => {
     const user = userEvent.setup();
     const { unmount } = renderView(withLinks("alice", null));
 
-    expect(screen.getByRole("button", { name: "Grid view" })).toHaveAttribute(
-      "aria-pressed",
-      "true"
-    );
-    await user.click(screen.getByRole("button", { name: "List view" }));
     expect(screen.getByRole("button", { name: "List view" })).toHaveAttribute(
       "aria-pressed",
       "true"
     );
-    // Rows are still one link each, named by title.
+    // Rows are one link each, named by title, like the cards.
+    expect(
+      screen.getByRole("link", { name: "First (opens in a new tab)" })
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Grid view" }));
+    expect(screen.getByRole("button", { name: "Grid view" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
     expect(
       screen.getByRole("link", { name: "First (opens in a new tab)" })
     ).toBeInTheDocument();
     unmount();
 
     renderView(withLinks("alice", null));
-    expect(screen.getByRole("button", { name: "List view" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Grid view" })).toHaveAttribute(
       "aria-pressed",
       "true"
     );

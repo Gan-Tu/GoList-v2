@@ -16,19 +16,23 @@ import { useCallback, useState } from "react";
 
 const VIEW_KEY = "golist.collectionView";
 const VIEWS = ["grid", "list"];
+// Rows by default: they show several times more links per screen than cards,
+// which is what skimming a shared list is for. The grid is one tap away.
+const DEFAULT_VIEW = "list";
 
 function readView() {
   try {
     const stored = window.localStorage.getItem(VIEW_KEY);
-    return VIEWS.includes(stored) ? stored : "grid";
+    return VIEWS.includes(stored) ? stored : DEFAULT_VIEW;
   } catch {
-    // Private windows and blocked site data throw here; cards are the default.
-    return "grid";
+    // Private windows and blocked site data throw here; use the default.
+    return DEFAULT_VIEW;
   }
 }
 
 /**
- * How a collection's links are laid out: "grid" (cards) or "list" (rows).
+ * How a collection's links are laid out: "list" (rows, the default) or
+ * "grid" (cards).
  *
  * One choice for every collection, remembered in this browser: someone who
  * would rather scan a list wants it on the next list they open too. It is read
