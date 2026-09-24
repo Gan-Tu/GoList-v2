@@ -91,6 +91,20 @@ function* subscribeGroup({ groupId }) {
   });
 }
 
+const LIST_GONE = Symbol("list gone");
+
+/** A list's current title, LIST_GONE if it was deleted, null if unreadable. */
+function* readListTitle(groupId) {
+  try {
+    const snapshot = yield call(fs.getDoc, fs.doc(db, COLLECTION, groupId));
+    return snapshot.exists() ? snapshot.data().title || "" : LIST_GONE;
+  } catch (error) {
+    // Keep the mirror's title rather than failing the whole page.
+    console.warn(`Could not read /${groupId}:`, error?.message);
+    return null;
+  }
+}
+
 function* fetchAccessibleGroups({ uid }) {
   if (!uid) {
     yield put({ type: "session/domainsLoaded", domains: [] });
@@ -106,7 +120,7 @@ function* fetchAccessibleGroups({ uid }) {
         fs.where("ownerId", "in", [uid, "PUBLIC"])
       )
     );
-    const domains = querySnapshot.docs.map((docSnapshot) => {
+    const listed = querySnapshot.docs.map((docSnapshot) => {
       const data = docSnapshot.data();
       return {
         id: docSnapshot.id,
@@ -115,6 +129,18 @@ function* fetchAccessibleGroups({ uid }) {
         destination: `/${docSnapshot.id}`,
         ownerId: data.ownerId
       };
+    });
+
+    // Domains is a mirror kept by triggers, and lists renamed before the
+    // rename trigger existed still carry their old titles there — so My
+    // Lists said "Demo" for a list whose page says "Simple Demo". Each list's
+    // own document is the truth; read those (in parallel) for the titles, and
+    // drop mirror entries whose list is gone.
+    const current = yield all(listed.map((domain) => call(readListTitle, domain.id)));
+    const domains = listed.flatMap((domain, index) => {
+      const title = current[index];
+      if (title === LIST_GONE) return [];
+      return [{ ...domain, title: title ?? domain.title }];
     });
     yield put({ type: "session/domainsLoaded", domains });
   } catch (error) {

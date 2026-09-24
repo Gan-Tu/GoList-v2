@@ -276,28 +276,36 @@ exports.createDomainDocument = onDocumentCreated(
  *
  * Without this the "My Lists" screen showed the title a list had on the day it
  * was created — which is why renaming was disabled in the UI.
+ *
+ * The list is compared with the mirror as it stands, not with the list's
+ * previous version: lists renamed before this trigger existed have a stale
+ * mirror that a "did the title just change?" check would never repair. Now
+ * any edit heals it, and an up-to-date mirror costs a read rather than a
+ * write.
  */
 exports.updateDomainDocument = onDocumentUpdated(
   "DataGroups/{groupId}",
   async (event) => {
-    const before = event.data?.before.data();
     const after = event.data?.after.data();
-    if (!before || !after) return;
-    if (before.title === after.title && before.ownerId === after.ownerId) {
-      return;
-    }
+    if (!after) return;
+
+    const mirror = {
+      title: after.title || "No Title",
+      ownerId: after.ownerId || "NO_OWNER"
+    };
+    const ref = db.collection("Domains").doc(event.params.groupId);
 
     try {
-      await db
-        .collection("Domains")
-        .doc(event.params.groupId)
-        .set(
-          {
-            title: after.title || "No Title",
-            ownerId: after.ownerId || "NO_OWNER"
-          },
-          { merge: true }
-        );
+      const current = await ref.get();
+      const data = current.data();
+      if (
+        current.exists &&
+        data.title === mirror.title &&
+        data.ownerId === mirror.ownerId
+      ) {
+        return;
+      }
+      await ref.set(mirror, { merge: true });
     } catch (err) {
       logger.error(`Failed to sync Domains/${event.params.groupId}`, err);
     }
