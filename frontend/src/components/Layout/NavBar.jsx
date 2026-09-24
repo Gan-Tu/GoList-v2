@@ -12,57 +12,92 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Disclosure } from "@headlessui/react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Bars3Icon, XMarkIcon } from "../Utilities/SvgIcons";
+import { classNames } from "../Utilities/Helpers";
 import UserProfileMenu from "./UserProfileMenu";
 
+/**
+ * True once the page has scrolled at all. An IntersectionObserver on a pixel
+ * at the very top of the document reports the crossing, so nothing runs on
+ * each scroll event.
+ */
+function useScrolledPastTop(sentinelRef) {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || typeof IntersectionObserver === "undefined") {
+      return undefined;
+    }
+    const observer = new IntersectionObserver(([entry]) =>
+      setScrolled(!entry.isIntersecting)
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [sentinelRef]);
+
+  return scrolled;
+}
+
 export default function NavBar() {
+  const sentinelRef = useRef(null);
+  const scrolled = useScrolledPastTop(sentinelRef);
+
   return (
-    <Disclosure as="nav" className="bg-white border-b border-gray-200">
-      {({ open }) => (
-        <>
-          <div className="mx-auto px-4 sm:px-6 lg:px-12">
-            <div className="flex justify-between h-16">
-              {/* A router Link, not an <a>: an anchor here threw away the SPA
-                  and reloaded the whole bundle on every logo click. */}
-              <Link to="/" className="flex-shrink-0 flex items-center gap-3">
-                <img
-                  src="/logo192.png"
-                  className="h-6 sm:h-9 w-auto"
-                  alt=""
-                  width="36"
-                  height="36"
-                />
-                <span className="self-center text-xl font-semibold whitespace-nowrap">
-                  GoList <span className="text-xs font-light">Beta</span>
-                </span>
-              </Link>
+    <>
+      <div
+        ref={sentinelRef}
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        aria-hidden="true"
+      />
+      {/* Translucent so the page shows through as it scrolls under. There
+          are only two destinations, so they are always on screen, at every
+          width, rather than behind a menu button. */}
+      <header className="sticky top-0 z-40 bg-canvas/85 backdrop-blur-xl backdrop-saturate-150">
+        <nav
+          aria-label="Main"
+          className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6"
+        >
+          {/* A router Link, not an <a>: an anchor here threw away the SPA
+              and reloaded the whole bundle on every logo click. */}
+          <Link
+            to="/"
+            className="flex shrink-0 items-center gap-2 rounded-lg transition-opacity duration-150 hover:opacity-80"
+          >
+            {/* A transparent, tightly cropped mark: logo192.png is the
+                home-screen icon, drawn on white with safe-zone padding. */}
+            <img
+              src="/logo-mark.png"
+              className="h-7 w-7"
+              alt=""
+              width="28"
+              height="28"
+            />
+            <span className="text-[17px] font-semibold tracking-tight text-fg">
+              GoList
+            </span>{" "}
+            {/* Dropped on the narrowest phones, where the header controls
+                need the room more. The space before it is invisible in the
+                flex row but keeps the link's name from reading "GoListBeta". */}
+            <span className="hidden rounded-full bg-subtle px-1.5 py-0.5 text-[10px] font-semibold uppercase leading-3 tracking-wider text-fg-muted min-[360px]:inline-block">
+              Beta
+            </span>
+          </Link>
 
-              <div className="hidden sm:ml-6 sm:flex sm:items-center">
-                <UserProfileMenu isVertical={false} />
-              </div>
+          <UserProfileMenu />
+        </nav>
 
-              <div className="flex items-center sm:hidden">
-                <Disclosure.Button className="-mr-2 inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                  <span className="sr-only">
-                    {open ? "Close main menu" : "Open main menu"}
-                  </span>
-                  {open ? (
-                    <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
-                  ) : (
-                    <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
-                  )}
-                </Disclosure.Button>
-              </div>
-            </div>
-          </div>
-
-          <Disclosure.Panel className="sm:hidden">
-            <UserProfileMenu isVertical={true} />
-          </Disclosure.Panel>
-        </>
-      )}
-    </Disclosure>
+        {/* The header and the canvas read as one surface at the top of the
+            page; this hairline fades in only once content passes beneath. */}
+        <div
+          className={classNames(
+            "pointer-events-none absolute inset-x-0 bottom-0 h-px bg-hairline transition-opacity duration-200",
+            scrolled ? "opacity-100" : "opacity-0"
+          )}
+          aria-hidden="true"
+        />
+      </header>
+    </>
   );
 }

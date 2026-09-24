@@ -15,9 +15,12 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
+import Button from "../Utilities/Button";
+import StatusMessage from "../Utilities/StatusMessage";
 import TextInput from "../Utilities/TextInput";
 import {
-  CheckIcon,
+  CheckCircleIcon,
+  EnvelopeIcon,
   ExclamationTriangleIcon,
   Spinner
 } from "../Utilities/SvgIcons";
@@ -25,12 +28,14 @@ import {
   useDocumentTitle,
   useEmailVerificationStatus
 } from "../../hooks/session";
+import { prefetchMyLists } from "../Layout/prefetch";
 
 export default function VerifyEmail() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const status = useEmailVerificationStatus();
   const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useDocumentTitle("Signing in · GoList");
 
@@ -44,18 +49,22 @@ export default function VerifyEmail() {
     return () => window.clearTimeout(timer);
   }, [status, navigate]);
 
+  // The success message stays up for a beat before moving on; that is time
+  // enough to fetch the lazy My Lists route so it opens without a spinner.
+  useEffect(() => {
+    if (status === "success") prefetchMyLists();
+  }, [status]);
+
   if (status === "success") {
     return (
-      <div className="w-full max-w-md py-12 text-center">
-        <CheckIcon
-          className="mx-auto h-10 w-10 text-green-600"
-          aria-hidden="true"
-        />
-        <h1 className="mt-4 text-xl font-bold text-gray-900">
-          You’re signed in
-        </h1>
-        <p className="mt-2 text-gray-600">Taking you to your lists…</p>
-      </div>
+      <StatusMessage
+        icon={CheckCircleIcon}
+        tone="success"
+        title="You’re signed in"
+        role="status"
+      >
+        Taking you to your lists…
+      </StatusMessage>
     );
   }
 
@@ -64,72 +73,81 @@ export default function VerifyEmail() {
   // window.prompt() here.
   if (status === "needsEmail") {
     return (
-      <div className="w-full max-w-md py-12">
-        <h1 className="text-xl font-bold text-gray-900">
-          Confirm your email address
-        </h1>
-        <p className="mt-2 text-gray-600">
-          It looks like you opened this link on a different device. Enter the
-          address you requested the link with to finish signing in.
-        </p>
-        <form
-          className="mt-6"
-          onSubmit={(event) => {
-            event.preventDefault();
-            dispatch({ type: "session/verifyEmail", email });
-          }}
-        >
-          <TextInput
-            inputId="confirm-email"
-            labelText="Email"
-            value={email}
-            setValue={setEmail}
-            isEmail
-            isRequired
-          />
-          <button
-            type="submit"
-            disabled={!email}
-            className="mt-6 rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50"
+      <div className="mx-auto w-full max-w-md py-4 sm:py-8">
+        <div className="rounded-2xl border bg-surface p-6 shadow-card sm:p-8">
+          <div className="mb-5 grid h-11 w-11 place-items-center rounded-xl bg-accent-soft text-accent-fg">
+            <EnvelopeIcon className="h-6 w-6" aria-hidden="true" />
+          </div>
+          <h1 className="text-balance text-xl font-semibold tracking-tight text-fg">
+            Confirm your email address
+          </h1>
+          <p className="mt-2 text-pretty text-[15px] leading-6 text-fg-muted">
+            It looks like you opened this link on a different device. Enter the
+            address you requested the link with to finish signing in.
+          </p>
+          <form
+            className="mt-6"
+            onSubmit={(event) => {
+              event.preventDefault();
+              setSubmitting(true);
+              dispatch({ type: "session/verifyEmail", email });
+            }}
           >
-            Finish signing in
-          </button>
-        </form>
+            <TextInput
+              inputId="confirm-email"
+              labelText="Email"
+              value={email}
+              setValue={setEmail}
+              isEmail
+              isRequired
+              autoComplete="email"
+              autoFocus
+              placeholder="you@example.com"
+            />
+            {/* Pending until the saga settles on success or failed, and
+                either one replaces this form. */}
+            <Button
+              type="submit"
+              variant="primary"
+              size="lg"
+              className="mt-5 w-full"
+              disabled={!email}
+              loading={submitting}
+            >
+              Finish signing in
+            </Button>
+          </form>
+        </div>
       </div>
     );
   }
 
   if (status === "failed") {
     return (
-      <div className="w-full max-w-md py-12 text-center">
-        <ExclamationTriangleIcon
-          className="mx-auto h-10 w-10 text-amber-500"
-          aria-hidden="true"
-        />
-        <h1 className="mt-4 text-xl font-bold text-gray-900">
-          This sign-in link didn’t work
-        </h1>
-        <p className="mt-2 text-gray-600">
-          Sign-in links expire and can only be used once. Request a new one to
-          try again.
-        </p>
-        <Link
-          to="/"
-          className="mt-8 inline-block rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-700"
-        >
-          Back to GoList
-        </Link>
-      </div>
+      <StatusMessage
+        icon={ExclamationTriangleIcon}
+        tone="danger"
+        title="This sign-in link didn’t work"
+        actions={
+          <Button as={Link} to="/" variant="primary" size="lg">
+            Back to GoList
+          </Button>
+        }
+      >
+        Sign-in links expire and can only be used once. Request a new one to
+        try again.
+      </StatusMessage>
     );
   }
 
+  // Held back for 300ms, like the route fallback in App.jsx: a link that is
+  // checked quickly (or found invalid at once) never flashes a spinner.
   return (
-    <div
-      className="flex items-center gap-2 py-16 text-gray-500"
+    <StatusMessage
+      icon={Spinner}
+      title="Signing you in…"
       role="status"
-    >
-      <Spinner className="h-5 w-5" />
-      <span>Signing you in…</span>
-    </div>
+      className="animate-[fade-in_200ms_ease-out_300ms_both]"
+    />
   );
 }

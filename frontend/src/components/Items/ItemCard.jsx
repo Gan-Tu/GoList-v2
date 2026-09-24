@@ -12,94 +12,78 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from "react";
-import DeleteConfirmationModal from "./DeleteConfirmationModal";
-import ItemEditForm from "./ItemEditForm";
-import ItemSnippet from "./ItemSnippet";
-import Modal from "../Utilities/Modal";
-import { PencilSquareIcon, Spinner, TrashIcon } from "../Utilities/SvgIcons";
-import { safeHref } from "../Utilities/Helpers";
-import { useItemIsSaving, useItemLink } from "../../hooks/data";
+import { useId } from "react";
+import { ItemMedia, SiteMonogram } from "./ItemMedia";
+import { ItemSnippetView, hasMetadata, itemStatus } from "./ItemSnippet";
+import { classNames, displayHost, safeHref } from "../Utilities/Helpers";
+import { useItemData, useItemIsSaving } from "../../hooks/data";
 
-export const CARD_CLASS =
-  "rounded-lg border border-gray-200 bg-white p-4 transition hover:shadow-md";
+// h-full lets every card in a grid row stretch to the tallest one.
+const CARD_CLASS =
+  "flex h-full flex-col overflow-hidden rounded-2xl border border-hairline bg-surface shadow-card";
 
-// Exported so the lazily-loaded sortable list can reuse it without pulling
-// drag-and-drop into this module — and therefore into the initial bundle.
-export function ItemControls({ id, groupId }) {
-  const [editMode, setEditMode] = useState(false);
-  const [deleteMode, setDeleteMode] = useState(false);
+const INTERACTIVE_CLASS =
+  "group transition duration-200 ease-smooth hover:shadow-card-hover " +
+  "motion-safe:hover:-translate-y-0.5 active:scale-[0.99]";
 
-  return (
-    <>
-      <Modal
-        title="Edit link"
-        isOpen={editMode}
-        onClose={() => setEditMode(false)}
-      >
-        <ItemEditForm
-          itemId={id}
-          groupId={groupId}
-          // Closing on an explicit save result, rather than the old 1-second
-          // timer that fired whether or not the write had landed.
-          onSaved={() => setEditMode(false)}
-          onCancel={() => setEditMode(false)}
-        />
-      </Modal>
-      <DeleteConfirmationModal
-        itemId={id}
-        groupId={groupId}
-        isOpen={deleteMode}
-        onClose={() => setDeleteMode(false)}
-      />
+/**
+ * A link as a card: preview image (or monogram), site, title, description.
+ *
+ * layout:  "media"   — a 1.91:1 image area on top; used when any link in the
+ *                      collection has an image, so the grid stays even.
+ *          "compact" — a small monogram tile beside the text, for collections
+ *                      with no images at all, where a grid of big letter
+ *                      tiles would be mostly empty color.
+ * preview: renders the card exactly as the grid will, but not as a link —
+ *          for the edit dialog.
+ */
+export function ItemCardView({
+  data,
+  layout = "media",
+  priority = false,
+  isSaving = false,
+  preview = false
+}) {
+  const titleId = useId();
+  const hostId = useId();
+  const snippetId = useId();
+  const newTabId = useId();
 
-      <div className="mt-3 flex gap-4 border-t border-gray-100 pt-3">
-        <button
-          type="button"
-          className="inline-flex items-center gap-1 text-xs font-medium text-gray-600 hover:text-gray-900"
-          onClick={() => setEditMode(true)}
-        >
-          <PencilSquareIcon className="h-4 w-4" aria-hidden="true" />
-          Edit
-        </button>
-        <button
-          type="button"
-          className="inline-flex items-center gap-1 text-xs font-medium text-red-600 hover:text-red-700"
-          onClick={() => setDeleteMode(true)}
-        >
-          <TrashIcon className="h-4 w-4" aria-hidden="true" />
-          Delete
-        </button>
-      </div>
-    </>
+  const href = preview ? "" : safeHref(data?.link);
+  const host = displayHost(data?.link);
+  const status = itemStatus(data, isSaving);
+
+  const text = (
+    <ItemSnippetView
+      data={data}
+      status={status}
+      showArrow={preview || Boolean(href)}
+      titleAs={preview ? "p" : "h2"}
+      ids={{ title: titleId, host: hostId, snippet: snippetId }}
+    />
   );
-}
 
-export default function ItemCard({ id, groupId, showControls }) {
-  const link = useItemLink(id);
-  const isSaving = useItemIsSaving(id);
-  const href = safeHref(link);
-
-  if (showControls) {
-    return (
-      <div className={CARD_CLASS}>
-        <ItemSnippet id={id} />
-        <ItemControls id={id} groupId={groupId} />
+  const body =
+    layout === "media" ? (
+      <>
+        <ItemMedia
+          src={safeHref(data?.imageUrl)}
+          seed={host}
+          priority={priority}
+          pending={isSaving && !hasMetadata(data)}
+        />
+        <div className="flex flex-1 flex-col p-4">{text}</div>
+      </>
+    ) : (
+      <div className="flex flex-1 items-start gap-3.5 p-4">
+        <SiteMonogram
+          host={host}
+          className="h-10 w-10 shrink-0 rounded-xl"
+          letterClassName="text-base"
+        />
+        {text}
       </div>
     );
-  }
-
-  const body = (
-    <>
-      <ItemSnippet id={id} />
-      {isSaving && (
-        <p className="mt-2 flex items-center gap-2 text-xs text-gray-400">
-          <Spinner className="h-3 w-3" />
-          Fetching preview…
-        </p>
-      )}
-    </>
-  );
 
   // A stored link that is not http(s) gets no href at all rather than becoming
   // a clickable javascript: URL in someone else's browser.
@@ -112,9 +96,33 @@ export default function ItemCard({ id, groupId, showControls }) {
       href={href}
       target="_blank"
       rel="noreferrer noopener"
-      className={`block ${CARD_CLASS} focus:outline-none focus:ring-2 focus:ring-gray-900`}
+      // Named by its title alone; the site and description follow as the
+      // description, instead of the whole card being read as one long name.
+      aria-labelledby={`${titleId} ${newTabId}`}
+      aria-describedby={classNames(
+        hostId,
+        String(data?.snippet || "").trim() && !status && snippetId
+      )}
+      className={classNames(CARD_CLASS, INTERACTIVE_CLASS)}
     >
       {body}
+      <span id={newTabId} className="sr-only">
+        (opens in a new tab)
+      </span>
     </a>
+  );
+}
+
+export default function ItemCard({ id, layout, priority }) {
+  const data = useItemData(id);
+  const isSaving = useItemIsSaving(id);
+
+  return (
+    <ItemCardView
+      data={data}
+      layout={layout}
+      priority={priority}
+      isSaving={isSaving}
+    />
   );
 }

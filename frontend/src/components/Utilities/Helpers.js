@@ -65,6 +65,26 @@ export function displayHost(url) {
   }
 }
 
+/**
+ * A stable hue (0–359) for any string, so a placeholder tile for the same site
+ * or list is always the same color — without fetching a favicon or image.
+ */
+export function hueFromString(value) {
+  let hash = 0;
+  for (const char of String(value ?? "")) {
+    hash = (Math.imul(hash, 31) + char.codePointAt(0)) | 0;
+  }
+  return Math.abs(hash) % 360;
+}
+
+/** The first letter or digit of a name, uppercased, for a monogram tile. */
+export function monogramLetter(value) {
+  const match = String(value ?? "")
+    .replace(/^(https?:\/\/)?(www\.)?/i, "")
+    .match(/[\p{L}\p{N}]/u);
+  return match ? match[0].toLocaleUpperCase() : "#";
+}
+
 export function validateShortUrl(shortUrl) {
   if (!shortUrl) return "Collection URL is empty but required.";
   if (shortUrl.length < 6) return "Collection URL must be at least 6 characters.";

@@ -12,27 +12,69 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import { ItemSnippetView } from "./ItemSnippet";
+import { ItemCardView } from "./ItemCard";
+import Button from "../Utilities/Button";
+import { ModalActions } from "../Utilities/Modal";
 import TextInput from "../Utilities/TextInput";
-import { EyeIcon, EyeSlashIcon, Spinner } from "../Utilities/SvgIcons";
-import { useItemData, useItemIsSaving } from "../../hooks/data";
+import { safeHref } from "../Utilities/Helpers";
+import { EyeIcon, EyeSlashIcon } from "../Utilities/SvgIcons";
+import {
+  useGroupHasImages,
+  useItemData,
+  useItemIsSaving
+} from "../../hooks/data";
 
 const FIELDS = ["link", "title", "snippet", "imageUrl"];
+const TITLE_LIMIT = 200;
+const SNIPPET_LIMIT = 500;
+
+// Typed URLs should not autocorrect, capitalize or spell-check, and phones
+// should offer the keyboard with "/" and ".com" on it.
+const URL_FIELD_PROPS = {
+  inputMode: "url",
+  autoCapitalize: "none",
+  autoCorrect: "off",
+  spellCheck: false,
+  autoComplete: "off"
+};
 
 function hasChanges(original, draft) {
   return FIELDS.some((field) => (original?.[field] || "") !== (draft?.[field] || ""));
 }
 
-export default function ItemEditForm({ itemId, groupId, onSaved, onCancel }) {
+/**
+ * The thumbnail URL is typed a character at a time; previewing each partial
+ * URL would fire a request for every keystroke. The preview follows once
+ * typing pauses.
+ */
+function useSettledValue(value, delay = 400) {
+  const [settled, setSettled] = useState(value);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setSettled(value), delay);
+    return () => window.clearTimeout(timer);
+  }, [value, delay]);
+  return settled;
+}
+
+export default function ItemEditForm({
+  itemId,
+  groupId,
+  onSaved,
+  onCancel,
+  firstFieldRef
+}) {
   const dispatch = useDispatch();
   const original = useItemData(itemId);
   const isSaving = useItemIsSaving(itemId);
+  const groupHasImages = useGroupHasImages(groupId);
+  const fieldId = useId();
 
   const [draft, setDraft] = useState(() => ({ ...original }));
   const [showPreview, setShowPreview] = useState(true);
   const submitted = useRef(false);
+  const previewImageUrl = useSettledValue(draft.imageUrl || "");
 
   // Closes the dialog when the write actually completes, rather than on the
   // fixed 1-second timer the previous version used — which closed the modal
@@ -47,8 +89,14 @@ export default function ItemEditForm({ itemId, groupId, onSaved, onCancel }) {
   const update = (field) => (value) =>
     setDraft((current) => ({ ...current, [field]: value }));
 
+  const hasLink = String(draft.link || "").trim().length > 0;
+  const withinLimits =
+    (draft.title || "").length <= TITLE_LIMIT &&
+    (draft.snippet || "").length <= SNIPPET_LIMIT;
+
   const onSubmit = (event) => {
     event.preventDefault();
+    if (!hasLink || !withinLimits) return;
     if (!hasChanges(original, draft)) {
       onSaved?.();
       return;
@@ -57,88 +105,90 @@ export default function ItemEditForm({ itemId, groupId, onSaved, onCancel }) {
     dispatch({ type: "collections/updateItem", itemId, groupId, data: draft });
   };
 
-  return (
-    <form className="mt-5" onSubmit={onSubmit}>
-      <div className="space-y-4">
-        {showPreview && (
-          <div>
-            <p className="mb-2 text-sm font-medium text-gray-900">
-              Card preview
-            </p>
-            <div className="rounded-lg border border-gray-200 p-4">
-              <ItemSnippetView data={draft} />
-            </div>
-          </div>
-        )}
+  // The preview is the grid's own card, in the layout the grid is using, so
+  // what you see here is what visitors will see.
+  const preview = { ...draft, imageUrl: previewImageUrl };
+  const previewLayout =
+    groupHasImages || safeHref(previewImageUrl) ? "media" : "compact";
 
+  return (
+    <form onSubmit={onSubmit}>
+      {showPreview && (
+        <div className="mb-6 rounded-2xl bg-canvas p-4 ring-1 ring-inset ring-hairline sm:px-6">
+          <div className="mx-auto max-w-[18rem]">
+            <ItemCardView data={preview} layout={previewLayout} preview />
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-5">
         <TextInput
-          inputId="link"
+          ref={firstFieldRef}
+          inputId={`${fieldId}-link`}
           labelText="URL"
           value={draft.link}
           setValue={update("link")}
           isDisabled={isSaving}
           isRequired
           placeholder="example.com/article"
+          {...URL_FIELD_PROPS}
         />
         <TextInput
-          inputId="title"
+          inputId={`${fieldId}-title`}
           labelText="Title"
           value={draft.title}
           setValue={update("title")}
           isDisabled={isSaving}
           showCharacterCount
-          characterLimit={200}
-          hint="Leave blank to use the page's own title."
+          characterLimit={TITLE_LIMIT}
+          hint="Leave blank to show the site’s name instead."
         />
         <TextInput
-          inputId="snippet"
+          inputId={`${fieldId}-snippet`}
           labelText="Description"
           value={draft.snippet}
           setValue={update("snippet")}
           isDisabled={isSaving}
           showCharacterCount
-          characterLimit={500}
+          characterLimit={SNIPPET_LIMIT}
           isTextArea
           rows={3}
         />
         <TextInput
-          inputId="imageUrl"
+          inputId={`${fieldId}-image`}
           labelText="Thumbnail URL"
           value={draft.imageUrl}
           setValue={update("imageUrl")}
           isDisabled={isSaving}
+          isOptional
+          placeholder="example.com/image.png"
+          {...URL_FIELD_PROPS}
         />
       </div>
 
-      <div className="mt-6 flex flex-wrap items-center gap-3">
-        <button
-          type="submit"
-          disabled={isSaving}
-          className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-60"
-        >
-          {isSaving && <Spinner className="h-4 w-4" />}
-          {isSaving ? "Saving…" : "Save"}
-        </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          Cancel
-        </button>
-        <button
-          type="button"
+      <ModalActions>
+        <Button
+          variant="ghost"
+          className="sm:mr-auto"
           onClick={() => setShowPreview((value) => !value)}
-          className="ml-auto inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
         >
           {showPreview ? (
-            <EyeSlashIcon className="h-4 w-4" aria-hidden="true" />
+            <EyeSlashIcon className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
           ) : (
-            <EyeIcon className="h-4 w-4" aria-hidden="true" />
+            <EyeIcon className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
           )}
           {showPreview ? "Hide preview" : "Show preview"}
-        </button>
-      </div>
+        </Button>
+        <Button onClick={onCancel}>Cancel</Button>
+        <Button
+          type="submit"
+          variant="primary"
+          loading={isSaving}
+          disabled={!hasLink || !withinLimits}
+        >
+          {isSaving ? "Saving…" : "Save"}
+        </Button>
+      </ModalActions>
     </form>
   );
 }

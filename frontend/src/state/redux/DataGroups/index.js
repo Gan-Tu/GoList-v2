@@ -144,13 +144,18 @@ function* createGroup({ groupId, title, urls }) {
     return;
   }
 
+  // Marked as started before the sign-in round-trip, not after: a first-time
+  // visitor has no session yet, and the button otherwise showed no progress
+  // at all while an anonymous one was created.
+  yield put({ type: "collections/createStarted", groupId });
+
   const uid = yield call(ensureSignedIn);
   if (!uid) {
+    yield put({ type: "collections/createFinished", groupId, ok: false });
     toast.error("Could not start a session. Please try again.");
     return;
   }
 
-  yield put({ type: "collections/createStarted", groupId });
   const toastId = toast.loading("Creating your collection...");
 
   const links = String(urls || "")

@@ -12,8 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Heroicons' broken-link glyph; not among the shared re-exports in SvgIcons.
+import { LinkSlashIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
+import Button from "../Utilities/Button";
+import StatusMessage from "../Utilities/StatusMessage";
 import { useDocumentTitle } from "../../hooks/session";
+import { prefetchMyListsProps } from "./prefetch";
 
 /**
  * A real destination for a missing collection.
@@ -29,16 +34,28 @@ export default function NotFound({
   useDocumentTitle("Not found · GoList");
 
   return (
-    <div className="w-full max-w-md text-center py-12">
-      <p className="text-sm font-semibold text-gray-400">404</p>
-      <h1 className="mt-2 text-2xl font-bold text-gray-900">{title}</h1>
-      <p className="mt-3 text-gray-600">{message}</p>
-      <Link
-        to="/"
-        className="mt-8 inline-flex items-center rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
-      >
-        Create a collection
-      </Link>
-    </div>
+    <StatusMessage
+      icon={LinkSlashIcon}
+      eyebrow="404"
+      title={title}
+      actions={
+        <>
+          <Button as={Link} to="/" variant="primary" size="lg">
+            Create a collection
+          </Button>
+          <Button
+            as={Link}
+            to="/_/myList"
+            variant="ghost"
+            size="lg"
+            {...prefetchMyListsProps}
+          >
+            My Lists
+          </Button>
+        </>
+      }
+    >
+      {message}
+    </StatusMessage>
   );
 }

@@ -1,3 +1,201 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * Design tokens.
+ *
+ * Colors are space-separated RGB channels so Tailwind's opacity modifiers work
+ * (`bg-accent/15`), and the whole palette flips for dark mode here rather than
+ * through `dark:` variants scattered across components. The values are checked
+ * by a contrast audit: body and muted text clear WCAG AA (4.5:1) on every
+ * surface they can sit on, in both themes; fg-subtle is for icons and
+ * placeholders only and clears the 3:1 non-text minimum.
+ */
+@layer base {
+  :root {
+    color-scheme: light;
+
+    /* Surfaces, back to front. */
+    --canvas: 245 245 247;
+    --surface: 255 255 255;
+    --elevated: 255 255 255;
+    --subtle: 240 240 243;
+    --control: 255 255 255;
+    --control-hover: 246 246 248;
+    --hairline: 229 229 234;
+    --hairline-strong: 210 210 215;
+
+    /* Text. */
+    --fg: 29 29 31;
+    --fg-muted: 106 106 112;
+    --fg-subtle: 138 138 143;
+
+    /* One accent. The blue picks up the underside of the logo. */
+    --accent: 0 113 227;
+    --accent-hover: 0 98 196;
+    --accent-fg: 0 102 204;
+    --accent-soft: 232 242 255;
+
+    --danger: 215 0 21;
+    --danger-hover: 186 0 18;
+    --danger-fg: 206 0 20;
+    --danger-soft: 255 237 238;
+
+    --success-fg: 22 120 50;
+    --success-soft: 231 246 236;
+
+    --focus: 0 113 227;
+
+    --toast-bg: 29 29 31;
+    --toast-fg: 255 255 255;
+
+    --shadow-button: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.04), 0 1px 3px 0 rgb(0 0 0 / 0.03);
+    --shadow-card-hover: 0 2px 4px -1px rgb(0 0 0 / 0.04),
+      0 16px 32px -12px rgb(0 0 0 / 0.18);
+    --shadow-popover: 0 4px 12px -4px rgb(0 0 0 / 0.08),
+      0 24px 56px -16px rgb(0 0 0 / 0.28);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+
+      --canvas: 11 11 13;
+      --surface: 28 28 30;
+      --elevated: 38 38 41;
+      --subtle: 44 44 47;
+      --control: 44 44 47;
+      --control-hover: 54 54 58;
+      --hairline: 52 52 56;
+      --hairline-strong: 72 72 76;
+
+      --fg: 245 245 247;
+      --fg-muted: 161 161 166;
+      --fg-subtle: 128 128 134;
+
+      --accent: 0 113 227;
+      --accent-hover: 0 98 196;
+      --accent-fg: 64 162 255;
+      --accent-soft: 21 44 72;
+
+      --danger: 215 0 21;
+      --danger-hover: 186 0 18;
+      --danger-fg: 255 110 102;
+      --danger-soft: 64 28 28;
+
+      --success-fg: 64 206 102;
+      --success-soft: 24 52 33;
+
+      --focus: 64 162 255;
+
+      --toast-bg: 58 58 62;
+      --toast-fg: 245 245 247;
+
+      --shadow-button: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+      --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+      --shadow-card-hover: 0 16px 32px -12px rgb(0 0 0 / 0.7);
+      --shadow-popover: inset 0 1px 0 0 rgb(255 255 255 / 0.06),
+        0 24px 56px -12px rgb(0 0 0 / 0.8);
+    }
+  }
+
+  html {
+    background-color: rgb(var(--canvas));
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-canvas font-sans text-fg antialiased;
+    text-rendering: optimizeLegibility;
+    /* index.html opts into viewport-fit=cover so bottom sheets can reach the
+       home indicator; this keeps content clear of the notch in landscape. */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  ::selection {
+    background-color: rgb(var(--accent) / 0.22);
+  }
+
+  /*
+   * One keyboard focus style for everything clickable. :focus-visible means a
+   * mouse click never draws it; :where() keeps specificity at zero so a
+   * component can still restyle it. Text fields use their own ring instead.
+   */
+  :where(
+      a,
+      button,
+      summary,
+      [role="button"],
+      [role="menuitem"],
+      [role="tab"],
+      [tabindex]:not([tabindex="-1"])
+    ):focus-visible {
+    outline: 2px solid rgb(var(--focus));
+    outline-offset: 2px;
+  }
+
+  /*
+   * The Intercom launcher sits above every z-index, so on a phone it would
+   * cover the action buttons at the bottom of a sheet. Modal sets this
+   * attribute while a dialog is open. Hiding rather than reconfiguring the
+   * messenger leaves the workspace's own launcher settings untouched.
+   */
+  html[data-dialog-open] .intercom-lightweight-app-launcher,
+  html[data-dialog-open] .intercom-launcher-frame,
+  html[data-dialog-open] iframe[name="intercom-launcher-frame"] {
+    visibility: hidden !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+
+    /* A spinner is status, not decoration — it keeps turning. */
+    .animate-spin {
+      animation-duration: 1s !important;
+      animation-iteration-count: infinite !important;
+    }
+  }
+}
+
+@layer components {
+  /* A loading placeholder block; size it with utilities. */
+  .skeleton {
+    @apply animate-pulse rounded-md bg-subtle;
+  }
+
+  /*
+   * Tinted tile for things with no image — a list, or a link without a
+   * preview. The hue comes from the item (see hueFromString) so each one is
+   * recognisable, and it costs no network request. Lightness is pinned so the
+   * letter clears 4.5:1 on its tile at every hue, in both themes.
+   */
+  .monogram {
+    background-image: linear-gradient(
+      135deg,
+      hsl(var(--h, 210) 85% 94%),
+      hsl(calc(var(--h, 210) + 35) 80% 89%)
+    );
+    color: hsl(var(--h, 210) 60% 24%);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .monogram {
+      background-image: linear-gradient(
+        135deg,
+        hsl(var(--h, 210) 32% 22%),
+        hsl(calc(var(--h, 210) + 35) 36% 16%)
+      );
+      color: hsl(var(--h, 210) 85% 80%);
+    }
+  }
+}

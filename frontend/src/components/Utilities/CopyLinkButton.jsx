@@ -14,10 +14,14 @@
 
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import {
-  ClipboardDocumentCheckIcon,
-  ClipboardDocumentIcon
-} from "./SvgIcons";
+import Button from "./Button";
+import { classNames } from "./Helpers";
+import { CheckIcon, LinkIcon } from "./SvgIcons";
+
+// Both icons share one cell and cross-fade, so the swap reads as the link
+// turning into a check rather than one glyph replacing another.
+const ICON_CLASS =
+  "col-start-1 row-start-1 h-4 w-4 transition duration-200 ease-smooth";
 
 /**
  * Copies the collection's short URL.
@@ -25,7 +29,12 @@ import {
  * The product is "share one short URL", but there was no way to actually get
  * that URL out of the app other than selecting the address bar by hand.
  */
-export default function CopyLinkButton({ url, className = "" }) {
+export default function CopyLinkButton({
+  url,
+  className = "",
+  size = "md",
+  variant = "secondary"
+}) {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -58,24 +67,48 @@ export default function CopyLinkButton({ url, className = "" }) {
   };
 
   return (
-    <button
-      type="button"
-      onClick={onCopy}
-      className={`inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 ${className}`}
-    >
-      {copied ? (
-        <ClipboardDocumentCheckIcon
-          className="w-4 h-4 text-green-600"
-          aria-hidden="true"
-        />
-      ) : (
-        <ClipboardDocumentIcon className="w-4 h-4" aria-hidden="true" />
-      )}
-      <span>{copied ? "Copied" : "Copy link"}</span>
-      {/* Announced to screen readers without moving focus. */}
+    <>
+      <Button variant={variant} size={size} onClick={onCopy} className={className}>
+        <span className="grid shrink-0" aria-hidden="true">
+          <LinkIcon
+            className={classNames(
+              ICON_CLASS,
+              copied ? "scale-50 opacity-0" : "scale-100 opacity-100"
+            )}
+            strokeWidth={2}
+          />
+          <CheckIcon
+            className={classNames(
+              ICON_CLASS,
+              "text-success-fg",
+              copied ? "scale-100 opacity-100" : "scale-50 opacity-0"
+            )}
+            strokeWidth={2.25}
+          />
+        </span>
+        {/* Both labels occupy the same cell, so the button keeps the width of
+            the longer one and nothing beside it shifts when the label swaps.
+            The hidden one is also hidden from the accessible name. */}
+        <span className="grid">
+          <span
+            className={classNames("col-start-1 row-start-1", copied && "invisible")}
+            aria-hidden={copied || undefined}
+          >
+            Copy link
+          </span>
+          <span
+            className={classNames("col-start-1 row-start-1", !copied && "invisible")}
+            aria-hidden={!copied || undefined}
+          >
+            Copied
+          </span>
+        </span>
+      </Button>
+      {/* Announced to screen readers without moving focus. Kept outside the
+          button so the announcement is not folded into its name. */}
       <span className="sr-only" role="status">
         {copied ? `${url} copied to clipboard` : ""}
       </span>
-    </button>
+    </>
   );
 }

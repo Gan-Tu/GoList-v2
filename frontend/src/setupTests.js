@@ -37,3 +37,13 @@ if (!window.matchMedia) {
 if (!window.scrollTo) {
   window.scrollTo = vi.fn();
 }
+
+// Headless UI's Dialog measures its panel with ResizeObserver, which jsdom
+// does not implement either. Nothing under test depends on the measurement.
+if (!window.ResizeObserver) {
+  window.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}

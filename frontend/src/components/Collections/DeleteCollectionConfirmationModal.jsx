@@ -12,10 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import Modal from "../Utilities/Modal";
+import Button from "../Utilities/Button";
+import Modal, { ModalActions } from "../Utilities/Modal";
+import { fieldClasses, labelClass } from "../Utilities/TextInput";
+import { classNames } from "../Utilities/Helpers";
 import { useGroup, useItemIds } from "../../hooks/data";
 
 export default function DeleteCollectionConfirmationModal({
@@ -28,6 +31,7 @@ export default function DeleteCollectionConfirmationModal({
   const group = useGroup(groupId);
   const itemIds = useItemIds(groupId);
   const [confirmation, setConfirmation] = useState("");
+  const inputRef = useRef(null);
 
   useEffect(() => {
     if (isOpen) setConfirmation("");
@@ -38,7 +42,8 @@ export default function DeleteCollectionConfirmationModal({
   // rather than accepting a single mis-aimed click.
   const canDelete = confirmation.trim() === groupId;
 
-  const onDelete = () => {
+  const onDelete = (event) => {
+    event.preventDefault();
     if (!canDelete) return;
     dispatch({ type: "collections/delete", groupId });
     onClose();
@@ -46,49 +51,51 @@ export default function DeleteCollectionConfirmationModal({
   };
 
   return (
-    <Modal title="Delete this collection?" isOpen={isOpen} onClose={onClose}>
-      <div className="mt-4 space-y-4">
-        <p className="text-sm text-gray-600">
-          <span className="font-medium text-gray-900">{group?.title}</span> and
-          its {itemIds.length} link{itemIds.length === 1 ? "" : "s"} will be
-          permanently deleted, and{" "}
-          <span className="font-medium text-gray-900">goli.st/{groupId}</span>{" "}
-          will stop working.
+    <Modal
+      title="Delete this collection?"
+      size="sm"
+      isOpen={isOpen}
+      onClose={onClose}
+      initialFocus={inputRef}
+    >
+      <form onSubmit={onDelete}>
+        <p className="text-sm leading-6 text-fg-muted [overflow-wrap:anywhere]">
+          <span className="font-medium text-fg">{group?.title}</span> and its{" "}
+          <span className="tabular-nums">{itemIds.length}</span> link
+          {itemIds.length === 1 ? "" : "s"} will be permanently deleted, and{" "}
+          <span className="font-medium text-fg">goli.st/{groupId}</span> will
+          stop working.
         </p>
-        <div>
-          <label
-            htmlFor="delete-confirmation"
-            className="mb-2 block text-sm font-medium text-gray-900"
-          >
-            Type <span className="font-mono">{groupId}</span> to confirm
-          </label>
-          <input
-            id="delete-confirmation"
-            type="text"
-            value={confirmation}
-            onChange={(event) => setConfirmation(event.target.value)}
-            className="block w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-red-500 focus:ring-1 focus:ring-red-500"
-            autoComplete="off"
-          />
-        </div>
-      </div>
-      <div className="mt-6 flex gap-3">
-        <button
-          type="button"
-          onClick={onDelete}
-          disabled={!canDelete}
-          className="rounded-lg bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-40"
-        >
-          Delete collection
-        </button>
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          Cancel
-        </button>
-      </div>
+
+        <label htmlFor="delete-confirmation" className={classNames(labelClass, "mt-5")}>
+          Type <span className="font-mono">{groupId}</span> to confirm
+        </label>
+        <input
+          ref={inputRef}
+          id="delete-confirmation"
+          type="text"
+          value={confirmation}
+          onChange={(event) => setConfirmation(event.target.value)}
+          placeholder={groupId}
+          autoComplete="off"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          className={classNames(
+            // The same field, but its focus ring is the color of what the
+            // button below will do.
+            fieldClasses({ tone: "danger" }),
+            "mt-1.5 font-mono"
+          )}
+        />
+
+        <ModalActions>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button type="submit" variant="danger" disabled={!canDelete}>
+            Delete collection
+          </Button>
+        </ModalActions>
+      </form>
     </Modal>
   );
 }

@@ -16,6 +16,8 @@ import { describe, expect, it } from "vitest";
 import {
   displayHost,
   fixUrl,
+  hueFromString,
+  monogramLetter,
   safeHref,
   validateShortUrl
 } from "./Helpers";
@@ -84,5 +86,44 @@ describe("validateShortUrl", () => {
     ["x".repeat(65), "too long"]
   ])("rejects %s (%s)", (value) => {
     expect(validateShortUrl(value)).not.toBe("");
+  });
+});
+
+describe("hueFromString", () => {
+  it("is stable for the same input and stays within 0–359", () => {
+    expect(hueFromString("react.dev")).toBe(hueFromString("react.dev"));
+    for (const value of ["", "a", "react.dev", "goli.st/demo", "😀", null]) {
+      const hue = hueFromString(value);
+      expect(Number.isInteger(hue)).toBe(true);
+      expect(hue).toBeGreaterThanOrEqual(0);
+      expect(hue).toBeLessThan(360);
+    }
+  });
+
+  it("spreads different inputs across hues", () => {
+    const hues = new Set(
+      ["react.dev", "vite.dev", "github.com", "stripe.com", "apple.com"].map(
+        hueFromString
+      )
+    );
+    expect(hues.size).toBeGreaterThan(1);
+  });
+});
+
+describe("monogramLetter", () => {
+  it("uses the first letter or digit, uppercased", () => {
+    expect(monogramLetter("weekend reading")).toBe("W");
+    expect(monogramLetter("  2024 trips")).toBe("2");
+    expect(monogramLetter("équipe")).toBe("É");
+  });
+
+  it("skips a url's scheme and www", () => {
+    expect(monogramLetter("https://www.github.com")).toBe("G");
+  });
+
+  it("falls back when there is nothing to use", () => {
+    expect(monogramLetter("")).toBe("#");
+    expect(monogramLetter("—")).toBe("#");
+    expect(monogramLetter(undefined)).toBe("#");
   });
 });

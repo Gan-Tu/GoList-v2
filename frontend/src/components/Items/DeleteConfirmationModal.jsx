@@ -12,9 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useRef } from "react";
 import { useDispatch } from "react-redux";
-import Modal from "../Utilities/Modal";
-import { ItemSnippetView } from "./ItemSnippet";
+import { ItemRowSummary, ROW_CLASS } from "./ItemRow";
+import Button from "../Utilities/Button";
+import Modal, { ModalActions } from "../Utilities/Modal";
+import { classNames, safeHref } from "../Utilities/Helpers";
 import { useItemData } from "../../hooks/data";
 
 export default function DeleteConfirmationModal({
@@ -25,6 +28,9 @@ export default function DeleteConfirmationModal({
 }) {
   const dispatch = useDispatch();
   const data = useItemData(itemId);
+  // Focus starts on Cancel: Enter on a freshly opened "delete?" dialog
+  // should never be the thing that deletes.
+  const cancelRef = useRef(null);
 
   const onDelete = () => {
     dispatch({ type: "collections/deleteItem", groupId, itemId });
@@ -32,31 +38,30 @@ export default function DeleteConfirmationModal({
   };
 
   return (
-    <Modal title="Delete this link?" isOpen={isOpen} onClose={onClose}>
-      <div className="mt-4 space-y-4">
-        {/* Showing the card being deleted removes the guesswork about which
-            link the confirmation refers to. */}
-        <div className="rounded-lg border border-gray-200 p-4">
-          <ItemSnippetView data={data} />
-        </div>
-        <p className="text-sm text-gray-600">This can’t be undone.</p>
+    <Modal
+      title="Delete this link?"
+      size="sm"
+      isOpen={isOpen}
+      onClose={onClose}
+      initialFocus={cancelRef}
+    >
+      {/* Showing the card being deleted removes the guesswork about which
+          link the confirmation refers to. */}
+      <div className={classNames(ROW_CLASS, "shadow-card")}>
+        <ItemRowSummary
+          data={data}
+          wideThumbnail={Boolean(safeHref(data?.imageUrl))}
+        />
       </div>
-      <div className="mt-6 flex gap-3">
-        <button
-          type="button"
-          onClick={onDelete}
-          className="rounded-lg bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700"
-        >
-          Delete link
-        </button>
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
+      <p className="mt-3 text-sm leading-5 text-fg-muted">This can’t be undone.</p>
+      <ModalActions>
+        <Button ref={cancelRef} onClick={onClose}>
           Cancel
-        </button>
-      </div>
+        </Button>
+        <Button variant="danger" onClick={onDelete}>
+          Delete link
+        </Button>
+      </ModalActions>
     </Modal>
   );
 }

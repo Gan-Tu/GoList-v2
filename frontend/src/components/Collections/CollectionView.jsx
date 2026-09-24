@@ -12,44 +12,87 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Suspense, lazy, useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import ItemCard from "../Items/ItemCard";
+import { EditableItemRow } from "../Items/ItemControls";
+import { ROW_LIST_CLASS } from "../Items/ItemRow";
 import CreateItemModal from "../Items/CreateItemModal";
 import DeleteCollectionConfirmationModal from "./DeleteCollectionConfirmationModal";
 import NotFound from "../Layout/NotFound";
+import Button from "../Utilities/Button";
 import CopyLinkButton from "../Utilities/CopyLinkButton";
+import StatusMessage from "../Utilities/StatusMessage";
+import { fieldClass } from "../Utilities/TextInput";
+import { classNames } from "../Utilities/Helpers";
 import {
-  AdjustmentsHorizontalIcon,
+  ArrowPathIcon,
+  ArrowRightIcon,
+  ArrowsUpDownIcon,
+  CheckCircleIcon,
   CheckIcon,
   ExclamationTriangleIcon,
-  PlusCircleIcon,
+  GlobeAltIcon,
+  LinkIcon,
+  PencilIcon,
+  PencilSquareIcon,
+  PlusIcon,
   TrashIcon
 } from "../Utilities/SvgIcons";
-
-// Drag-and-drop is a ~12 KB gzip chunk that only an owner in edit mode needs.
-const SortableItemList = lazy(() => import("./SortableItemList"));
 import {
+  useCanDelete,
   useCanEdit,
   useGroup,
+  useGroupHasImages,
   useGroupStatus,
   useItemIds
 } from "../../hooks/data";
 import { useDocumentTitle } from "../../hooks/session";
 
+// Drag-and-drop is a ~16 KB gzip chunk that only an owner in edit mode needs.
+const SortableItemList = lazy(() => import("./SortableItemList"));
+
+const PAGE_CLASS = "mx-auto w-full max-w-6xl";
+const GRID_CLASS = "grid gap-4 sm:grid-cols-2 lg:grid-cols-3";
+
+// .skeleton already pulses; animate-pulse is spelled out as well because the
+// tests run without CSS and find the skeleton by that class name.
+const BONE = "skeleton animate-pulse";
+
+/** The page's own shape — header, then image cards — so nothing jumps when it loads. */
 function CollectionSkeleton() {
   return (
-    <div className="w-full max-w-4xl animate-pulse" aria-hidden="true">
-      <div className="h-8 w-52 rounded bg-gray-200" />
-      <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        {[0, 1, 2, 3].map((key) => (
-          <div key={key} className="h-24 rounded-lg border border-gray-200 bg-white p-4">
-            <div className="h-4 w-2/3 rounded bg-gray-200" />
-            <div className="mt-3 h-3 w-full rounded bg-gray-100" />
-            <div className="mt-2 h-3 w-4/5 rounded bg-gray-100" />
+    <div className={PAGE_CLASS} aria-busy="true">
+      <p className="sr-only" role="status">
+        Loading collection…
+      </p>
+      <div aria-hidden="true">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
+          <div className="min-w-0 flex-1">
+            <div className={classNames(BONE, "h-9 w-4/5 max-w-md rounded-lg sm:h-10")} />
+            <div className={classNames(BONE, "mt-2 h-5 w-48")} />
           </div>
-        ))}
+          <div className={classNames(BONE, "h-9 w-[7.5rem] rounded-full sm:mt-0.5")} />
+        </div>
+        <ul className={classNames(GRID_CLASS, "mt-8")}>
+          {[0, 1, 2, 3, 4, 5].map((key) => (
+            <li
+              key={key}
+              className="overflow-hidden rounded-2xl border border-hairline bg-surface shadow-card"
+            >
+              <div className={classNames(BONE, "aspect-[1.91/1] rounded-none")} />
+              <div className="p-4">
+                <div className="flex h-5 items-center">
+                  <div className={classNames(BONE, "h-3 w-24")} />
+                </div>
+                <div className={classNames(BONE, "mt-2 h-4 w-4/5")} />
+                <div className={classNames(BONE, "mt-3 h-3.5 w-full")} />
+                <div className={classNames(BONE, "mt-2 h-3.5 w-2/3")} />
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
@@ -57,90 +100,203 @@ function CollectionSkeleton() {
 
 function EmptyState({ canEdit, onAdd }) {
   return (
-    <div className="rounded-lg border border-dashed border-gray-300 bg-white py-12 text-center">
-      <p className="text-gray-900 font-medium">No links here yet</p>
-      <p className="mt-1 text-sm text-gray-500">
+    <div className="rounded-2xl border border-dashed border-hairline-strong bg-surface/60 px-6">
+      <StatusMessage
+        icon={LinkIcon}
+        tone="accent"
+        titleAs="h2"
+        title="No links here yet"
+        actions={
+          canEdit && (
+            <Button variant="primary" size="lg" onClick={onAdd}>
+              <PlusIcon className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
+              Add a link
+            </Button>
+          )
+        }
+      >
         {canEdit
-          ? "Add the first link to this collection."
+          ? "Paste a link and GoList fills in its title, description and thumbnail."
           : "The owner hasn’t added any links yet."}
-      </p>
-      {canEdit && (
-        <button
-          type="button"
-          onClick={onAdd}
-          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
-        >
-          <PlusCircleIcon className="w-4 h-4" aria-hidden="true" />
-          Add a link
-        </button>
-      )}
+      </StatusMessage>
     </div>
   );
 }
 
 function TitleEditor({ title, onSave, onCancel }) {
   const [draft, setDraft] = useState(title);
+  const inputRef = useRef(null);
+
+  // Starts with the whole title selected: typing replaces it, and an arrow
+  // key keeps it for a small fix.
+  useEffect(() => {
+    inputRef.current?.focus();
+    inputRef.current?.select();
+  }, []);
+
+  const trimmed = draft.trim();
+
+  const onSubmit = (event) => {
+    event.preventDefault();
+    if (!trimmed) return;
+    // An unchanged title is not worth a write (or a "Title updated" toast).
+    if (trimmed === title.trim()) {
+      onCancel();
+      return;
+    }
+    onSave(draft);
+  };
 
   return (
     <form
-      className="flex items-center gap-2"
-      onSubmit={(event) => {
-        event.preventDefault();
-        onSave(draft);
-      }}
+      className="flex flex-col gap-3 sm:flex-row sm:items-center"
+      onSubmit={onSubmit}
     >
       <label htmlFor="collection-title" className="sr-only">
         Collection title
       </label>
       <input
+        ref={inputRef}
         id="collection-title"
         type="text"
-        autoFocus
         value={draft}
+        maxLength={200}
+        autoComplete="off"
         onChange={(event) => setDraft(event.target.value)}
         onKeyDown={(event) => {
-          if (event.key === "Escape") onCancel();
+          if (event.key === "Escape") {
+            event.preventDefault();
+            onCancel();
+          }
         }}
-        className="rounded-md border border-gray-300 px-2 py-1 text-xl font-bold text-gray-900 focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
+        // fieldClass sets its own 16px/14px text, and which of two font-size
+        // utilities wins depends on stylesheet order, not class order — so
+        // the heading size is marked important. (It also stays above 16px,
+        // so iOS does not zoom into the field.)
+        className={classNames(
+          fieldClass,
+          "min-w-0 flex-1 !text-2xl font-semibold tracking-tight sm:!text-3xl"
+        )}
       />
-      <button
-        type="submit"
-        className="inline-flex items-center gap-1 rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700"
-      >
-        <CheckIcon className="w-4 h-4" aria-hidden="true" />
-        Save
-      </button>
-      <button
-        type="button"
-        onClick={onCancel}
-        className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100"
-      >
-        Cancel
-      </button>
+      <div className="flex shrink-0 items-center gap-2">
+        <Button type="submit" variant="primary" disabled={!trimmed}>
+          Save
+        </Button>
+        <Button variant="ghost" onClick={onCancel}>
+          Cancel
+        </Button>
+      </div>
     </form>
   );
 }
 
-export default function CollectionView() {
+/** Two labels in one grid cell: the button keeps the wider one's width. */
+function SwapLabel({ showSecond, first, second }) {
+  return (
+    <span className="grid">
+      <span
+        className={classNames("col-start-1 row-start-1", showSecond && "invisible")}
+        aria-hidden={showSecond || undefined}
+      >
+        {first}
+      </span>
+      <span
+        className={classNames("col-start-1 row-start-1", !showSecond && "invisible")}
+        aria-hidden={!showSecond || undefined}
+      >
+        {second}
+      </span>
+    </span>
+  );
+}
+
+function EditToolbar({
+  itemCount,
+  isRenaming,
+  canDelete,
+  renameButtonRef,
+  onRename,
+  onDelete
+}) {
+  const canReorder = itemCount > 1;
+  const HintIcon = canReorder ? ArrowsUpDownIcon : CheckCircleIcon;
+
+  return (
+    <div className="mt-6 flex animate-fade-in flex-col gap-2 rounded-2xl border border-hairline bg-surface p-2 pl-3.5 shadow-card sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:pl-4">
+      <p className="flex min-w-0 items-start gap-2 py-1.5 text-[13px] leading-5 text-fg-muted">
+        <HintIcon
+          className="mt-0.5 h-4 w-4 shrink-0 text-fg-subtle"
+          strokeWidth={2}
+          aria-hidden="true"
+        />
+        {canReorder ? (
+          <span>
+            Drag to reorder — changes save automatically.
+            <span className="sr-only">
+              {" "}
+              With a keyboard, focus a link’s handle and press Space to pick it
+              up, move it with the arrow keys, then press Space again to drop
+              it.
+            </span>
+          </span>
+        ) : (
+          <span>Changes save automatically.</span>
+        )}
+      </p>
+      {/* Stacked on a phone, the ghost buttons' icons line up under the
+          hint's icon. */}
+      <div className="-ml-4 flex flex-wrap items-center gap-1 sm:ml-0">
+        <Button
+          ref={renameButtonRef}
+          variant="ghost"
+          onClick={onRename}
+          disabled={isRenaming}
+        >
+          <PencilIcon className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+          Rename
+        </Button>
+        {canDelete && (
+          <Button variant="danger-ghost" onClick={onDelete}>
+            <TrashIcon className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+            Delete collection
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CollectionPage({ id }) {
   const dispatch = useDispatch();
-  const { id } = useParams();
 
   const group = useGroup(id);
   const status = useGroupStatus(id);
   const itemIds = useItemIds(id);
   const canEdit = useCanEdit(id);
+  const canDelete = useCanDelete(id);
+  const hasImages = useGroupHasImages(id);
 
-  const [mode, setMode] = useState(null);
+  // Editing and the open dialog are separate state. They used to share one
+  // `mode`, so opening "Add link" or "Delete" from edit mode silently left
+  // it, and cancelling the dialog dropped the user out of editing.
+  const [isEditing, setIsEditing] = useState(false);
+  const [dialog, setDialog] = useState(null); // "add" | "delete" | null
   const [isRenaming, setIsRenaming] = useState(false);
+
+  const renameButtonRef = useRef(null);
+  const refocusRename = useRef(false);
 
   useDocumentTitle(group?.title ? `${group.title} · GoList` : null);
 
+  // The title field unmounts on Save or Cancel; focus goes back to Rename
+  // rather than falling to <body>, where a keyboard user would lose their
+  // place.
   useEffect(() => {
-    // A live listener, torn down on navigate — so a collection edited in
-    // another tab or by a collaborator updates in place.
-    dispatch({ type: "collections/subscribe", groupId: id });
-    return () => dispatch({ type: "collections/unsubscribe", groupId: id });
-  }, [dispatch, id]);
+    if (!isRenaming && refocusRename.current) {
+      refocusRename.current = false;
+      renameButtonRef.current?.focus();
+    }
+  }, [isRenaming]);
 
   if (status === "notFound") {
     return (
@@ -153,160 +309,207 @@ export default function CollectionView() {
 
   if (status === "error") {
     return (
-      <div className="w-full max-w-md text-center py-12">
-        <ExclamationTriangleIcon
-          className="mx-auto w-10 h-10 text-amber-500"
-          aria-hidden="true"
-        />
-        <h1 className="mt-4 text-xl font-bold text-gray-900">
-          Couldn’t load this collection
-        </h1>
-        <p className="mt-2 text-gray-600">
-          Check your connection and try again.
-        </p>
-        <button
-          type="button"
-          onClick={() =>
-            dispatch({ type: "collections/subscribe", groupId: id })
-          }
-          className="mt-6 rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-700"
-        >
-          Retry
-        </button>
-      </div>
+      <StatusMessage
+        icon={ExclamationTriangleIcon}
+        title="Couldn’t load this collection"
+        actions={
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={() => dispatch({ type: "collections/subscribe", groupId: id })}
+          >
+            <ArrowPathIcon className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
+            Retry
+          </Button>
+        }
+      >
+        Check your connection and try again.
+      </StatusMessage>
     );
   }
 
   // Distinguishing "still loading" from "loaded but empty" is what stops an
-  // empty collection from showing a spinner forever, as it used to.
-  if (!group || status === "loading" || status === undefined) {
+  // empty collection from showing a spinner forever, as it used to. A
+  // collection already in the store (seen earlier this session) renders
+  // straight away while the listener reconnects, instead of flashing the
+  // skeleton on every back-navigation.
+  if (!group) {
     return <CollectionSkeleton />;
   }
 
-  const isEditing = mode === "edit";
+  // Losing edit rights mid-edit (signing out, say) ends editing too.
+  const editing = canEdit && isEditing;
+  const count = itemIds.length;
   const shareUrl = `${window.location.origin}/${id}`;
 
-  return (
-    <div className="w-full max-w-4xl">
-      <CreateItemModal
-        groupId={id}
-        isOpen={mode === "create"}
-        onClose={() => setMode(null)}
-      />
-      <DeleteCollectionConfirmationModal
-        groupId={id}
-        isOpen={mode === "delete"}
-        onClose={() => setMode(null)}
-      />
+  const closeDialog = () => setDialog(null);
+  const stopRenaming = () => {
+    refocusRename.current = true;
+    setIsRenaming(false);
+  };
 
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        {isRenaming ? (
-          <TitleEditor
-            title={group.title}
-            onSave={(title) => {
-              dispatch({ type: "collections/rename", groupId: id, title });
-              setIsRenaming(false);
-            }}
-            onCancel={() => setIsRenaming(false)}
-          />
-        ) : (
-          <div className="min-w-0">
-            <h1 className="truncate text-2xl font-bold text-gray-900">
-              {group.title}
+  return (
+    <div className={PAGE_CLASS}>
+      <header className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
+        <div className="min-w-0 flex-1">
+          {isRenaming ? (
+            <TitleEditor
+              title={group.title}
+              onSave={(title) => {
+                dispatch({ type: "collections/rename", groupId: id, title });
+                stopRenaming();
+              }}
+              onCancel={stopRenaming}
+            />
+          ) : (
+            <h1 className="text-balance text-3xl font-semibold tracking-tight text-fg [overflow-wrap:anywhere] sm:text-4xl">
+              {group.title || "Untitled collection"}
             </h1>
-            <p className="mt-1 text-sm text-gray-500">
-              {itemIds.length} link{itemIds.length === 1 ? "" : "s"}
-            </p>
+          )}
+
+          <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] leading-5 text-fg-muted">
+            <span className="min-w-0 break-all font-mono">goli.st/{id}</span>
+            <span className="text-fg-subtle" aria-hidden="true">
+              ·
+            </span>
+            <span className="tabular-nums">
+              {count} link{count === 1 ? "" : "s"}
+            </span>
+            {canEdit && group.ownerId === "PUBLIC" && (
+              // Shared demo lists are editable by every visitor; say so
+              // before someone assumes the edits are private.
+              <span className="inline-flex items-center gap-1 rounded-full bg-subtle px-2 py-0.5 text-[11px] font-medium leading-4 text-fg-muted">
+                <GlobeAltIcon className="h-3 w-3" strokeWidth={2} aria-hidden="true" />
+                Anyone can edit
+              </span>
+            )}
+          </div>
+        </div>
+
+        {!isRenaming && (
+          <div className="flex shrink-0 flex-wrap items-center gap-2 sm:mt-0.5">
+            <CopyLinkButton url={shareUrl} />
+            {canEdit && (
+              <>
+                <Button onClick={() => setDialog("add")} className="max-sm:w-9 max-sm:px-0">
+                  <PlusIcon className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+                  <span className="max-sm:sr-only">Add link</span>
+                </Button>
+                <Button
+                  variant={editing ? "primary" : "secondary"}
+                  aria-pressed={editing}
+                  onClick={() => setIsEditing(!editing)}
+                >
+                  {editing ? (
+                    <CheckIcon className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+                  ) : (
+                    <PencilSquareIcon className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+                  )}
+                  <SwapLabel showSecond={editing} first="Edit" second="Done" />
+                </Button>
+              </>
+            )}
           </div>
         )}
+      </header>
 
-        <div className="flex items-center gap-2">
-          <CopyLinkButton url={shareUrl} />
+      {editing && (
+        <EditToolbar
+          itemCount={count}
+          isRenaming={isRenaming}
+          canDelete={canDelete}
+          renameButtonRef={renameButtonRef}
+          onRename={() => setIsRenaming(true)}
+          onDelete={() => setDialog("delete")}
+        />
+      )}
 
-          {canEdit && !isRenaming && (
-            <>
-              <button
-                type="button"
-                onClick={() => setMode(isEditing ? null : "edit")}
-                aria-pressed={isEditing}
-                className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-gray-900 ${
-                  isEditing
-                    ? "border-gray-900 bg-gray-900 text-white"
-                    : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                <AdjustmentsHorizontalIcon
-                  className="w-4 h-4"
-                  aria-hidden="true"
-                />
-                {isEditing ? "Done" : "Edit"}
-              </button>
-
-              {isEditing && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => setIsRenaming(true)}
-                    className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                  >
-                    Rename
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setMode("create")}
-                    className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white p-2 text-gray-700 hover:bg-gray-50"
-                  >
-                    <span className="sr-only">Add a link</span>
-                    <PlusCircleIcon className="w-5 h-5" aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setMode("delete")}
-                    className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white p-2 text-red-600 hover:bg-red-50"
-                  >
-                    <span className="sr-only">Delete this collection</span>
-                    <TrashIcon className="w-5 h-5" aria-hidden="true" />
-                  </button>
-                </>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-
-      <div className="mt-8">
-        {itemIds.length === 0 ? (
-          <EmptyState canEdit={canEdit} onAdd={() => setMode("create")} />
-        ) : isEditing ? (
+      <div className={editing ? "mt-4" : "mt-8"}>
+        {count === 0 ? (
+          <EmptyState canEdit={canEdit} onAdd={() => setDialog("add")} />
+        ) : editing ? (
           <Suspense
             fallback={
-              // Falls back to the same cards without drag handles, so the list
-              // stays readable while the chunk loads instead of blanking out.
-              <ul className="grid gap-4">
+              // The same rows with inert handles, so the list stays usable
+              // while the chunk loads and nothing moves when it arrives.
+              <ul className={ROW_LIST_CLASS}>
                 {itemIds.map((itemId) => (
                   <li key={itemId}>
-                    <ItemCard id={itemId} groupId={id} showControls />
+                    <EditableItemRow
+                      id={itemId}
+                      groupId={id}
+                      wideThumbnail={hasImages}
+                    />
                   </li>
                 ))}
               </ul>
             }
           >
-            <SortableItemList groupId={id} itemIds={itemIds} />
+            <SortableItemList
+              groupId={id}
+              itemIds={itemIds}
+              wideThumbnails={hasImages}
+            />
           </Suspense>
         ) : (
-          <ul
-            className={`grid gap-4 ${
-              itemIds.length >= 4 ? "sm:grid-cols-2 lg:grid-cols-3" : ""
-            }`}
-          >
-            {itemIds.map((itemId) => (
-              <li key={itemId}>
-                <ItemCard id={itemId} groupId={id} />
+          <ul className={classNames(GRID_CLASS, "animate-fade-in")}>
+            {itemIds.map((itemId, index) => (
+              <li key={itemId} className="min-w-0">
+                <ItemCard
+                  id={itemId}
+                  layout={hasImages ? "media" : "compact"}
+                  // Roughly the first row: what a visitor sees on arrival.
+                  priority={index < 3}
+                />
               </li>
             ))}
           </ul>
         )}
       </div>
+
+      {!canEdit && (
+        // Every shared list is a visitor's first look at GoList.
+        <p className="mt-12 text-center">
+          <Link
+            to="/"
+            className="group inline-flex h-9 items-center gap-1 rounded-full px-3 text-[13px] text-fg-muted transition-colors hover:text-fg"
+          >
+            Make your own list on GoList
+            <ArrowRightIcon
+              className="h-3.5 w-3.5 transition-transform duration-200 ease-smooth motion-safe:group-hover:translate-x-0.5"
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+          </Link>
+        </p>
+      )}
+
+      {canEdit && (
+        <CreateItemModal groupId={id} isOpen={dialog === "add"} onClose={closeDialog} />
+      )}
+      {canDelete && (
+        <DeleteCollectionConfirmationModal
+          groupId={id}
+          isOpen={dialog === "delete"}
+          onClose={closeDialog}
+        />
+      )}
     </div>
   );
+}
+
+export default function CollectionView() {
+  const dispatch = useDispatch();
+  const { id } = useParams();
+
+  useEffect(() => {
+    // A live listener, torn down on navigate — so a collection edited in
+    // another tab or by a collaborator updates in place.
+    dispatch({ type: "collections/subscribe", groupId: id });
+    return () => dispatch({ type: "collections/unsubscribe", groupId: id });
+  }, [dispatch, id]);
+
+  // Keyed by id: the router reuses this element from one collection to the
+  // next, and edit mode or an open dialog must not carry across.
+  return <CollectionPage key={id} id={id} />;
 }

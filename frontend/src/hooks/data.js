@@ -54,6 +54,22 @@ export function useItemIsSaving(itemId) {
 }
 
 /**
+ * Whether any link in the collection has a preview image.
+ *
+ * The collection page picks one card layout for the whole grid: image cards
+ * when there is at least one image, compact text cards when there is none.
+ * Mixing the two per card made rows of uneven height.
+ */
+export function useGroupHasImages(groupId) {
+  return useSelector((store) => {
+    const itemIds = store.collections.groups[groupId]?.itemIds || EMPTY_ARRAY;
+    return itemIds.some((itemId) =>
+      Boolean(String(store.collections.items[itemId]?.imageUrl || "").trim())
+    );
+  });
+}
+
+/**
  * Whether the signed-in user may edit this collection.
  *
  * This only drives what the UI offers — Firestore rules are what actually
@@ -65,6 +81,20 @@ export function useCanEdit(groupId) {
     const ownerId = store.collections.groups[groupId]?.ownerId;
     if (!ownerId) return false;
     return ownerId === "PUBLIC" || (Boolean(uid) && ownerId === uid);
+  });
+}
+
+/**
+ * Whether the signed-in user may delete this collection. Narrower than
+ * useCanEdit: the rules let anyone edit a shared PUBLIC list but only its
+ * owner delete one, so a demo list cannot be griefed away. Offering the
+ * button anyway only led to a failed delete.
+ */
+export function useCanDelete(groupId) {
+  return useSelector((store) => {
+    const uid = store.session.user?.uid;
+    const ownerId = store.collections.groups[groupId]?.ownerId;
+    return Boolean(uid) && ownerId === uid;
   });
 }
 

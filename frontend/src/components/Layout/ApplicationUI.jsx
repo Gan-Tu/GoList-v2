@@ -46,10 +46,14 @@ export default function ApplicationUI({ children }) {
   return (
     // A flex column with a growing main is what keeps the footer at the bottom
     // on short pages without the fixed positioning that used to overlap
-    // content on mobile.
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    // content on mobile. dvh rather than vh: on phones 100vh is the height
+    // with the browser toolbar hidden, which pushed the footer below the fold.
+    <div className="flex min-h-dvh flex-col bg-canvas">
       <NavBar />
-      <main className="flex-1 w-full flex items-start justify-center px-4 py-10">
+      {/* The same centered column as the header and footer, so every edge
+          lines up. Pages fill its width and center anything narrower
+          themselves. */}
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-16 pt-8 sm:px-6 sm:pt-12">
         {children}
       </main>
       <Footer />

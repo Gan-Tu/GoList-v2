@@ -12,59 +12,94 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from "react";
 import { displayHost } from "../Utilities/Helpers";
-import { LinkIcon } from "../Utilities/SvgIcons";
-import { useItemData } from "../../hooks/data";
+import { ArrowUpRightIcon, Spinner } from "../Utilities/SvgIcons";
 
-export function ItemSnippetView({ data }) {
-  const [imageFailed, setImageFailed] = useState(false);
-  const thumbnail = data?.imageUrl;
-
+/**
+ * What a link is called on screen. A link with no metadata yet still needs
+ * something readable, so the hostname stands in for a title rather than
+ * rendering an empty row.
+ */
+export function itemLabel(data) {
   return (
-    <div className="flex items-start gap-4">
-      <div className="min-w-0 flex-1 space-y-1">
-        {/* A link with no metadata yet still needs something readable, so the
-            hostname stands in for a title rather than rendering an empty row. */}
-        <p className="line-clamp-1 text-sm font-medium text-gray-900">
-          {data?.title || displayHost(data?.link) || "Untitled link"}
-        </p>
-        {data?.snippet && (
-          <p className="line-clamp-2 text-sm text-gray-500">{data.snippet}</p>
-        )}
-        {data?.link && (
-          <p className="line-clamp-1 text-xs text-gray-400">
-            {displayHost(data.link)}
-          </p>
-        )}
-      </div>
-
-      <div className="flex-shrink-0">
-        {thumbnail && !imageFailed ? (
-          <img
-            className="h-12 w-12 rounded object-cover bg-gray-100"
-            src={thumbnail}
-            alt=""
-            width="48"
-            height="48"
-            // Explicit dimensions reserve the space, so previews loading in
-            // after the card does not shift the list under the reader.
-            loading="lazy"
-            decoding="async"
-            referrerPolicy="no-referrer"
-            onError={() => setImageFailed(true)}
-          />
-        ) : (
-          <div className="flex h-12 w-12 items-center justify-center rounded bg-gray-100">
-            <LinkIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-          </div>
-        )}
-      </div>
-    </div>
+    String(data?.title || "").trim() || displayHost(data?.link) || "Untitled link"
   );
 }
 
-export default function ItemSnippet({ id }) {
-  const data = useItemData(id);
-  return <ItemSnippetView data={data} />;
+/** Whether a link has any preview metadata yet (a brand-new one has none). */
+export function hasMetadata(data) {
+  return Boolean(data?.title || data?.snippet || data?.imageUrl);
+}
+
+/**
+ * A short progress note for an item with a write in flight. A brand-new link
+ * has no metadata until the server fetches its preview; anything else is an
+ * edit being saved.
+ */
+export function itemStatus(data, isSaving) {
+  if (!isSaving) return null;
+  return hasMetadata(data) ? "Saving…" : "Fetching preview…";
+}
+
+/**
+ * The text half of a link card: site, title, description.
+ *
+ * `ids` lets the card point its accessible name at the title alone, rather
+ * than at every word on the card. `titleAs` is h2 in the collection grid (the
+ * page's h1 is the collection) and a plain paragraph in previews.
+ */
+export function ItemSnippetView({
+  data,
+  status = null,
+  showArrow = false,
+  titleAs: Title = "p",
+  ids = {}
+}) {
+  const host = displayHost(data?.link);
+  const snippet = String(data?.snippet || "").trim();
+
+  return (
+    <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex items-center gap-2">
+        <p
+          id={ids.host}
+          className="min-w-0 flex-1 truncate text-[13px] leading-5 text-fg-muted"
+        >
+          {host}
+        </p>
+        {showArrow && (
+          // Says "this leaves the page" before the click, and brightens with
+          // the card's hover.
+          <ArrowUpRightIcon
+            className="h-4 w-4 shrink-0 text-fg-subtle transition duration-200 ease-smooth group-hover:text-fg motion-safe:group-hover:-translate-y-px motion-safe:group-hover:translate-x-px"
+            strokeWidth={2}
+            aria-hidden="true"
+          />
+        )}
+      </div>
+
+      <Title
+        id={ids.title}
+        className="mt-1 line-clamp-2 text-[15px] font-semibold leading-snug text-fg [overflow-wrap:anywhere]"
+      >
+        {itemLabel(data)}
+      </Title>
+
+      {status ? (
+        <p className="mt-1.5 flex items-center gap-1.5 text-sm leading-5 text-fg-muted">
+          <Spinner className="h-3.5 w-3.5" />
+          {status}
+        </p>
+      ) : (
+        snippet && (
+          <p
+            id={ids.snippet}
+            className="mt-1 line-clamp-2 text-sm leading-5 text-fg-muted text-pretty"
+          >
+            {snippet}
+          </p>
+        )
+      )}
+    </div>
+  );
 }
