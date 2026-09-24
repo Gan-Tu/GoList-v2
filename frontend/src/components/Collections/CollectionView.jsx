@@ -57,7 +57,6 @@ import {
   useItemIds
 } from "../../hooks/data";
 import { useCollectionView } from "../../hooks/preferences";
-import { missingDetails } from "../../state/redux/DataGroups/drafts";
 import { useDocumentTitle } from "../../hooks/session";
 
 // Drag-and-drop is a ~16 KB gzip chunk that only an owner in edit mode needs.
@@ -274,7 +273,7 @@ function EditToolbar({
         <Button
           variant="ghost"
           onClick={onSuggest}
-          title="Look up missing titles, descriptions and images"
+          title="Look up each link’s title, description and image"
         >
           <SparklesIcon className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
           Fill in details
@@ -416,18 +415,15 @@ function CollectionPage({ id }) {
   // Leaving with nothing changed needs no confirmation.
   const cancelEditing = () => (isDirty ? setDialog("discard") : discardEdits());
 
-  // Looks up details only for links missing some; the dialog shows the
-  // results as they arrive and applies none until the owner picks.
+  // Looks up every link's page, so details can be refreshed as well as
+  // filled in; the dialog shows what differs as results arrive and applies
+  // none of it until the owner picks.
   const suggestDetails = () => {
     const items = draft.itemIds
-      .map((itemId) => ({
-        id: itemId,
-        link: draft.items[itemId]?.link,
-        missing: missingDetails(draft.items[itemId])
-      }))
-      .filter((item) => item.link && item.missing.length > 0);
+      .map((itemId) => ({ id: itemId, link: draft.items[itemId]?.link }))
+      .filter((item) => item.link);
     if (items.length === 0) {
-      toast("Every link already has a title, description and image.");
+      toast("Add a link first — there’s nothing to look up yet.");
       return;
     }
     dispatch({ type: "collections/suggestDetails", groupId: id, items });

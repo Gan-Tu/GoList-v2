@@ -14,7 +14,7 @@
 
 import { describe, expect, it } from "vitest";
 import reducer, { sortItemIds } from "./reducer";
-import { draftUpdates, isDraftDirty } from "./drafts";
+import { detailChanges, draftUpdates, isDraftDirty } from "./drafts";
 
 const initial = reducer(undefined, { type: "@@INIT" });
 
@@ -192,18 +192,34 @@ describe("edit-mode drafts", () => {
     });
   });
 
-  it("fills only missing details, never what is already there", () => {
+  it("applies exactly the details the owner accepted, replacing when asked", () => {
     const state = act(editing, "draftApplySuggestions", {
       accepted: {
-        a: { title: "Other", snippet: "From the page", imageUrl: "https://a.com/og.png" },
-        b: { snippet: "Not used" }
+        a: { title: "From the page", imageUrl: "https://a.com/og.png" },
+        b: { snippet: "Newer" }
       }
     });
     const { a, b } = state.drafts["list-1"].items;
-    expect(a.title).toBe("A");
-    expect(a.snippet).toBe("From the page");
+    expect(a.title).toBe("From the page");
     expect(a.imageUrl).toBe("https://a.com/og.png");
-    expect(b.snippet).toBe("Bee");
+    expect(a.snippet).toBe("");
+    expect(b.snippet).toBe("Newer");
+    expect(b.title).toBe("B");
+  });
+
+  // A link added in edit mode fetches its own preview; that arrives into
+  // whatever the owner has typed in the meantime and must not overwrite it.
+  it("fills a new link's preview without overwriting what was typed", () => {
+    const item = { id: "n", link: "https://n.com", title: "Mine", snippet: "", imageUrl: "" };
+    let state = act(editing, "draftAddItem", { item });
+    state = act(state, "draftFillItem", {
+      itemId: "n",
+      metadata: { title: "Theirs", snippet: "From the page" }
+    });
+    expect(state.drafts["list-1"].items.n).toMatchObject({
+      title: "Mine",
+      snippet: "From the page"
+    });
   });
 
   it("drops the draft and its suggestions on discard, save or delete", () => {
@@ -260,5 +276,33 @@ describe("create lifecycle", () => {
 
     const consumed = reducer(ok, { type: "collections/consumeCreated" });
     expect(consumed.lastCreatedId).toBeNull();
+  });
+});
+
+describe("detailChanges", () => {
+  const item = { title: "Mine", snippet: "", imageUrl: "https://x.com/old.png" };
+
+  it("adds what is missing and replaces what differs", () => {
+    expect(
+      detailChanges(item, {
+        title: "The page's title",
+        snippet: "About it",
+        imageUrl: "https://x.com/new.png"
+      })
+    ).toEqual([
+      { field: "title", kind: "replace", from: "Mine", to: "The page's title" },
+      { field: "snippet", kind: "add", from: "", to: "About it" },
+      { field: "imageUrl", kind: "replace", from: "https://x.com/old.png", to: "https://x.com/new.png" }
+    ]);
+  });
+
+  it("ignores details the page repeats unchanged or leaves empty", () => {
+    expect(detailChanges(item, { title: "  Mine  ", imageUrl: "" })).toEqual([]);
+  });
+
+  it("measures a replacement at its stored length", () => {
+    const long = "x".repeat(260);
+    const clamped = { title: "x".repeat(200) };
+    expect(detailChanges(clamped, { title: long })).toEqual([]);
   });
 });

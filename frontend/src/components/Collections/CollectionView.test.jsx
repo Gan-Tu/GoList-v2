@@ -445,35 +445,41 @@ describe("edit mode as a draft", () => {
 
   // The lookup itself runs in a saga; here its results are fed in by hand to
   // check the review step and what accepting does.
-  it("proposes missing details and adds only the ones kept", async () => {
+  it("proposes additions and replacements, and applies only those kept", async () => {
     const user = userEvent.setup();
     const { store, actions } = renderView(owned());
 
     await user.click(screen.getByRole("button", { name: "Edit" }));
     await user.click(screen.getByRole("button", { name: "Fill in details" }));
 
+    // Every link is looked up, complete or not, so details can be refreshed.
     const lookup = actions.find((action) => action.type === "collections/suggestDetails");
     expect(lookup.items).toEqual([
-      { id: "a", link: "https://one.example.com", missing: ["snippet", "imageUrl"] },
-      { id: "b", link: "https://two.example.com", missing: ["imageUrl"] }
+      { id: "a", link: "https://one.example.com" },
+      { id: "b", link: "https://two.example.com" }
     ]);
 
     const feed = (type, extra) => store.dispatch({ type, groupId: GROUP, ...extra });
     feed("collections/suggestionsStarted", { total: 2 });
-    feed("collections/suggestionsResult", { itemId: "a", found: { snippet: "From the page" } });
-    feed("collections/suggestionsResult", { itemId: "b", found: { imageUrl: "https://two.example.com/og.png" } });
+    // "First" is unchanged, so only the description is new for a.
+    feed("collections/suggestionsResult", { itemId: "a", found: { title: "First", snippet: "From the page" } });
+    feed("collections/suggestionsResult", {
+      itemId: "b",
+      found: { title: "Second, renamed", imageUrl: "https://two.example.com/og.png" }
+    });
     feed("collections/suggestionsFinished");
 
-    const dialog = await screen.findByRole("dialog", { name: "Fill in missing details" });
-    // Untick the second link, keep the first.
-    const boxes = within(dialog).getAllByRole("checkbox");
-    await user.click(boxes[1]);
-    await user.click(within(dialog).getByRole("button", { name: "Add to 1 link" }));
+    const dialog = await screen.findByRole("dialog", { name: "Fill in details" });
+    expect(within(dialog).getByText("Found 3 changes for 2 links")).toBeInTheDocument();
+    // Keep the owner's own title for b, but take its image.
+    await user.click(within(dialog).getByRole("button", { name: "Replace title" }));
+    await user.click(within(dialog).getByRole("button", { name: "Apply 2 changes" }));
 
     const draft = store.getState().collections.drafts[GROUP];
     expect(draft.items.a.snippet).toBe("From the page");
-    expect(draft.items.b.imageUrl).toBe("");
-    // Still only a draft: the saved item is unchanged until Save.
+    expect(draft.items.b.imageUrl).toBe("https://two.example.com/og.png");
+    expect(draft.items.b.title).toBe("Second");
+    // Still only a draft: the saved items are unchanged until Save.
     expect(store.getState().collections.items.a.snippet).toBe("");
   });
 });

@@ -21,8 +21,8 @@ import { fixUrl } from "../../../components/Utilities/Helpers";
 
 const ITEM_FIELDS = ["link", "title", "snippet", "imageUrl"];
 
-// The details a link can be missing, and how long each may be — the same
-// limits the edit form counts against.
+// The details a lookup can add or refresh, and how long each may be — the
+// same limits the edit form counts against.
 export const DETAIL_LIMITS = { title: 200, snippet: 500, imageUrl: 2048 };
 const DETAIL_FIELDS = Object.keys(DETAIL_LIMITS);
 
@@ -46,9 +46,39 @@ export function createDraft(group, items) {
   return { base: snapshot, ...snapshot };
 }
 
-/** Which of title, description and image a link has no value for. */
-export function missingDetails(item) {
-  return DETAIL_FIELDS.filter((field) => isBlank(item?.[field]));
+/** A looked-up value as it would be stored: trimmed and within its limit. */
+function cleanDetail(field, value) {
+  return String(value ?? "").trim().slice(0, DETAIL_LIMITS[field]);
+}
+
+/**
+ * What a lookup would change on a link, field by field: "add" where the link
+ * has nothing, "replace" where it has something different. Values the page
+ * repeats unchanged are not changes at all.
+ */
+export function detailChanges(item, found) {
+  const changes = [];
+  if (!item || !found) return changes;
+  for (const field of DETAIL_FIELDS) {
+    const to = cleanDetail(field, found[field]);
+    if (!to) continue;
+    const from = String(item[field] ?? "").trim();
+    if (from === to) continue;
+    changes.push({ field, kind: from ? "replace" : "add", from, to });
+  }
+  return changes;
+}
+
+/** Sets the given details on a link — what the owner chose to accept. */
+export function applyDetails(item, fields) {
+  if (!item || !fields) return item;
+  let next = item;
+  for (const field of DETAIL_FIELDS) {
+    if (fields[field] === undefined) continue;
+    const value = cleanDetail(field, fields[field]);
+    if (value && value !== item[field]) next = { ...next, [field]: value };
+  }
+  return next;
 }
 
 /**

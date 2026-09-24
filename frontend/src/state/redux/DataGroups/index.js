@@ -329,12 +329,16 @@ function* saveDraft({ groupId }) {
 // gentle on the per-user preview quota the server enforces.
 const SUGGEST_CONCURRENCY = 4;
 
-function* lookUpDetails(callable, { id, link, missing }) {
+const DETAIL_FIELDS = ["title", "snippet", "imageUrl"];
+
+// Everything the page says about itself; the review dialog works out which
+// of it would add to or replace what the link already has.
+function* lookUpDetails(callable, { id, link }) {
   try {
     const response = yield call(callable, { url: link });
     const metadata = response?.data || {};
     const found = {};
-    for (const field of missing) {
+    for (const field of DETAIL_FIELDS) {
       const value = metadata[field];
       if (typeof value === "string" && value.trim()) found[field] = value.trim();
     }
@@ -360,9 +364,10 @@ function* runSuggestions(groupId, items) {
 }
 
 /**
- * Looks up titles, descriptions and images for links missing some, and parks
- * what it finds for the owner to review — nothing is applied until they
- * accept it. Closing the review dialog cancels whatever is still running.
+ * Looks up the title, description and image each link's page gives now, and
+ * parks them for the owner to review — additions and replacements alike, but
+ * nothing is applied until they accept it. Closing the review dialog cancels
+ * whatever is still running.
  */
 function* suggestDetails({ groupId, items }) {
   yield put({ type: "collections/suggestionsStarted", groupId, total: items.length });

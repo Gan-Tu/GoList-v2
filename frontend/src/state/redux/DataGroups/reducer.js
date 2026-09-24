@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {
+  applyDetails,
   applyItemEdit,
   createDraft,
   fillMissing
@@ -257,11 +258,13 @@ export default function reducer(state = initialState, action) {
       });
     }
 
+    // Exactly the details the owner ticked in review — additions and
+    // replacements alike; anything unticked was left out of `accepted`.
     case "collections/draftApplySuggestions": {
       return withDraft(state, action.groupId, (draft) => {
         const items = { ...draft.items };
-        for (const [itemId, found] of Object.entries(action.accepted || {})) {
-          if (items[itemId]) items[itemId] = fillMissing(items[itemId], found);
+        for (const [itemId, fields] of Object.entries(action.accepted || {})) {
+          if (items[itemId]) items[itemId] = applyDetails(items[itemId], fields);
         }
         return { ...draft, items };
       });
