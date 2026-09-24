@@ -20,6 +20,7 @@ import { EditableItemRow } from "../Items/ItemControls";
 import { ROW_LIST_CLASS } from "../Items/ItemRow";
 import CreateItemModal from "../Items/CreateItemModal";
 import DeleteCollectionConfirmationModal from "./DeleteCollectionConfirmationModal";
+import ViewToggle from "./ViewToggle";
 import NotFound from "../Layout/NotFound";
 import Button from "../Utilities/Button";
 import CopyLinkButton from "../Utilities/CopyLinkButton";
@@ -48,6 +49,7 @@ import {
   useGroupStatus,
   useItemIds
 } from "../../hooks/data";
+import { useCollectionView } from "../../hooks/preferences";
 import { useDocumentTitle } from "../../hooks/session";
 
 // Drag-and-drop is a ~16 KB gzip chunk that only an owner in edit mode needs.
@@ -56,12 +58,20 @@ const SortableItemList = lazy(() => import("./SortableItemList"));
 const PAGE_CLASS = "mx-auto w-full max-w-6xl";
 const GRID_CLASS = "grid gap-4 sm:grid-cols-2 lg:grid-cols-3";
 
+// The list view is one rounded panel with hairlines between rows — the
+// grouped-list look — rather than a stack of separate cards.
+const LIST_CLASS =
+  "divide-y divide-hairline overflow-hidden rounded-2xl border border-hairline bg-surface shadow-card";
+
 // .skeleton already pulses; animate-pulse is spelled out as well because the
 // tests run without CSS and find the skeleton by that class name.
 const BONE = "skeleton animate-pulse";
 
-/** The page's own shape — header, then image cards — so nothing jumps when it loads. */
-function CollectionSkeleton() {
+/**
+ * The page's own shape — header, then cards or rows in the visitor's chosen
+ * layout — so nothing jumps when it loads.
+ */
+function CollectionSkeleton({ view }) {
   return (
     <div className={PAGE_CLASS} aria-busy="true">
       <p className="sr-only" role="status">
@@ -75,24 +85,39 @@ function CollectionSkeleton() {
           </div>
           <div className={classNames(BONE, "h-9 w-[7.5rem] rounded-full sm:mt-0.5")} />
         </div>
-        <ul className={classNames(GRID_CLASS, "mt-8")}>
-          {[0, 1, 2, 3, 4, 5].map((key) => (
-            <li
-              key={key}
-              className="overflow-hidden rounded-2xl border border-hairline bg-surface shadow-card"
-            >
-              <div className={classNames(BONE, "aspect-[1.91/1] rounded-none")} />
-              <div className="p-4">
-                <div className="flex h-5 items-center">
+        {view === "list" ? (
+          <ul className={classNames(LIST_CLASS, "mt-8")}>
+            {[0, 1, 2, 3, 4, 5].map((key) => (
+              <li key={key} className="flex items-center gap-3.5 px-4 py-3 sm:gap-4 sm:px-5">
+                <div className={classNames(BONE, "h-14 w-14 shrink-0 rounded-xl sm:h-16 sm:w-[122px]")} />
+                <div className="min-w-0 flex-1">
                   <div className={classNames(BONE, "h-3 w-24")} />
+                  <div className={classNames(BONE, "mt-2.5 h-4 w-3/5")} />
+                  <div className={classNames(BONE, "mt-2.5 h-3.5 w-4/5")} />
                 </div>
-                <div className={classNames(BONE, "mt-2 h-4 w-4/5")} />
-                <div className={classNames(BONE, "mt-3 h-3.5 w-full")} />
-                <div className={classNames(BONE, "mt-2 h-3.5 w-2/3")} />
-              </div>
-            </li>
-          ))}
-        </ul>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <ul className={classNames(GRID_CLASS, "mt-8")}>
+            {[0, 1, 2, 3, 4, 5].map((key) => (
+              <li
+                key={key}
+                className="overflow-hidden rounded-2xl border border-hairline bg-surface shadow-card"
+              >
+                <div className={classNames(BONE, "aspect-[1.91/1] rounded-none")} />
+                <div className="p-4">
+                  <div className="flex h-5 items-center">
+                    <div className={classNames(BONE, "h-3 w-24")} />
+                  </div>
+                  <div className={classNames(BONE, "mt-2 h-4 w-4/5")} />
+                  <div className={classNames(BONE, "mt-3 h-3.5 w-full")} />
+                  <div className={classNames(BONE, "mt-2 h-3.5 w-2/3")} />
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
@@ -275,6 +300,7 @@ function CollectionPage({ id }) {
   const canEdit = useCanEdit(id);
   const canDelete = useCanDelete(id);
   const hasImages = useGroupHasImages(id);
+  const [view, setView] = useCollectionView();
 
   // Editing and the open dialog are separate state. They used to share one
   // `mode`, so opening "Add link" or "Delete" from edit mode silently left
@@ -334,13 +360,15 @@ function CollectionPage({ id }) {
   // straight away while the listener reconnects, instead of flashing the
   // skeleton on every back-navigation.
   if (!group) {
-    return <CollectionSkeleton />;
+    return <CollectionSkeleton view={view} />;
   }
 
   // Losing edit rights mid-edit (signing out, say) ends editing too.
   const editing = canEdit && isEditing;
   const count = itemIds.length;
   const shareUrl = `${window.location.origin}/${id}`;
+  // Edit mode has its own row layout, and an empty list has nothing to lay out.
+  const showViewToggle = !editing && count > 0;
 
   const closeDialog = () => setDialog(null);
   const stopRenaming = () => {
@@ -350,8 +378,12 @@ function CollectionPage({ id }) {
 
   return (
     <div className={PAGE_CLASS}>
-      <header className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
-        <div className="min-w-0 flex-1">
+      {/* Two columns at every width. From `sm` the title and actions share the
+          top row, and the details and layout switch the one below. On a phone
+          the title and actions take full rows, with the details and switch
+          between them — the switch never has to squeeze in beside buttons. */}
+      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-3 sm:gap-x-8 sm:gap-y-2">
+        <div className={classNames("col-span-2 min-w-0", !isRenaming && "sm:col-span-1")}>
           {isRenaming ? (
             <TitleEditor
               title={group.title}
@@ -366,28 +398,32 @@ function CollectionPage({ id }) {
               {group.title || "Untitled collection"}
             </h1>
           )}
-
-          <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] leading-5 text-fg-muted">
-            <span className="min-w-0 break-all font-mono">goli.st/{id}</span>
-            <span className="text-fg-subtle" aria-hidden="true">
-              ·
-            </span>
-            <span className="tabular-nums">
-              {count} link{count === 1 ? "" : "s"}
-            </span>
-            {canEdit && group.ownerId === "PUBLIC" && (
-              // Shared demo lists are editable by every visitor; say so
-              // before someone assumes the edits are private.
-              <span className="inline-flex items-center gap-1 rounded-full bg-subtle px-2 py-0.5 text-[11px] font-medium leading-4 text-fg-muted">
-                <GlobeAltIcon className="h-3 w-3" strokeWidth={2} aria-hidden="true" />
-                Anyone can edit
-              </span>
-            )}
-          </div>
         </div>
 
+        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[13px] leading-5 text-fg-muted">
+          <span className="min-w-0 break-all font-mono">goli.st/{id}</span>
+          <span className="text-fg-subtle" aria-hidden="true">
+            ·
+          </span>
+          <span className="tabular-nums">
+            {count} link{count === 1 ? "" : "s"}
+          </span>
+          {canEdit && group.ownerId === "PUBLIC" && (
+            // Shared demo lists are editable by every visitor; say so
+            // before someone assumes the edits are private.
+            <span className="inline-flex items-center gap-1 rounded-full bg-subtle px-2 py-0.5 text-[11px] font-medium leading-4 text-fg-muted">
+              <GlobeAltIcon className="h-3 w-3" strokeWidth={2} aria-hidden="true" />
+              Anyone can edit
+            </span>
+          )}
+        </div>
+
+        {showViewToggle && (
+          <ViewToggle value={view} onChange={setView} className="justify-self-end" />
+        )}
+
         {!isRenaming && (
-          <div className="flex shrink-0 flex-wrap items-center gap-2 sm:mt-0.5">
+          <div className="col-span-2 mt-2 flex flex-wrap items-center gap-2 sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:mt-0.5 sm:self-start sm:justify-self-end">
             <CopyLinkButton url={shareUrl} />
             {canEdit && (
               <>
@@ -451,8 +487,24 @@ function CollectionPage({ id }) {
               wideThumbnails={hasImages}
             />
           </Suspense>
+        ) : view === "list" ? (
+          // Keyed by layout so switching replays the fade instead of snapping.
+          <ul key="list" className={classNames(LIST_CLASS, "animate-fade-in")}>
+            {itemIds.map((itemId, index) => (
+              <li key={itemId}>
+                <ItemCard
+                  id={itemId}
+                  layout="row"
+                  wideThumbnail={hasImages}
+                  // Rows are short; the first several are what a visitor
+                  // sees on arrival.
+                  priority={index < 4}
+                />
+              </li>
+            ))}
+          </ul>
         ) : (
-          <ul className={classNames(GRID_CLASS, "animate-fade-in")}>
+          <ul key="grid" className={classNames(GRID_CLASS, "animate-fade-in")}>
             {itemIds.map((itemId, index) => (
               <li key={itemId} className="min-w-0">
                 <ItemCard

@@ -168,12 +168,24 @@ export function ItemMedia({ src, seed, priority = false, pending = false }) {
   );
 }
 
-function ThumbnailImage({ src, seed }) {
+const THUMBNAIL_SIZES = {
+  // Edit-mode rows and the delete confirmation.
+  sm: { box: "h-10 w-10 rounded-lg", wide: "sm:w-[76px]", square: "", letter: "text-sm" },
+  // The collection's list view, where the thumbnail leads each row.
+  lg: {
+    box: "h-14 w-14 rounded-xl sm:h-16",
+    wide: "sm:w-[122px]",
+    square: "sm:w-16",
+    letter: "text-lg"
+  }
+};
+
+function ThumbnailImage({ src, seed, priority, letterClassName }) {
   const [{ status, shape }, handlers] = usePreviewImage();
 
   if (status === "failed") {
     return (
-      <SiteMonogram host={seed} className="absolute inset-0" letterClassName="text-sm" />
+      <SiteMonogram host={seed} className="absolute inset-0" letterClassName={letterClassName} />
     );
   }
 
@@ -181,10 +193,10 @@ function ThumbnailImage({ src, seed }) {
     <>
       <img
         alt=""
-        loading="lazy"
+        {...loadingProps(priority)}
         src={src}
-        width="76"
-        height="40"
+        width="122"
+        height="64"
         decoding="async"
         referrerPolicy="no-referrer"
         {...handlers}
@@ -201,24 +213,48 @@ function ThumbnailImage({ src, seed }) {
 }
 
 /**
- * The small preview at the start of a compact row. `wide` gives it the card's
- * own 1.91:1 shape from `sm` up, so a banner reads the same in both places;
- * it stays square on phones, where the row has little width to spare.
+ * The preview at the start of a row. `wide` gives it the card's own 1.91:1
+ * shape from `sm` up, so a banner reads the same in both places; it stays
+ * square on phones, where the row has little width to spare.
+ *
+ * size: "sm" for edit-mode rows, "lg" for the list view. Each size spells out
+ * its own width classes rather than overriding another's: two width utilities
+ * on one element are settled by stylesheet order, not class order.
  */
-export function ItemThumbnail({ src, seed, wide = false, className = "" }) {
+export function ItemThumbnail({
+  src,
+  seed,
+  wide = false,
+  size = "sm",
+  priority = false,
+  className = ""
+}) {
+  const sizing = THUMBNAIL_SIZES[size] || THUMBNAIL_SIZES.sm;
+
   return (
     <div
       aria-hidden="true"
       className={classNames(
-        "relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-subtle",
-        wide && "sm:w-[76px]",
+        "relative shrink-0 overflow-hidden bg-subtle",
+        sizing.box,
+        wide ? sizing.wide : sizing.square,
         className
       )}
     >
       {src ? (
-        <ThumbnailImage key={src} src={src} seed={seed} />
+        <ThumbnailImage
+          key={src}
+          src={src}
+          seed={seed}
+          priority={priority}
+          letterClassName={sizing.letter}
+        />
       ) : (
-        <SiteMonogram host={seed} className="absolute inset-0" letterClassName="text-sm" />
+        <SiteMonogram
+          host={seed}
+          className="absolute inset-0"
+          letterClassName={sizing.letter}
+        />
       )}
     </div>
   );

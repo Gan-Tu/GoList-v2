@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { useId } from "react";
-import { ItemMedia, SiteMonogram } from "./ItemMedia";
+import { ItemMedia, ItemThumbnail, SiteMonogram } from "./ItemMedia";
 import { ItemSnippetView, hasMetadata, itemStatus } from "./ItemSnippet";
 import { classNames, displayHost, safeHref } from "../Utilities/Helpers";
 import { useItemData, useItemIsSaving } from "../../hooks/data";
@@ -26,6 +26,16 @@ const INTERACTIVE_CLASS =
   "group transition duration-200 ease-smooth hover:shadow-card-hover " +
   "motion-safe:hover:-translate-y-0.5 active:scale-[0.99]";
 
+// A row sits inside the list view's single rounded panel, which draws the
+// border and the dividers; the row itself only lights up on hover.
+const ROW_CLASS = "flex items-center gap-3.5 px-4 py-3 sm:gap-4 sm:px-5";
+
+// The focus outline is pulled inside the row, since the panel clips anything
+// drawn outside it.
+const ROW_INTERACTIVE_CLASS =
+  "group transition-colors duration-150 ease-smooth hover:bg-subtle/60 " +
+  "active:bg-subtle focus-visible:-outline-offset-2";
+
 /**
  * A link as a card: preview image (or monogram), site, title, description.
  *
@@ -34,12 +44,16 @@ const INTERACTIVE_CLASS =
  *          "compact" — a small monogram tile beside the text, for collections
  *                      with no images at all, where a grid of big letter
  *                      tiles would be mostly empty color.
+ *          "row"     — the list view: a thumbnail, then the text on one or
+ *                      two lines. `wideThumbnail` gives the thumbnail the
+ *                      banner shape when the collection has images.
  * preview: renders the card exactly as the grid will, but not as a link —
  *          for the edit dialog.
  */
 export function ItemCardView({
   data,
   layout = "media",
+  wideThumbnail = false,
   priority = false,
   isSaving = false,
   preview = false
@@ -59,12 +73,24 @@ export function ItemCardView({
       status={status}
       showArrow={preview || Boolean(href)}
       titleAs={preview ? "p" : "h2"}
+      snippetLines={layout === "row" ? 1 : 2}
       ids={{ title: titleId, host: hostId, snippet: snippetId }}
     />
   );
 
   const body =
-    layout === "media" ? (
+    layout === "row" ? (
+      <>
+        <ItemThumbnail
+          src={safeHref(data?.imageUrl)}
+          seed={host}
+          wide={wideThumbnail}
+          size="lg"
+          priority={priority}
+        />
+        {text}
+      </>
+    ) : layout === "media" ? (
       <>
         <ItemMedia
           src={safeHref(data?.imageUrl)}
@@ -87,8 +113,12 @@ export function ItemCardView({
 
   // A stored link that is not http(s) gets no href at all rather than becoming
   // a clickable javascript: URL in someone else's browser.
+  const frame = layout === "row" ? ROW_CLASS : CARD_CLASS;
+  const interactive =
+    layout === "row" ? ROW_INTERACTIVE_CLASS : INTERACTIVE_CLASS;
+
   if (!href) {
-    return <div className={CARD_CLASS}>{body}</div>;
+    return <div className={frame}>{body}</div>;
   }
 
   return (
@@ -103,7 +133,7 @@ export function ItemCardView({
         hostId,
         String(data?.snippet || "").trim() && !status && snippetId
       )}
-      className={classNames(CARD_CLASS, INTERACTIVE_CLASS)}
+      className={classNames(frame, interactive)}
     >
       {body}
       <span id={newTabId} className="sr-only">
@@ -113,7 +143,7 @@ export function ItemCardView({
   );
 }
 
-export default function ItemCard({ id, layout, priority }) {
+export default function ItemCard({ id, layout, wideThumbnail, priority }) {
   const data = useItemData(id);
   const isSaving = useItemIsSaving(id);
 
@@ -121,6 +151,7 @@ export default function ItemCard({ id, layout, priority }) {
     <ItemCardView
       data={data}
       layout={layout}
+      wideThumbnail={wideThumbnail}
       priority={priority}
       isSaving={isSaving}
     />

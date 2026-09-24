@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { displayHost } from "../Utilities/Helpers";
+import { classNames, displayHost } from "../Utilities/Helpers";
 import { ArrowUpRightIcon, Spinner } from "../Utilities/SvgIcons";
 
 /**
@@ -48,11 +48,15 @@ export function itemStatus(data, isSaving) {
  * than at every word on the card. `titleAs` is h2 in the collection grid (the
  * page's h1 is the collection) and a plain paragraph in previews.
  */
+// Spelled out in full so Tailwind sees both class names in the source.
+const SNIPPET_CLAMP = { 1: "line-clamp-1", 2: "line-clamp-2" };
+
 export function ItemSnippetView({
   data,
   status = null,
   showArrow = false,
   titleAs: Title = "p",
+  snippetLines = 2,
   ids = {}
 }) {
   const host = displayHost(data?.link);
@@ -94,7 +98,10 @@ export function ItemSnippetView({
         snippet && (
           <p
             id={ids.snippet}
-            className="mt-1 line-clamp-2 text-sm leading-5 text-fg-muted text-pretty"
+            className={classNames(
+              "mt-1 text-sm leading-5 text-fg-muted text-pretty",
+              SNIPPET_CLAMP[snippetLines] || SNIPPET_CLAMP[2]
+            )}
           >
             {snippet}
           </p>

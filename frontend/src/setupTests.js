@@ -18,6 +18,9 @@ import { afterEach, vi } from "vitest";
 
 afterEach(() => {
   cleanup();
+  // Layout preferences live in localStorage; one test's choice must not
+  // become the next test's starting point.
+  window.localStorage.clear();
 });
 
 // jsdom implements neither of these, and components under test call both.

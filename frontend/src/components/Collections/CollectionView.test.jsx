@@ -278,3 +278,71 @@ describe("edit affordances", () => {
     ).toBeInTheDocument();
   });
 });
+
+describe("layout", () => {
+  const withLinks = (ownerId, user, itemIds = ["a", "b"]) => ({
+    ...baseState({
+      groups: {
+        [GROUP]: { id: GROUP, title: "Reading", ownerId, itemIds }
+      },
+      items: {
+        a: { id: "a", title: "First", link: "https://one.example.com" },
+        b: { id: "b", title: "Second", link: "https://two.example.com" }
+      },
+      groupStatus: { [GROUP]: "ready" }
+    }),
+    session: {
+      user,
+      authResolved: true,
+      domains: [],
+      domainsStatus: "idle",
+      emailForSignIn: null,
+      emailVerification: "idle"
+    }
+  });
+
+  it("switches to a list and remembers it for the next visit", async () => {
+    const user = userEvent.setup();
+    const { unmount } = renderView(withLinks("alice", null));
+
+    expect(screen.getByRole("button", { name: "Grid view" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+    await user.click(screen.getByRole("button", { name: "List view" }));
+    expect(screen.getByRole("button", { name: "List view" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+    // Rows are still one link each, named by title.
+    expect(
+      screen.getByRole("link", { name: "First (opens in a new tab)" })
+    ).toBeInTheDocument();
+    unmount();
+
+    renderView(withLinks("alice", null));
+    expect(screen.getByRole("button", { name: "List view" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+  });
+
+  // Edit mode already lays links out as rows, and an empty collection has
+  // nothing to arrange — a switch there would do nothing.
+  it("hides the layout switch while editing and on an empty collection", async () => {
+    const user = userEvent.setup();
+    const { unmount } = renderView(
+      withLinks("alice", { uid: "alice", isAnonymous: false })
+    );
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    expect(
+      screen.queryByRole("button", { name: "List view" })
+    ).not.toBeInTheDocument();
+    unmount();
+
+    renderView(withLinks("alice", null, []));
+    expect(
+      screen.queryByRole("button", { name: "List view" })
+    ).not.toBeInTheDocument();
+  });
+});
