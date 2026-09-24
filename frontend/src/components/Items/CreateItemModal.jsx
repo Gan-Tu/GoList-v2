@@ -14,11 +14,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
+import { v4 as uuidv4 } from "uuid";
 import Button from "../Utilities/Button";
 import Modal, { ModalActions } from "../Utilities/Modal";
 import TextInput from "../Utilities/TextInput";
-import { MAX_ITEMS_PER_COLLECTION, safeHref } from "../Utilities/Helpers";
-import { useItemIds } from "../../hooks/data";
+import {
+  MAX_ITEMS_PER_COLLECTION,
+  fixUrl,
+  safeHref
+} from "../Utilities/Helpers";
+import { useDraft, useItemIds } from "../../hooks/data";
 
 /**
  * Whether the input plausibly names a web page. safeHref alone is too
@@ -34,7 +39,11 @@ function isWebAddress(value) {
 
 export default function CreateItemModal({ groupId, isOpen, onClose }) {
   const dispatch = useDispatch();
-  const itemCount = useItemIds(groupId).length;
+  // While the collection is being edited, a new link joins the draft — it is
+  // saved with the other changes, or dropped with them on Cancel.
+  const draft = useDraft(groupId);
+  const savedCount = useItemIds(groupId).length;
+  const itemCount = draft ? draft.itemIds.length : savedCount;
   const [url, setUrl] = useState("");
   const [touched, setTouched] = useState(false);
   const inputRef = useRef(null);
@@ -60,7 +69,21 @@ export default function CreateItemModal({ groupId, isOpen, onClose }) {
       setTouched(true);
       return;
     }
-    dispatch({ type: "collections/createItem", groupId, url });
+    if (draft) {
+      dispatch({
+        type: "collections/draftAddItem",
+        groupId,
+        item: {
+          id: uuidv4(),
+          link: fixUrl(url),
+          title: "",
+          snippet: "",
+          imageUrl: ""
+        }
+      });
+    } else {
+      dispatch({ type: "collections/createItem", groupId, url });
+    }
     onClose();
   };
 

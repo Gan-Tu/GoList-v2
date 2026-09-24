@@ -18,7 +18,7 @@ import { ItemRowSummary, ROW_CLASS } from "./ItemRow";
 import Button from "../Utilities/Button";
 import Modal, { ModalActions } from "../Utilities/Modal";
 import { classNames, safeHref } from "../Utilities/Helpers";
-import { useItemData } from "../../hooks/data";
+import { useDraftItem } from "../../hooks/data";
 
 export default function DeleteConfirmationModal({
   itemId,
@@ -27,19 +27,20 @@ export default function DeleteConfirmationModal({
   onClose
 }) {
   const dispatch = useDispatch();
-  const data = useItemData(itemId);
+  const data = useDraftItem(groupId, itemId);
   // Focus starts on Cancel: Enter on a freshly opened "delete?" dialog
   // should never be the thing that deletes.
   const cancelRef = useRef(null);
 
   const onDelete = () => {
-    dispatch({ type: "collections/deleteItem", groupId, itemId });
+    // Out of the draft only: Cancel brings it back, Save makes it final.
+    dispatch({ type: "collections/draftRemoveItem", groupId, itemId });
     onClose();
   };
 
   return (
     <Modal
-      title="Delete this link?"
+      title="Remove this link?"
       size="sm"
       isOpen={isOpen}
       onClose={onClose}
@@ -53,13 +54,13 @@ export default function DeleteConfirmationModal({
           wideThumbnail={Boolean(safeHref(data?.imageUrl))}
         />
       </div>
-      <p className="mt-3 text-sm leading-5 text-fg-muted">This can’t be undone.</p>
+      <p className="mt-3 text-sm leading-5 text-fg-muted">It’s removed from the collection when you save your changes.</p>
       <ModalActions>
         <Button ref={cancelRef} onClick={onClose}>
           Cancel
         </Button>
         <Button variant="danger" onClick={onDelete}>
-          Delete link
+          Remove link
         </Button>
       </ModalActions>
     </Modal>

@@ -26,15 +26,22 @@ const GROUP = "my-list";
 
 // A store with reducers but no saga middleware: the view can be exercised
 // without booting Firebase, which would otherwise try to open a real
-// connection from jsdom.
+// connection from jsdom. Dispatched actions are recorded, so a test can check
+// what a save would have sent without running the saga.
 function renderView(preloadedState) {
+  const actions = [];
+  const record = () => (next) => (action) => {
+    actions.push(action);
+    return next(action);
+  };
   const store = configureStore({
     reducer: { collections, session },
     preloadedState,
-    middleware: (getDefault) => getDefault({ serializableCheck: false })
+    middleware: (getDefault) =>
+      getDefault({ serializableCheck: false }).concat(record)
   });
 
-  return render(
+  const utils = render(
     <Provider store={store}>
       <MemoryRouter initialEntries={[`/${GROUP}`]}>
         <Routes>
@@ -43,6 +50,7 @@ function renderView(preloadedState) {
       </MemoryRouter>
     </Provider>
   );
+  return { ...utils, store, actions };
 }
 
 function baseState(overrides = {}) {
@@ -54,6 +62,9 @@ function baseState(overrides = {}) {
       creating: {},
       savingItems: {},
       lastCreatedId: null,
+      drafts: {},
+      savingDrafts: {},
+      suggestions: {},
       ...overrides
     },
     session: {
@@ -239,10 +250,7 @@ describe("edit affordances", () => {
     renderView(ready("alice", { uid: "alice", isAnonymous: false }));
 
     await user.click(screen.getByRole("button", { name: "Edit" }));
-    expect(screen.getByRole("button", { name: "Done" })).toHaveAttribute(
-      "aria-pressed",
-      "true"
-    );
+    expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Add link" }));
     const dialog = await screen.findByRole("dialog", { name: "Add a link" });
@@ -251,10 +259,7 @@ describe("edit affordances", () => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     );
 
-    expect(screen.getByRole("button", { name: "Done" })).toHaveAttribute(
-      "aria-pressed",
-      "true"
-    );
+    expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Rename" })).toBeInTheDocument();
   });
 
@@ -301,7 +306,7 @@ describe("layout", () => {
     }
   });
 
-  it("starts as a list and remembers a switch to the grid", async () => {
+  it("starts as a list and remembers a switch to the gallery", async () => {
     const user = userEvent.setup();
     const { unmount } = renderView(withLinks("alice", null));
 
@@ -314,8 +319,8 @@ describe("layout", () => {
       screen.getByRole("link", { name: "First (opens in a new tab)" })
     ).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Grid view" }));
-    expect(screen.getByRole("button", { name: "Grid view" })).toHaveAttribute(
+    await user.click(screen.getByRole("button", { name: "Gallery view" }));
+    expect(screen.getByRole("button", { name: "Gallery view" })).toHaveAttribute(
       "aria-pressed",
       "true"
     );
@@ -325,7 +330,7 @@ describe("layout", () => {
     unmount();
 
     renderView(withLinks("alice", null));
-    expect(screen.getByRole("button", { name: "Grid view" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Gallery view" })).toHaveAttribute(
       "aria-pressed",
       "true"
     );
@@ -348,5 +353,127 @@ describe("layout", () => {
     expect(
       screen.queryByRole("button", { name: "List view" })
     ).not.toBeInTheDocument();
+  });
+});
+
+describe("edit mode as a draft", () => {
+  const owned = () => ({
+    ...baseState({
+      groups: {
+        [GROUP]: { id: GROUP, title: "Reading", ownerId: "alice", itemIds: ["a", "b"] }
+      },
+      items: {
+        a: { id: "a", order: 0, title: "First", link: "https://one.example.com", snippet: "", imageUrl: "" },
+        b: { id: "b", order: 1, title: "Second", link: "https://two.example.com", snippet: "Two", imageUrl: "" }
+      },
+      groupStatus: { [GROUP]: "ready" }
+    }),
+    session: {
+      user: { uid: "alice", isAnonymous: false },
+      authResolved: true,
+      domains: [],
+      domainsStatus: "idle",
+      emailForSignIn: null,
+      emailVerification: "idle"
+    }
+  });
+
+  async function renameTo(user, title) {
+    await user.click(screen.getByRole("button", { name: "Rename" }));
+    const field = screen.getByLabelText("Collection title");
+    await user.clear(field);
+    await user.type(field, `${title}{Enter}`);
+  }
+
+  it("throws every change away on Cancel, after asking", async () => {
+    const user = userEvent.setup();
+    const { actions } = renderView(owned());
+
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    await renameTo(user, "Renamed");
+    expect(screen.getByRole("heading", { level: 1, name: "Renamed" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    const dialog = await screen.findByRole("dialog", { name: "Discard your changes?" });
+    await user.click(within(dialog).getByRole("button", { name: "Discard changes" }));
+
+    expect(screen.getByRole("heading", { level: 1, name: "Reading" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument();
+    // Nothing was ever sent to be saved.
+    expect(actions.some((action) => action.type === "collections/saveDraft")).toBe(false);
+  });
+
+  it("leaves without asking when nothing changed", async () => {
+    const user = userEvent.setup();
+    renderView(owned());
+
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument();
+  });
+
+  it("saves the staged changes in one go", async () => {
+    const user = userEvent.setup();
+    const { actions } = renderView(owned());
+
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    await renameTo(user, "Renamed");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(actions.filter((action) => action.type === "collections/saveDraft")).toEqual([
+      { type: "collections/saveDraft", groupId: GROUP }
+    ]);
+  });
+
+  it("removes a link from its edit dialog", async () => {
+    const user = userEvent.setup();
+    renderView(owned());
+
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    const [editFirst] = await screen.findAllByRole("button", { name: "Edit link" });
+    await user.click(editFirst);
+    const dialog = await screen.findByRole("dialog", { name: "Edit link" });
+    await user.click(within(dialog).getByRole("button", { name: "Remove link" }));
+
+    await waitFor(() =>
+      expect(screen.getAllByRole("button", { name: "Edit link" })).toHaveLength(1)
+    );
+    expect(screen.getByText("Unsaved changes")).toBeInTheDocument();
+  });
+
+  // The lookup itself runs in a saga; here its results are fed in by hand to
+  // check the review step and what accepting does.
+  it("proposes missing details and adds only the ones kept", async () => {
+    const user = userEvent.setup();
+    const { store, actions } = renderView(owned());
+
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    await user.click(screen.getByRole("button", { name: "Fill in details" }));
+
+    const lookup = actions.find((action) => action.type === "collections/suggestDetails");
+    expect(lookup.items).toEqual([
+      { id: "a", link: "https://one.example.com", missing: ["snippet", "imageUrl"] },
+      { id: "b", link: "https://two.example.com", missing: ["imageUrl"] }
+    ]);
+
+    const feed = (type, extra) => store.dispatch({ type, groupId: GROUP, ...extra });
+    feed("collections/suggestionsStarted", { total: 2 });
+    feed("collections/suggestionsResult", { itemId: "a", found: { snippet: "From the page" } });
+    feed("collections/suggestionsResult", { itemId: "b", found: { imageUrl: "https://two.example.com/og.png" } });
+    feed("collections/suggestionsFinished");
+
+    const dialog = await screen.findByRole("dialog", { name: "Fill in missing details" });
+    // Untick the second link, keep the first.
+    const boxes = within(dialog).getAllByRole("checkbox");
+    await user.click(boxes[1]);
+    await user.click(within(dialog).getByRole("button", { name: "Add to 1 link" }));
+
+    const draft = store.getState().collections.drafts[GROUP];
+    expect(draft.items.a.snippet).toBe("From the page");
+    expect(draft.items.b.imageUrl).toBe("");
+    // Still only a draft: the saved item is unchanged until Save.
+    expect(store.getState().collections.items.a.snippet).toBe("");
   });
 });

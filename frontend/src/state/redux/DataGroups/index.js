@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {
+  all,
   call,
   fork,
   put,
@@ -20,7 +21,8 @@ import {
   select,
   take,
   takeEvery,
-  takeLatest
+  takeLatest,
+  takeLeading
 } from "redux-saga/effects";
 import { eventChannel } from "redux-saga";
 import * as fs from "firebase/firestore";
@@ -30,6 +32,7 @@ import { v4 as uuidv4 } from "uuid";
 import { db, functions } from "../../../firebase";
 import { fixUrl, validateShortUrl } from "../../../components/Utilities/Helpers";
 import { ensureSignedIn } from "../Session/index";
+import { draftUpdates } from "./drafts";
 
 const COLLECTION = "DataGroups";
 
@@ -213,26 +216,6 @@ function* createGroup({ groupId, title, urls }) {
   yield fork(backfillMetadata, groupId);
 }
 
-function* renameGroup({ groupId, title }) {
-  const trimmed = String(title || "").trim();
-  if (!trimmed) {
-    toast.error("A collection needs a title.");
-    return;
-  }
-
-  yield call(ensureSignedIn);
-
-  try {
-    yield call(fs.updateDoc, fs.doc(db, COLLECTION, groupId), {
-      title: trimmed
-    });
-    toast.success("Title updated.");
-  } catch (error) {
-    console.error("Failed to rename collection:", error);
-    toast.error("Could not rename this collection.");
-  }
-}
-
 function* deleteGroup({ groupId }) {
   yield call(ensureSignedIn);
   try {
@@ -310,70 +293,123 @@ function* createItem({ groupId, url }) {
   }
 }
 
-function* updateItem({ itemId, groupId, data }) {
-  yield call(ensureSignedIn);
-  yield put({ type: "collections/itemSaving", itemId, saving: true });
+/**
+ * Saves an edit-mode draft in a single update: only the fields that changed,
+ * so a reorder does not rewrite every item and a collaborator's edit to
+ * something the owner never touched survives. On failure the draft stays, so
+ * nothing the owner did is lost.
+ */
+function* saveDraft({ groupId }) {
+  const draft = yield select((store) => store.collections.drafts[groupId]);
+  if (!draft) return;
 
-  const current = yield select((store) => store.collections.items[itemId] || {});
-  const next = { ...current, ...data };
-  if (next.link) next.link = fixUrl(next.link);
+  const updates = draftUpdates(draft, fs.deleteField());
+  if (Object.keys(updates).length === 0) {
+    yield put({ type: "collections/draftSaved", groupId });
+    return;
+  }
+
+  yield put({ type: "collections/draftSaving", groupId, saving: true });
+  yield call(ensureSignedIn);
 
   try {
-    yield call(fs.updateDoc, fs.doc(db, COLLECTION, groupId), {
-      [`items.${itemId}`]: next
-    });
-    toast.success("Saved.", { duration: 1500 });
+    yield call(fs.updateDoc, fs.doc(db, COLLECTION, groupId), updates);
   } catch (error) {
-    console.error("Failed to update item:", error);
-    toast.error("Could not save your changes.");
-  } finally {
-    yield put({ type: "collections/itemSaving", itemId, saving: false });
+    console.error("Failed to save changes:", error);
+    yield put({ type: "collections/draftSaving", groupId, saving: false });
+    toast.error("Could not save your changes. They’re still here — try again.");
+    return;
   }
+
+  yield put({ type: "collections/draftSaved", groupId });
+  toast.success("Changes saved.", { duration: 1500 });
 }
 
-function* deleteItem({ groupId, itemId }) {
-  yield call(ensureSignedIn);
+// Parallel lookups when suggesting details: quick for a typical list, and
+// gentle on the per-user preview quota the server enforces.
+const SUGGEST_CONCURRENCY = 4;
+
+function* lookUpDetails(callable, { id, link, missing }) {
   try {
-    yield call(fs.updateDoc, fs.doc(db, COLLECTION, groupId), {
-      [`items.${itemId}`]: fs.deleteField()
-    });
-    toast.success("Link removed.", { duration: 1500 });
-  } catch (error) {
-    console.error("Failed to delete item:", error);
-    toast.error("Could not remove that link.");
-  }
-}
-
-function* reorderItems({ groupId, itemIds }) {
-  yield call(ensureSignedIn);
-  // Reflect the drop immediately, then persist. Waiting for the round-trip
-  // makes the card visibly snap back to its old position first.
-  yield put({ type: "collections/reorderOptimistic", groupId, itemIds });
-
-  const items = yield select((store) => store.collections.items);
-  const update = {};
-  itemIds.forEach((itemId, index) => {
-    if (items[itemId]) {
-      update[`items.${itemId}`] = { ...items[itemId], order: index };
+    const response = yield call(callable, { url: link });
+    const metadata = response?.data || {};
+    const found = {};
+    for (const field of missing) {
+      const value = metadata[field];
+      if (typeof value === "string" && value.trim()) found[field] = value.trim();
     }
-  });
-
-  try {
-    yield call(fs.updateDoc, fs.doc(db, COLLECTION, groupId), update);
+    return { itemId: id, found };
   } catch (error) {
-    console.error("Failed to save the new order:", error);
-    toast.error("Could not save the new order.");
+    // One unreachable site should not end the lookup for the rest.
+    console.warn(`Could not look up details for ${link}:`, error?.message);
+    return { itemId: id, found: {} };
+  }
+}
+
+function* runSuggestions(groupId, items) {
+  yield call(ensureSignedIn);
+  const callable = httpsCallable(functions, "getUrlMetadata");
+  for (let index = 0; index < items.length; index += SUGGEST_CONCURRENCY) {
+    const batch = items.slice(index, index + SUGGEST_CONCURRENCY);
+    const results = yield all(batch.map((item) => call(lookUpDetails, callable, item)));
+    for (const result of results) {
+      yield put({ type: "collections/suggestionsResult", groupId, ...result });
+    }
+  }
+  yield put({ type: "collections/suggestionsFinished", groupId });
+}
+
+/**
+ * Looks up titles, descriptions and images for links missing some, and parks
+ * what it finds for the owner to review — nothing is applied until they
+ * accept it. Closing the review dialog cancels whatever is still running.
+ */
+function* suggestDetails({ groupId, items }) {
+  yield put({ type: "collections/suggestionsStarted", groupId, total: items.length });
+  yield race({
+    done: call(runSuggestions, groupId, items),
+    cancelled: take(
+      (action) =>
+        action.type === "collections/suggestionsCleared" && action.groupId === groupId
+    )
+  });
+}
+
+/**
+ * A link added in edit mode fetches its preview straight away, as it would
+ * outside edit mode, but into the draft: cancelling the edit drops it along
+ * with the link.
+ */
+function* fetchDraftItemDetails({ groupId, item }) {
+  yield put({ type: "collections/itemSaving", itemId: item.id, saving: true });
+  try {
+    yield call(ensureSignedIn);
+    const response = yield call(httpsCallable(functions, "getUrlMetadata"), {
+      url: item.link
+    });
+    yield put({
+      type: "collections/draftFillItem",
+      groupId,
+      itemId: item.id,
+      metadata: response?.data || {}
+    });
+  } catch (error) {
+    // A missing preview is cosmetic; "Fill in details" can try again later.
+    console.warn("Could not load a preview for that link:", error);
+  } finally {
+    yield put({ type: "collections/itemSaving", itemId: item.id, saving: false });
   }
 }
 
 export function* watchDataGroupsApp() {
   yield takeEvery("collections/subscribe", subscribeGroup);
   yield takeLatest("collections/create", createGroup);
-  yield takeLatest("collections/rename", renameGroup);
   yield takeLatest("collections/delete", deleteGroup);
   yield takeEvery("collections/createItem", createItem);
-  yield takeEvery("collections/updateItem", updateItem);
-  yield takeEvery("collections/deleteItem", deleteItem);
-  yield takeLatest("collections/reorder", reorderItems);
+  // One save at a time: a second press of Save while the first is in flight
+  // is ignored rather than writing the same changes twice.
+  yield takeLeading("collections/saveDraft", saveDraft);
+  yield takeLatest("collections/suggestDetails", suggestDetails);
+  yield takeEvery("collections/draftAddItem", fetchDraftItemDetails);
   yield takeLatest("session/fetchDomains", fetchAccessibleGroups);
 }

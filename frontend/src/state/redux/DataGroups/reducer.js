@@ -12,6 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {
+  applyItemEdit,
+  createDraft,
+  fillMissing
+} from "./drafts";
+
 // State is plain objects rather than Maps so it stays serializable — Redux
 // DevTools time-travel and the store's serializableCheck both depend on that.
 
@@ -29,8 +35,41 @@ const initialState = {
   // Set when a create succeeds so the form can navigate to the new collection.
   // Sagas have no router access, so the intent is parked here and the
   // component consumes it — rather than the old fixed 1-second setTimeout.
-  lastCreatedId: null
+  lastCreatedId: null,
+  // groupId -> the edit-mode draft (see drafts.js). Its presence is what puts
+  // a collection in edit mode.
+  drafts: {},
+  // groupId -> boolean, true while a draft's save is in flight
+  savingDrafts: {},
+  // groupId -> { status: "loading" | "ready", total, checked,
+  //              found: { itemId: { title?, snippet?, imageUrl? } } }
+  // Details looked up for links that are missing some, awaiting review.
+  suggestions: {}
 };
+
+/** Applies `update` to a group's draft; a no-op when there is none. */
+function withDraft(state, groupId, update) {
+  const draft = state.drafts?.[groupId];
+  if (!draft) return state;
+  return { ...state, drafts: { ...state.drafts, [groupId]: update(draft) } };
+}
+
+function without(map, key) {
+  if (!map || !(key in map)) return map || {};
+  const next = { ...map };
+  delete next[key];
+  return next;
+}
+
+/** Ends an edit session: the draft, its save flag and any suggestions go. */
+function endDraft(state, groupId) {
+  return {
+    ...state,
+    drafts: without(state.drafts, groupId),
+    savingDrafts: without(state.savingDrafts, groupId),
+    suggestions: without(state.suggestions, groupId)
+  };
+}
 
 /**
  * Orders items by their explicit `order` field.
@@ -109,7 +148,8 @@ export default function reducer(state = initialState, action) {
       delete groups[action.groupId];
       delete groupStatus[action.groupId];
 
-      return { ...state, groups, items, groupStatus };
+      // A deleted collection has nothing left to edit.
+      return endDraft({ ...state, groups, items, groupStatus }, action.groupId);
     }
 
     case "collections/createStarted": {
@@ -143,25 +183,155 @@ export default function reducer(state = initialState, action) {
       return { ...state, savingItems };
     }
 
-    // Applied immediately on drag so the list does not snap back while the
-    // write is in flight; the next snapshot confirms it.
-    case "collections/reorderOptimistic": {
+    // ---- edit-mode drafts ----------------------------------------------------
+
+    case "collections/draftStart": {
       const group = state.groups[action.groupId];
-      if (!group) return state;
-
-      const items = { ...state.items };
-      action.itemIds.forEach((itemId, index) => {
-        if (items[itemId]) items[itemId] = { ...items[itemId], order: index };
-      });
-
+      if (!group || state.drafts?.[action.groupId]) return state;
       return {
         ...state,
-        items,
-        groups: {
-          ...state.groups,
-          [action.groupId]: { ...group, itemIds: action.itemIds }
+        drafts: {
+          ...state.drafts,
+          [action.groupId]: createDraft(group, state.items)
         }
       };
+    }
+
+    case "collections/draftRename": {
+      return withDraft(state, action.groupId, (draft) => ({
+        ...draft,
+        title: String(action.title ?? "").trim() || draft.title
+      }));
+    }
+
+    case "collections/draftReorder": {
+      return withDraft(state, action.groupId, (draft) => {
+        // Only a permutation of what is already there is a reorder.
+        const same =
+          action.itemIds.length === draft.itemIds.length &&
+          action.itemIds.every((id) => draft.items[id]);
+        return same ? { ...draft, itemIds: action.itemIds } : draft;
+      });
+    }
+
+    case "collections/draftUpdateItem": {
+      return withDraft(state, action.groupId, (draft) => {
+        const item = draft.items[action.itemId];
+        if (!item) return draft;
+        return {
+          ...draft,
+          items: { ...draft.items, [action.itemId]: applyItemEdit(item, action.data) }
+        };
+      });
+    }
+
+    case "collections/draftRemoveItem": {
+      return withDraft(state, action.groupId, (draft) => ({
+        ...draft,
+        itemIds: draft.itemIds.filter((id) => id !== action.itemId),
+        items: without(draft.items, action.itemId)
+      }));
+    }
+
+    case "collections/draftAddItem": {
+      return withDraft(state, action.groupId, (draft) => {
+        if (draft.items[action.item.id]) return draft;
+        return {
+          ...draft,
+          itemIds: [...draft.itemIds, action.item.id],
+          items: { ...draft.items, [action.item.id]: action.item }
+        };
+      });
+    }
+
+    // A just-added link's preview arriving. Only empty fields are filled, so
+    // anything the owner typed in the meantime wins.
+    case "collections/draftFillItem": {
+      return withDraft(state, action.groupId, (draft) => {
+        const item = draft.items[action.itemId];
+        if (!item) return draft;
+        return {
+          ...draft,
+          items: { ...draft.items, [action.itemId]: fillMissing(item, action.metadata) }
+        };
+      });
+    }
+
+    case "collections/draftApplySuggestions": {
+      return withDraft(state, action.groupId, (draft) => {
+        const items = { ...draft.items };
+        for (const [itemId, found] of Object.entries(action.accepted || {})) {
+          if (items[itemId]) items[itemId] = fillMissing(items[itemId], found);
+        }
+        return { ...draft, items };
+      });
+    }
+
+    case "collections/draftSaving": {
+      const savingDrafts = { ...state.savingDrafts };
+      if (action.saving) {
+        savingDrafts[action.groupId] = true;
+      } else {
+        delete savingDrafts[action.groupId];
+      }
+      return { ...state, savingDrafts };
+    }
+
+    case "collections/draftDiscard":
+    case "collections/draftSaved": {
+      return endDraft(state, action.groupId);
+    }
+
+    // ---- suggested details -------------------------------------------------
+
+    case "collections/suggestionsStarted": {
+      return {
+        ...state,
+        suggestions: {
+          ...state.suggestions,
+          [action.groupId]: {
+            status: "loading",
+            total: action.total,
+            checked: 0,
+            found: {}
+          }
+        }
+      };
+    }
+
+    case "collections/suggestionsResult": {
+      const current = state.suggestions?.[action.groupId];
+      if (!current) return state;
+      const hasFound = action.found && Object.keys(action.found).length > 0;
+      return {
+        ...state,
+        suggestions: {
+          ...state.suggestions,
+          [action.groupId]: {
+            ...current,
+            checked: current.checked + 1,
+            found: hasFound
+              ? { ...current.found, [action.itemId]: action.found }
+              : current.found
+          }
+        }
+      };
+    }
+
+    case "collections/suggestionsFinished": {
+      const current = state.suggestions?.[action.groupId];
+      if (!current) return state;
+      return {
+        ...state,
+        suggestions: {
+          ...state.suggestions,
+          [action.groupId]: { ...current, status: "ready" }
+        }
+      };
+    }
+
+    case "collections/suggestionsCleared": {
+      return { ...state, suggestions: without(state.suggestions, action.groupId) };
     }
 
     // Returning `state` — not a fresh object — is what lets useSelector skip

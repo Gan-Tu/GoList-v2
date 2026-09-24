@@ -14,6 +14,7 @@
 
 import { describe, expect, it } from "vitest";
 import reducer, { sortItemIds } from "./reducer";
+import { draftUpdates, isDraftDirty } from "./drafts";
 
 const initial = reducer(undefined, { type: "@@INIT" });
 
@@ -116,38 +117,121 @@ describe("removed", () => {
   });
 });
 
-describe("reorderOptimistic", () => {
-  it("reorders ids and rewrites the order field without mutating state", () => {
-    const loaded = reducer(
-      initial,
-      snapshot("list-1", {
-        a: { id: "a", order: 0 },
-        b: { id: "b", order: 1 }
-      })
-    );
-    const before = loaded.items.a;
+describe("edit-mode drafts", () => {
+  const REMOVED = "<removed>";
+  const loaded = reducer(
+    initial,
+    snapshot("list-1", {
+      a: { id: "a", order: 0, link: "https://a.com", title: "A", snippet: "", imageUrl: "" },
+      b: { id: "b", order: 1, link: "https://b.com", title: "B", snippet: "Bee", imageUrl: "" }
+    })
+  );
+  const act = (state, type, extra = {}) =>
+    reducer(state, { type: `collections/${type}`, groupId: "list-1", ...extra });
+  const editing = act(loaded, "draftStart");
 
-    const state = reducer(loaded, {
-      type: "collections/reorderOptimistic",
-      groupId: "list-1",
-      itemIds: ["b", "a"]
-    });
+  it("edits a copy and leaves the saved collection alone", () => {
+    let state = act(editing, "draftRename", { title: "Renamed" });
+    state = act(state, "draftReorder", { itemIds: ["b", "a"] });
+    state = act(state, "draftUpdateItem", { itemId: "a", data: { title: "A2" } });
+    state = act(state, "draftRemoveItem", { itemId: "b" });
 
-    expect(state.groups["list-1"].itemIds).toEqual(["b", "a"]);
-    expect(state.items.a.order).toBe(1);
-    expect(state.items.b.order).toBe(0);
-    // The original object must be untouched — the old reducer mutated the
-    // group it had just copied out of the previous state.
-    expect(before.order).toBe(0);
+    expect(state.drafts["list-1"].title).toBe("Renamed");
+    expect(state.drafts["list-1"].itemIds).toEqual(["a"]);
+    expect(state.drafts["list-1"].items.a.title).toBe("A2");
+    // What visitors see does not change until the save lands.
+    expect(state.groups["list-1"]).toBe(loaded.groups["list-1"]);
+    expect(state.items).toBe(loaded.items);
   });
 
-  it("ignores a reorder for a group that is not loaded", () => {
-    const state = reducer(initial, {
-      type: "collections/reorderOptimistic",
-      groupId: "missing",
-      itemIds: ["a"]
+  it("describes nothing to save for an untouched draft", () => {
+    expect(draftUpdates(editing.drafts["list-1"], REMOVED)).toEqual({});
+    expect(isDraftDirty(editing.drafts["list-1"])).toBe(false);
+  });
+
+  // A reorder should not rewrite every description, and a collaborator's
+  // edit to a field the owner never touched must survive the save.
+  it("saves only the fields that changed, as field paths", () => {
+    let state = act(editing, "draftRename", { title: "Renamed" });
+    state = act(state, "draftUpdateItem", { itemId: "a", data: { snippet: "Aye" } });
+    state = act(state, "draftRemoveItem", { itemId: "b" });
+
+    expect(draftUpdates(state.drafts["list-1"], REMOVED)).toEqual({
+      title: "Renamed",
+      "items.a.snippet": "Aye",
+      "items.b": REMOVED
     });
-    expect(state).toBe(initial);
+  });
+
+  it("rewrites order only when the sequence changed", () => {
+    const reordered = act(editing, "draftReorder", { itemIds: ["b", "a"] });
+    expect(draftUpdates(reordered.drafts["list-1"], REMOVED)).toEqual({
+      "items.b.order": 0,
+      "items.a.order": 1
+    });
+
+    // Stored orders with a gap (left by an earlier delete) are not a change.
+    const gapped = act(
+      reducer(
+        initial,
+        snapshot("list-1", {
+          a: { id: "a", order: 0, link: "https://a.com" },
+          c: { id: "c", order: 5, link: "https://c.com" }
+        })
+      ),
+      "draftStart"
+    );
+    expect(draftUpdates(gapped.drafts["list-1"], REMOVED)).toEqual({});
+  });
+
+  it("writes an added link whole, at the end", () => {
+    const item = { id: "n", link: "https://n.com", title: "", snippet: "", imageUrl: "" };
+    const state = act(editing, "draftAddItem", { item });
+    expect(draftUpdates(state.drafts["list-1"], REMOVED)).toEqual({
+      "items.n": { ...item, order: 2 }
+    });
+  });
+
+  it("fills only missing details, never what is already there", () => {
+    const state = act(editing, "draftApplySuggestions", {
+      accepted: {
+        a: { title: "Other", snippet: "From the page", imageUrl: "https://a.com/og.png" },
+        b: { snippet: "Not used" }
+      }
+    });
+    const { a, b } = state.drafts["list-1"].items;
+    expect(a.title).toBe("A");
+    expect(a.snippet).toBe("From the page");
+    expect(a.imageUrl).toBe("https://a.com/og.png");
+    expect(b.snippet).toBe("Bee");
+  });
+
+  it("drops the draft and its suggestions on discard, save or delete", () => {
+    const withSuggestions = act(editing, "suggestionsStarted", { total: 1 });
+    for (const type of ["draftDiscard", "draftSaved", "removed"]) {
+      const state = act(withSuggestions, type);
+      expect(state.drafts["list-1"]).toBeUndefined();
+      expect(state.suggestions["list-1"]).toBeUndefined();
+    }
+  });
+
+  it("collects suggestions as each link is checked", () => {
+    let state = act(editing, "suggestionsStarted", { total: 2 });
+    state = act(state, "suggestionsResult", { itemId: "a", found: { snippet: "S" } });
+    state = act(state, "suggestionsResult", { itemId: "b", found: {} });
+    state = act(state, "suggestionsFinished");
+
+    expect(state.suggestions["list-1"]).toEqual({
+      status: "ready",
+      total: 2,
+      checked: 2,
+      found: { a: { snippet: "S" } }
+    });
+  });
+
+  it("ignores draft actions for a collection that is not being edited", () => {
+    const state = act(loaded, "draftRename", { title: "Nope" });
+    expect(state).toBe(loaded);
   });
 });
 

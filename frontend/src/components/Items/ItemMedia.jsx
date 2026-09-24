@@ -129,7 +129,11 @@ function MediaImage({ src, seed, priority }) {
         referrerPolicy="no-referrer"
         {...handlers}
         className={classNames(
-          "transition-opacity duration-200 ease-out",
+          // White behind the image itself: a transparent logo is drawn for a
+          // white page, and on a dark tile its dark lettering all but
+          // disappears. Opaque images cover it; before load it is hidden
+          // with the image.
+          "bg-white transition-opacity duration-200 ease-out",
           status === "loaded" ? "opacity-100" : "opacity-0",
           isTile
             ? classNames(TILE_CLASS, "object-cover shadow-card")
@@ -201,7 +205,8 @@ function ThumbnailImage({ src, seed, priority, letterClassName }) {
         referrerPolicy="no-referrer"
         {...handlers}
         className={classNames(
-          "absolute inset-0 h-full w-full transition-opacity duration-200 ease-out",
+          // White backing for transparent logos; see MediaImage.
+          "absolute inset-0 h-full w-full bg-white transition-opacity duration-200 ease-out",
           status === "loaded" ? "opacity-100" : "opacity-0",
           shape === "square" ? "object-contain" : "object-cover",
           shape === "tall" && "object-top"

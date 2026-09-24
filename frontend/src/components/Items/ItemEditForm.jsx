@@ -12,19 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useDispatch } from "react-redux";
 import { ItemCardView } from "./ItemCard";
 import Button from "../Utilities/Button";
 import { ModalActions } from "../Utilities/Modal";
-import TextInput from "../Utilities/TextInput";
+import TextInput, { labelClass } from "../Utilities/TextInput";
 import { safeHref } from "../Utilities/Helpers";
-import { EyeIcon, EyeSlashIcon } from "../Utilities/SvgIcons";
-import {
-  useGroupHasImages,
-  useItemData,
-  useItemIsSaving
-} from "../../hooks/data";
+import { EyeIcon, EyeSlashIcon, TrashIcon } from "../Utilities/SvgIcons";
+import { useDraftHasImages, useDraftItem } from "../../hooks/data";
 
 const FIELDS = ["link", "title", "snippet", "imageUrl"];
 const TITLE_LIMIT = 200;
@@ -40,8 +36,19 @@ const URL_FIELD_PROPS = {
   autoComplete: "off"
 };
 
-function hasChanges(original, draft) {
-  return FIELDS.some((field) => (original?.[field] || "") !== (draft?.[field] || ""));
+/**
+ * Only the fields the owner changed in this form. A link added moments ago may
+ * still be fetching its preview; sending every field would blank the title
+ * that arrives while the form is open.
+ */
+function changedFields(start, values) {
+  const changed = {};
+  for (const field of FIELDS) {
+    if ((start?.[field] || "") !== (values?.[field] || "")) {
+      changed[field] = values[field] || "";
+    }
+  }
+  return changed;
 }
 
 /**
@@ -58,33 +65,28 @@ function useSettledValue(value, delay = 400) {
   return settled;
 }
 
+/**
+ * Edits one link of the edit-mode draft. Done stages the change with the
+ * rest of the edit; it is saved (or thrown away) with them.
+ */
 export default function ItemEditForm({
   itemId,
   groupId,
-  onSaved,
+  onDone,
   onCancel,
   firstFieldRef
 }) {
   const dispatch = useDispatch();
-  const original = useItemData(itemId);
-  const isSaving = useItemIsSaving(itemId);
-  const groupHasImages = useGroupHasImages(groupId);
+  const original = useDraftItem(groupId, itemId);
+  const groupHasImages = useDraftHasImages(groupId);
   const fieldId = useId();
 
+  // What the form opened with, to tell the owner's changes from updates
+  // (a preview arriving) that happened while it was open.
+  const [start] = useState(() => ({ ...original }));
   const [draft, setDraft] = useState(() => ({ ...original }));
   const [showPreview, setShowPreview] = useState(true);
-  const submitted = useRef(false);
   const previewImageUrl = useSettledValue(draft.imageUrl || "");
-
-  // Closes the dialog when the write actually completes, rather than on the
-  // fixed 1-second timer the previous version used — which closed the modal
-  // whether or not the save had landed.
-  useEffect(() => {
-    if (submitted.current && !isSaving) {
-      submitted.current = false;
-      onSaved?.();
-    }
-  }, [isSaving, onSaved]);
 
   const update = (field) => (value) =>
     setDraft((current) => ({ ...current, [field]: value }));
@@ -97,12 +99,18 @@ export default function ItemEditForm({
   const onSubmit = (event) => {
     event.preventDefault();
     if (!hasLink || !withinLimits) return;
-    if (!hasChanges(original, draft)) {
-      onSaved?.();
-      return;
+    const data = changedFields(start, draft);
+    if (Object.keys(data).length > 0) {
+      dispatch({ type: "collections/draftUpdateItem", groupId, itemId, data });
     }
-    submitted.current = true;
-    dispatch({ type: "collections/updateItem", itemId, groupId, data: draft });
+    onDone?.();
+  };
+
+  // No second confirmation: like every edit-mode change it is only staged,
+  // and cancelling the edit brings the link back.
+  const onRemove = () => {
+    dispatch({ type: "collections/draftRemoveItem", groupId, itemId });
+    onDone?.();
   };
 
   // The preview is the grid's own card, in the layout the grid is using, so
@@ -113,13 +121,32 @@ export default function ItemEditForm({
 
   return (
     <form onSubmit={onSubmit}>
-      {showPreview && (
-        <div className="mb-6 rounded-2xl bg-canvas p-4 ring-1 ring-inset ring-hairline sm:px-6">
-          <div className="mx-auto max-w-[18rem]">
-            <ItemCardView data={preview} layout={previewLayout} preview />
-          </div>
+      <div className="mb-6">
+        <div className="mb-1.5 flex items-center justify-between gap-3">
+          <p className={labelClass}>Preview</p>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="-mr-2"
+            aria-expanded={showPreview}
+            onClick={() => setShowPreview((value) => !value)}
+          >
+            {showPreview ? (
+              <EyeSlashIcon className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+            ) : (
+              <EyeIcon className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+            )}
+            {showPreview ? "Hide" : "Show"}
+          </Button>
         </div>
-      )}
+        {showPreview && (
+          <div className="rounded-2xl bg-canvas p-4 ring-1 ring-inset ring-hairline sm:px-6">
+            <div className="mx-auto max-w-[18rem]">
+              <ItemCardView data={preview} layout={previewLayout} preview />
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="space-y-5">
         <TextInput
@@ -128,7 +155,6 @@ export default function ItemEditForm({
           labelText="URL"
           value={draft.link}
           setValue={update("link")}
-          isDisabled={isSaving}
           isRequired
           placeholder="example.com/article"
           {...URL_FIELD_PROPS}
@@ -138,7 +164,6 @@ export default function ItemEditForm({
           labelText="Title"
           value={draft.title}
           setValue={update("title")}
-          isDisabled={isSaving}
           showCharacterCount
           characterLimit={TITLE_LIMIT}
           hint="Leave blank to show the site’s name instead."
@@ -148,7 +173,6 @@ export default function ItemEditForm({
           labelText="Description"
           value={draft.snippet}
           setValue={update("snippet")}
-          isDisabled={isSaving}
           showCharacterCount
           characterLimit={SNIPPET_LIMIT}
           isTextArea
@@ -159,34 +183,26 @@ export default function ItemEditForm({
           labelText="Thumbnail URL"
           value={draft.imageUrl}
           setValue={update("imageUrl")}
-          isDisabled={isSaving}
           isOptional
           placeholder="example.com/image.png"
           {...URL_FIELD_PROPS}
         />
       </div>
 
+      {/* The destructive action sits apart, at the left on desktop and at
+          the bottom of the stack on a phone. */}
       <ModalActions>
-        <Button
-          variant="ghost"
-          className="sm:mr-auto"
-          onClick={() => setShowPreview((value) => !value)}
-        >
-          {showPreview ? (
-            <EyeSlashIcon className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
-          ) : (
-            <EyeIcon className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
-          )}
-          {showPreview ? "Hide preview" : "Show preview"}
+        <Button variant="danger-ghost" className="sm:mr-auto" onClick={onRemove}>
+          <TrashIcon className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+          Remove link
         </Button>
         <Button onClick={onCancel}>Cancel</Button>
         <Button
           type="submit"
           variant="primary"
-          loading={isSaving}
           disabled={!hasLink || !withinLimits}
         >
-          {isSaving ? "Saving…" : "Save"}
+          Done
         </Button>
       </ModalActions>
     </form>

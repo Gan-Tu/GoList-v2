@@ -107,7 +107,8 @@ export default function SortableItemList({ groupId, itemIds, wideThumbnails }) {
   const accessibility = useMemo(() => {
     // Read at announcement time rather than subscribed to, so the list does
     // not re-render whenever any item's metadata changes.
-    const nameOf = (id) => itemLabel(store.getState().collections.items[id]);
+    const nameOf = (id) =>
+      itemLabel(store.getState().collections.drafts?.[groupId]?.items[id]);
     const positionOf = (id) =>
       `position ${itemIds.indexOf(id) + 1} of ${itemIds.length}`;
     // dnd-kit reports the row as over its own slot the moment it is picked
@@ -137,7 +138,7 @@ export default function SortableItemList({ groupId, itemIds, wideThumbnails }) {
           `Reordering cancelled. ${nameOf(active.id)} is back at ${positionOf(active.id)}.`
       }
     };
-  }, [store, itemIds]);
+  }, [store, groupId, itemIds]);
 
   const onDragEnd = ({ active, over }) => {
     setBodyCursor("");
@@ -145,8 +146,10 @@ export default function SortableItemList({ groupId, itemIds, wideThumbnails }) {
     const oldIndex = itemIds.indexOf(active.id);
     const newIndex = itemIds.indexOf(over.id);
     if (oldIndex < 0 || newIndex < 0) return;
+    // Into the draft: the new order is saved with everything else, or
+    // dropped on Cancel.
     dispatch({
-      type: "collections/reorder",
+      type: "collections/draftReorder",
       groupId,
       itemIds: arrayMove(itemIds, oldIndex, newIndex)
     });

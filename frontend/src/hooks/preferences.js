@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const VIEW_KEY = "golist.collectionView";
 const VIEWS = ["grid", "list"];
@@ -35,12 +35,24 @@ function readView() {
  * "grid" (cards).
  *
  * One choice for every collection, remembered in this browser: someone who
- * would rather scan a list wants it on the next list they open too. It is read
- * while rendering, so a returning visitor's first frame (and the loading
- * skeleton) is already in their layout.
+ * would rather scan a list wants it on the next list they open too — any
+ * goli.st address, after a reload or a week later. It is read while
+ * rendering, so a returning visitor's first frame (and the loading skeleton)
+ * is already in their layout. localStorage rather than a cookie: the server
+ * never needs it, and a cookie would ride along on every request.
  */
 export function useCollectionView() {
   const [view, setView] = useState(readView);
+
+  // Another open tab switching layout switches this one too, rather than
+  // leaving two tabs of the same site disagreeing until the next reload.
+  useEffect(() => {
+    const onStorage = (event) => {
+      if (event.key === VIEW_KEY) setView(readView());
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   const update = useCallback((next) => {
     setView(next);

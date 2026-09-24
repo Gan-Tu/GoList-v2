@@ -15,6 +15,7 @@
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useParams } from "react-router-dom";
+import toast from "react-hot-toast";
 import ItemCard from "../Items/ItemCard";
 import { EditableItemRow } from "../Items/ItemControls";
 import { ROW_LIST_CLASS } from "../Items/ItemRow";
@@ -24,6 +25,7 @@ import ViewToggle from "./ViewToggle";
 import NotFound from "../Layout/NotFound";
 import Button from "../Utilities/Button";
 import CopyLinkButton from "../Utilities/CopyLinkButton";
+import Modal, { ModalActions } from "../Utilities/Modal";
 import StatusMessage from "../Utilities/StatusMessage";
 import { fieldClass } from "../Utilities/TextInput";
 import { classNames } from "../Utilities/Helpers";
@@ -39,21 +41,30 @@ import {
   PencilIcon,
   PencilSquareIcon,
   PlusIcon,
+  SparklesIcon,
   TrashIcon
 } from "../Utilities/SvgIcons";
 import {
   useCanDelete,
   useCanEdit,
+  useDraft,
+  useDraftHasImages,
+  useDraftIsDirty,
   useGroup,
   useGroupHasImages,
   useGroupStatus,
+  useIsSavingDraft,
   useItemIds
 } from "../../hooks/data";
 import { useCollectionView } from "../../hooks/preferences";
+import { missingDetails } from "../../state/redux/DataGroups/drafts";
 import { useDocumentTitle } from "../../hooks/session";
 
 // Drag-and-drop is a ~16 KB gzip chunk that only an owner in edit mode needs.
 const SortableItemList = lazy(() => import("./SortableItemList"));
+// So is reviewing looked-up details. Mounted as soon as edit mode starts, so
+// it has arrived by the time "Fill in details" is pressed.
+const SuggestDetailsDialog = lazy(() => import("./SuggestDetailsDialog"));
 
 const PAGE_CLASS = "mx-auto w-full max-w-6xl";
 const GRID_CLASS = "grid gap-4 sm:grid-cols-2 lg:grid-cols-3";
@@ -215,31 +226,13 @@ function TitleEditor({ title, onSave, onCancel }) {
   );
 }
 
-/** Two labels in one grid cell: the button keeps the wider one's width. */
-function SwapLabel({ showSecond, first, second }) {
-  return (
-    <span className="grid">
-      <span
-        className={classNames("col-start-1 row-start-1", showSecond && "invisible")}
-        aria-hidden={showSecond || undefined}
-      >
-        {first}
-      </span>
-      <span
-        className={classNames("col-start-1 row-start-1", !showSecond && "invisible")}
-        aria-hidden={!showSecond || undefined}
-      >
-        {second}
-      </span>
-    </span>
-  );
-}
-
 function EditToolbar({
   itemCount,
   isRenaming,
+  isDirty,
   canDelete,
   renameButtonRef,
+  onSuggest,
   onRename,
   onDelete
 }) {
@@ -247,30 +240,45 @@ function EditToolbar({
   const HintIcon = canReorder ? ArrowsUpDownIcon : CheckCircleIcon;
 
   return (
-    <div className="mt-6 flex animate-fade-in flex-col gap-2 rounded-2xl border border-hairline bg-surface p-2 pl-3.5 shadow-card sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:pl-4">
-      <p className="flex min-w-0 items-start gap-2 py-1.5 text-[13px] leading-5 text-fg-muted">
-        <HintIcon
-          className="mt-0.5 h-4 w-4 shrink-0 text-fg-subtle"
-          strokeWidth={2}
-          aria-hidden="true"
-        />
-        {canReorder ? (
+    <div className="mt-6 flex animate-fade-in flex-col gap-2 rounded-2xl border border-hairline bg-surface p-2 pl-3.5 shadow-card lg:flex-row lg:items-center lg:justify-between lg:gap-4 lg:pl-4">
+      <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1.5 py-1.5 text-[13px] leading-5 text-fg-muted">
+        <p className="flex min-w-0 items-start gap-2">
+          <HintIcon
+            className="mt-0.5 h-4 w-4 shrink-0 text-fg-subtle"
+            strokeWidth={2}
+            aria-hidden="true"
+          />
           <span>
-            Drag to reorder — changes save automatically.
-            <span className="sr-only">
-              {" "}
-              With a keyboard, focus a link’s handle and press Space to pick it
-              up, move it with the arrow keys, then press Space again to drop
-              it.
-            </span>
+            {canReorder && "Drag to reorder. "}
+            Nothing is saved until you press Save.
+            {canReorder && (
+              <span className="sr-only">
+                {" "}
+                With a keyboard, focus a link’s handle and press Space to pick
+                it up, move it with the arrow keys, then press Space again to
+                drop it.
+              </span>
+            )}
           </span>
-        ) : (
-          <span>Changes save automatically.</span>
+        </p>
+        {isDirty && (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-2 py-0.5 text-[11px] font-medium leading-4 text-accent-fg">
+            <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
+            Unsaved changes
+          </span>
         )}
-      </p>
+      </div>
       {/* Stacked on a phone, the ghost buttons' icons line up under the
           hint's icon. */}
-      <div className="-ml-4 flex flex-wrap items-center gap-1 sm:ml-0">
+      <div className="-ml-4 flex flex-wrap items-center gap-1 lg:ml-0">
+        <Button
+          variant="ghost"
+          onClick={onSuggest}
+          title="Look up missing titles, descriptions and images"
+        >
+          <SparklesIcon className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+          Fill in details
+        </Button>
         <Button
           ref={renameButtonRef}
           variant="ghost"
@@ -302,12 +310,21 @@ function CollectionPage({ id }) {
   const hasImages = useGroupHasImages(id);
   const [view, setView] = useCollectionView();
 
+  // Edit mode is a draft (state/redux/DataGroups/drafts.js): every change
+  // lands in it, and Save writes them all at once or Cancel drops them. It
+  // lives in the store, so leaving the page and coming back resumes it.
+  const draft = useDraft(id);
+  const isDirty = useDraftIsDirty(id);
+  const draftHasImages = useDraftHasImages(id);
+  const isSavingDraft = useIsSavingDraft(id);
+
   // Editing and the open dialog are separate state. They used to share one
   // `mode`, so opening "Add link" or "Delete" from edit mode silently left
   // it, and cancelling the dialog dropped the user out of editing.
-  const [isEditing, setIsEditing] = useState(false);
-  const [dialog, setDialog] = useState(null); // "add" | "delete" | null
+  const [dialog, setDialog] = useState(null); // "add" | "delete" | "discard" | "suggest" | null
   const [isRenaming, setIsRenaming] = useState(false);
+  // Remounts the suggestions dialog per lookup, so its selection starts fresh.
+  const [suggestRun, setSuggestRun] = useState(0);
 
   const renameButtonRef = useRef(null);
   const refocusRename = useRef(false);
@@ -323,6 +340,19 @@ function CollectionPage({ id }) {
       renameButtonRef.current?.focus();
     }
   }, [isRenaming]);
+
+  // Closing the tab or reloading with unsaved edits asks first; the browser
+  // shows its own "Leave site?" prompt.
+  const hasUnsavedEdits = canEdit && Boolean(draft) && isDirty;
+  useEffect(() => {
+    if (!hasUnsavedEdits) return undefined;
+    const warn = (event) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [hasUnsavedEdits]);
 
   if (status === "notFound") {
     return (
@@ -364,13 +394,51 @@ function CollectionPage({ id }) {
   }
 
   // Losing edit rights mid-edit (signing out, say) ends editing too.
-  const editing = canEdit && isEditing;
-  const count = itemIds.length;
+  const editing = canEdit && Boolean(draft);
+  // In edit mode the page shows the draft; everywhere else, what is saved.
+  const title = editing ? draft.title : group.title;
+  const shownIds = editing ? draft.itemIds : itemIds;
+  const shownHasImages = editing ? draftHasImages : hasImages;
+  const count = shownIds.length;
   const shareUrl = `${window.location.origin}/${id}`;
   // Edit mode has its own row layout, and an empty list has nothing to lay out.
   const showViewToggle = !editing && count > 0;
 
   const closeDialog = () => setDialog(null);
+
+  const startEditing = () => dispatch({ type: "collections/draftStart", groupId: id });
+  const saveEdits = () => dispatch({ type: "collections/saveDraft", groupId: id });
+  const discardEdits = () => {
+    setDialog(null);
+    setIsRenaming(false);
+    dispatch({ type: "collections/draftDiscard", groupId: id });
+  };
+  // Leaving with nothing changed needs no confirmation.
+  const cancelEditing = () => (isDirty ? setDialog("discard") : discardEdits());
+
+  // Looks up details only for links missing some; the dialog shows the
+  // results as they arrive and applies none until the owner picks.
+  const suggestDetails = () => {
+    const items = draft.itemIds
+      .map((itemId) => ({
+        id: itemId,
+        link: draft.items[itemId]?.link,
+        missing: missingDetails(draft.items[itemId])
+      }))
+      .filter((item) => item.link && item.missing.length > 0);
+    if (items.length === 0) {
+      toast("Every link already has a title, description and image.");
+      return;
+    }
+    dispatch({ type: "collections/suggestDetails", groupId: id, items });
+    setSuggestRun((run) => run + 1);
+    setDialog("suggest");
+  };
+  const closeSuggestions = () => {
+    // Stops any lookups still running; their results are not needed.
+    dispatch({ type: "collections/suggestionsCleared", groupId: id });
+    setDialog(null);
+  };
   const stopRenaming = () => {
     refocusRename.current = true;
     setIsRenaming(false);
@@ -386,16 +454,16 @@ function CollectionPage({ id }) {
         <div className={classNames("col-span-2 min-w-0", !isRenaming && "sm:col-span-1")}>
           {isRenaming ? (
             <TitleEditor
-              title={group.title}
-              onSave={(title) => {
-                dispatch({ type: "collections/rename", groupId: id, title });
+              title={title}
+              onSave={(next) => {
+                dispatch({ type: "collections/draftRename", groupId: id, title: next });
                 stopRenaming();
               }}
               onCancel={stopRenaming}
             />
           ) : (
             <h1 className="text-balance text-3xl font-semibold tracking-tight text-fg [overflow-wrap:anywhere] sm:text-4xl">
-              {group.title || "Untitled collection"}
+              {title || "Untitled collection"}
             </h1>
           )}
         </div>
@@ -424,25 +492,34 @@ function CollectionPage({ id }) {
 
         {!isRenaming && (
           <div className="col-span-2 mt-2 flex flex-wrap items-center gap-2 sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:mt-0.5 sm:self-start sm:justify-self-end">
-            <CopyLinkButton url={shareUrl} />
+            {/* Sharing waits until the edits are saved; while editing the
+                row is Add, Cancel and Save, which also keeps it to three
+                controls on a phone. */}
+            {!editing && <CopyLinkButton url={shareUrl} />}
             {canEdit && (
               <>
                 <Button onClick={() => setDialog("add")} className="max-sm:w-9 max-sm:px-0">
                   <PlusIcon className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
                   <span className="max-sm:sr-only">Add link</span>
                 </Button>
-                <Button
-                  variant={editing ? "primary" : "secondary"}
-                  aria-pressed={editing}
-                  onClick={() => setIsEditing(!editing)}
-                >
-                  {editing ? (
-                    <CheckIcon className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
-                  ) : (
+                {editing ? (
+                  <>
+                    <Button onClick={cancelEditing} disabled={isSavingDraft}>
+                      Cancel
+                    </Button>
+                    <Button variant="primary" onClick={saveEdits} loading={isSavingDraft}>
+                      {!isSavingDraft && (
+                        <CheckIcon className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+                      )}
+                      {isSavingDraft ? "Saving…" : "Save"}
+                    </Button>
+                  </>
+                ) : (
+                  <Button onClick={startEditing}>
                     <PencilSquareIcon className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
-                  )}
-                  <SwapLabel showSecond={editing} first="Edit" second="Done" />
-                </Button>
+                    Edit
+                  </Button>
+                )}
               </>
             )}
           </div>
@@ -453,8 +530,10 @@ function CollectionPage({ id }) {
         <EditToolbar
           itemCount={count}
           isRenaming={isRenaming}
+          isDirty={isDirty}
           canDelete={canDelete}
           renameButtonRef={renameButtonRef}
+          onSuggest={suggestDetails}
           onRename={() => setIsRenaming(true)}
           onDelete={() => setDialog("delete")}
         />
@@ -469,12 +548,12 @@ function CollectionPage({ id }) {
               // The same rows with inert handles, so the list stays usable
               // while the chunk loads and nothing moves when it arrives.
               <ul className={ROW_LIST_CLASS}>
-                {itemIds.map((itemId) => (
+                {shownIds.map((itemId) => (
                   <li key={itemId}>
                     <EditableItemRow
                       id={itemId}
                       groupId={id}
-                      wideThumbnail={hasImages}
+                      wideThumbnail={shownHasImages}
                     />
                   </li>
                 ))}
@@ -483,8 +562,8 @@ function CollectionPage({ id }) {
           >
             <SortableItemList
               groupId={id}
-              itemIds={itemIds}
-              wideThumbnails={hasImages}
+              itemIds={shownIds}
+              wideThumbnails={shownHasImages}
             />
           </Suspense>
         ) : view === "list" ? (
@@ -546,6 +625,33 @@ function CollectionPage({ id }) {
           onClose={closeDialog}
         />
       )}
+      {editing && (
+        <Suspense fallback={null}>
+          <SuggestDetailsDialog
+            key={suggestRun}
+            groupId={id}
+            isOpen={dialog === "suggest"}
+            onClose={closeSuggestions}
+          />
+        </Suspense>
+      )}
+      <Modal
+        title="Discard your changes?"
+        size="sm"
+        isOpen={dialog === "discard"}
+        onClose={closeDialog}
+      >
+        <p className="text-sm leading-5 text-fg-muted">
+          Your edits to this collection haven’t been saved. Discarding puts
+          everything back the way it was.
+        </p>
+        <ModalActions>
+          <Button onClick={closeDialog}>Keep editing</Button>
+          <Button variant="danger" onClick={discardEdits}>
+            Discard changes
+          </Button>
+        </ModalActions>
+      </Modal>
     </div>
   );
 }

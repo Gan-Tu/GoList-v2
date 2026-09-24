@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import { useSelector } from "react-redux";
+import { isDraftDirty } from "../state/redux/DataGroups/drafts";
 
 // useSelector compares results by reference. Returning a fresh `[]` from a
 // selector — as `... || []` does — looks like a new value on every store read
@@ -104,4 +105,47 @@ export function useMyCollections() {
 
 export function useMyCollectionsStatus() {
   return useSelector((store) => store.session.domainsStatus);
+}
+
+// ---- edit-mode drafts -------------------------------------------------------
+// While a collection is being edited, its edit-mode views read the draft (see
+// state/redux/DataGroups/drafts.js); everyone else keeps seeing the saved
+// collection until Save.
+
+/** The collection's edit-mode draft, or undefined when it is not being edited. */
+export function useDraft(groupId) {
+  return useSelector((store) => store.collections.drafts?.[groupId]);
+}
+
+export function useDraftItem(groupId, itemId) {
+  return useSelector(
+    (store) => store.collections.drafts?.[groupId]?.items[itemId]
+  );
+}
+
+/** Whether the draft differs from the saved collection. */
+export function useDraftIsDirty(groupId) {
+  return useSelector((store) =>
+    isDraftDirty(store.collections.drafts?.[groupId])
+  );
+}
+
+/** useGroupHasImages, for the draft: added images count straight away. */
+export function useDraftHasImages(groupId) {
+  return useSelector((store) => {
+    const draft = store.collections.drafts?.[groupId];
+    if (!draft) return false;
+    return draft.itemIds.some((itemId) =>
+      Boolean(String(draft.items[itemId]?.imageUrl || "").trim())
+    );
+  });
+}
+
+export function useIsSavingDraft(groupId) {
+  return useSelector((store) => Boolean(store.collections.savingDrafts?.[groupId]));
+}
+
+/** Details looked up for the draft's links, awaiting the owner's review. */
+export function useSuggestions(groupId) {
+  return useSelector((store) => store.collections.suggestions?.[groupId]);
 }

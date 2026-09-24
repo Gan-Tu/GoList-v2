@@ -21,11 +21,14 @@ import Button from "../Utilities/Button";
 import Modal from "../Utilities/Modal";
 import { classNames } from "../Utilities/Helpers";
 import { GripVerticalIcon, PencilIcon, TrashIcon } from "../Utilities/SvgIcons";
-import { useItemData, useItemIsSaving } from "../../hooks/data";
+import { useDraftItem, useItemIsSaving } from "../../hooks/data";
 
 // This module is everything edit mode needs per link except drag-and-drop,
 // which stays in the lazily-loaded SortableItemList. The static rows shown
 // while that chunk downloads come from here too, so they match exactly.
+//
+// Rows show the edit-mode draft, and every change here goes into it; nothing
+// reaches the saved collection until the owner presses Save.
 
 /**
  * The trailing Edit / Delete buttons of an edit-mode row, and their dialogs.
@@ -50,9 +53,7 @@ export function ItemControls({ id, groupId, describedBy }) {
           itemId={id}
           groupId={groupId}
           firstFieldRef={firstFieldRef}
-          // Closing on an explicit save result, rather than the old 1-second
-          // timer that fired whether or not the write had landed.
-          onSaved={close}
+          onDone={close}
           onCancel={close}
         />
       </Modal>
@@ -77,11 +78,11 @@ export function ItemControls({ id, groupId, describedBy }) {
         <Button
           variant="danger-ghost"
           iconOnly
-          title="Delete link"
+          title="Remove link"
           aria-describedby={describedBy}
           onClick={() => setDialog("delete")}
         >
-          <span className="sr-only">Delete link</span>
+          <span className="sr-only">Remove link</span>
           <TrashIcon className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
         </Button>
       </div>
@@ -115,7 +116,7 @@ export const EditableItemRow = forwardRef(function EditableItemRow(
   },
   ref
 ) {
-  const data = useItemData(id);
+  const data = useDraftItem(groupId, id);
   const isSaving = useItemIsSaving(id);
   const titleId = useId();
 

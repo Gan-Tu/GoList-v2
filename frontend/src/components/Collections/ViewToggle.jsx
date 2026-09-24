@@ -15,9 +15,10 @@
 import { classNames } from "../Utilities/Helpers";
 import { QueueListIcon, Squares2X2Icon } from "../Utilities/SvgIcons";
 
+// List first: it is the default, and the denser way to skim a collection.
 const OPTIONS = [
-  { value: "grid", label: "Grid view", Icon: Squares2X2Icon },
-  { value: "list", label: "List view", Icon: QueueListIcon }
+  { value: "list", label: "List view", Icon: QueueListIcon },
+  { value: "grid", label: "Gallery view", Icon: Squares2X2Icon }
 ];
 
 /**
