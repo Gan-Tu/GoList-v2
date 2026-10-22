@@ -51,6 +51,9 @@ jobs:
       - name: Test security rules
         run: npm run test:rules
 
+      - name: Test API integration
+        run: npm run test:api
+
       # Rules, indexes and functions were previously never deployed by CI at
       # all — only hosting was. They drifted from the repository and had to be
       # pushed by hand, which is exactly how a project ends up with no rules

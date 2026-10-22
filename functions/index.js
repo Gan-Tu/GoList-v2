@@ -14,7 +14,8 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
-const admin = require("firebase-admin");
+const { initializeApp } = require("firebase-admin/app");
+const { getFirestore } = require("firebase-admin/firestore");
 const logger = require("firebase-functions/logger");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const { HttpsError, onCall, onRequest } = require("firebase-functions/v2/https");
@@ -31,8 +32,8 @@ const {
 } = require("./lib/metadata");
 const { consume } = require("./lib/rateLimit");
 
-admin.initializeApp();
-const db = admin.firestore();
+initializeApp();
+const db = getFirestore();
 db.settings({ ignoreUndefinedProperties: true });
 
 setGlobalOptions({

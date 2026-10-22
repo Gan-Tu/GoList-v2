@@ -105,7 +105,7 @@ export const ShortUrlField = forwardRef(function ShortUrlField(
         aria-invalid={invalid ? "true" : undefined}
         className={classNames(
           "min-w-0 flex-1 self-stretch border-0 bg-transparent pl-0 text-fg shadow-none",
-          "placeholder:text-fg-subtle focus:outline-none focus:ring-0",
+          "placeholder:text-fg-subtle focus:outline-hidden focus:ring-0",
           styles.input
         )}
         {...props}

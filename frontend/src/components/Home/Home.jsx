@@ -141,7 +141,7 @@ function Hero() {
         {/* The one place color comes from outside the tokens: the logo's
             gradient. Every stop clears 3:1 against the canvas as large text
             in its theme. `box-decoration-clone` restarts it on each line. */}
-        <span className="box-decoration-clone bg-gradient-to-r from-[#059669] via-[#0891b2] to-[#0071e3] bg-clip-text text-transparent dark:from-[#34d399] dark:via-[#22d3ee] dark:to-[#40a2ff]">
+        <span className="box-decoration-clone bg-linear-to-r from-[#059669] via-[#0891b2] to-[#0071e3] bg-clip-text text-transparent dark:from-[#34d399] dark:via-[#22d3ee] dark:to-[#40a2ff]">
           belongs together
         </span>
       </h1>

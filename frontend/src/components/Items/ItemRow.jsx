@@ -49,7 +49,7 @@ export function ItemRowSummary({
       <div className="min-w-0 flex-1">
         <p
           id={titleId}
-          className="line-clamp-1 text-sm font-medium leading-5 text-fg [overflow-wrap:anywhere]"
+          className="line-clamp-1 text-sm font-medium leading-5 text-fg wrap-anywhere"
         >
           {itemLabel(data)}
         </p>

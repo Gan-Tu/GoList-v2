@@ -21,7 +21,7 @@ const FIELD_BASE =
   "block w-full rounded-xl border bg-control px-3.5 py-2.5 " +
   "text-base text-fg shadow-button placeholder:text-fg-subtle " +
   "transition-[border-color,box-shadow] duration-150 " +
-  "focus:outline-none focus:ring-4 " +
+  "focus:outline-hidden focus:ring-4 " +
   "disabled:cursor-not-allowed disabled:bg-subtle disabled:text-fg-muted sm:text-sm";
 
 const FIELD_TONES = {

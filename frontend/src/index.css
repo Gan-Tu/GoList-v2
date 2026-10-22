@@ -1,11 +1,122 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@plugin "@tailwindcss/forms";
+
+@custom-variant dark (@media (prefers-color-scheme: dark));
+
+@theme inline {
+  --color-canvas: rgb(var(--canvas));
+  --color-surface: rgb(var(--surface));
+  --color-elevated: rgb(var(--elevated));
+  --color-subtle: rgb(var(--subtle));
+
+  --color-control: rgb(var(--control));
+  --color-control-hover: rgb(var(--control-hover));
+
+  --color-hairline: rgb(var(--hairline));
+  --color-hairline-strong: rgb(var(--hairline-strong));
+
+  --color-fg: rgb(var(--fg));
+  --color-fg-muted: rgb(var(--fg-muted));
+  --color-fg-subtle: rgb(var(--fg-subtle));
+
+  --color-accent: rgb(var(--accent));
+  --color-accent-hover: rgb(var(--accent-hover));
+  --color-accent-fg: rgb(var(--accent-fg));
+  --color-accent-soft: rgb(var(--accent-soft));
+
+  --color-danger: rgb(var(--danger));
+  --color-danger-hover: rgb(var(--danger-hover));
+  --color-danger-fg: rgb(var(--danger-fg));
+  --color-danger-soft: rgb(var(--danger-soft));
+
+  --color-success-fg: rgb(var(--success-fg));
+  --color-success-soft: rgb(var(--success-soft));
+
+  --color-focus: rgb(var(--focus));
+
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Text', 'Segoe UI',
+    system-ui, Roboto, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji';
+  --font-mono:
+    ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono',
+    monospace;
+
+  --shadow-button: var(--shadow-button);
+  --shadow-card: var(--shadow-card);
+  --shadow-card-hover: var(--shadow-card-hover);
+  --shadow-popover: var(--shadow-popover);
+
+  --ease-smooth: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  --animate-fade-in: fade-in 200ms ease-out both;
+  --animate-fade-up: fade-up 320ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Keep the semantic border default used by existing components. */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: rgb(var(--hairline));
+  }
+}
+
+@utility skeleton {
+  /* A loading placeholder block; size it with utilities. */
+  @apply animate-pulse rounded-md bg-subtle;
+}
+
+@utility monogram {
+  /*
+   * Tinted tile for things with no image — a list, or a link without a
+   * preview. The hue comes from the item (see hueFromString) so each one is
+   * recognisable, and it costs no network request. Lightness is pinned so the
+   * letter clears 4.5:1 on its tile at every hue, in both themes.
+   */
+  background-image: linear-gradient(
+    135deg,
+    hsl(var(--h, 210) 85% 94%),
+    hsl(calc(var(--h, 210) + 35) 80% 89%)
+  );
+  color: hsl(var(--h, 210) 60% 24%);
+
+  @media (prefers-color-scheme: dark) {
+    background-image: linear-gradient(
+      135deg,
+      hsl(var(--h, 210) 32% 22%),
+      hsl(calc(var(--h, 210) + 35) 36% 16%)
+    );
+    color: hsl(var(--h, 210) 85% 80%);
+  }
+}
 
 /*
  * Design tokens.
  *
- * Colors are space-separated RGB channels so Tailwind's opacity modifiers work
+ * Colors are space-separated RGB channels so opacity modifiers work
  * (`bg-accent/15`), and the whole palette flips for dark mode here rather than
  * through `dark:` variants scattered across components. The values are checked
  * by a contrast audit: body and muted text clear WCAG AA (4.5:1) on every
@@ -163,39 +274,6 @@
     .animate-spin {
       animation-duration: 1s !important;
       animation-iteration-count: infinite !important;
-    }
-  }
-}
-
-@layer components {
-  /* A loading placeholder block; size it with utilities. */
-  .skeleton {
-    @apply animate-pulse rounded-md bg-subtle;
-  }
-
-  /*
-   * Tinted tile for things with no image — a list, or a link without a
-   * preview. The hue comes from the item (see hueFromString) so each one is
-   * recognisable, and it costs no network request. Lightness is pinned so the
-   * letter clears 4.5:1 on its tile at every hue, in both themes.
-   */
-  .monogram {
-    background-image: linear-gradient(
-      135deg,
-      hsl(var(--h, 210) 85% 94%),
-      hsl(calc(var(--h, 210) + 35) 80% 89%)
-    );
-    color: hsl(var(--h, 210) 60% 24%);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .monogram {
-      background-image: linear-gradient(
-        135deg,
-        hsl(var(--h, 210) 32% 22%),
-        hsl(calc(var(--h, 210) + 35) 36% 16%)
-      );
-      color: hsl(var(--h, 210) 85% 80%);
     }
   }
 }
