@@ -93,7 +93,7 @@ function CollectionSkeleton({ view }) {
             <div className={classNames(BONE, "h-9 w-4/5 max-w-md rounded-lg sm:h-10")} />
             <div className={classNames(BONE, "mt-2 h-5 w-48")} />
           </div>
-          <div className={classNames(BONE, "h-9 w-[7.5rem] rounded-full sm:mt-0.5")} />
+          <div className={classNames(BONE, "h-9 w-30 rounded-full sm:mt-0.5")} />
         </div>
         {view === "list" ? (
           <ul className={classNames(LIST_CLASS, "mt-8")}>
@@ -210,7 +210,7 @@ function TitleEditor({ title, onSave, onCancel }) {
         // so iOS does not zoom into the field.)
         className={classNames(
           fieldClass,
-          "min-w-0 flex-1 !text-2xl font-semibold tracking-tight sm:!text-3xl"
+          "min-w-0 flex-1 text-2xl! font-semibold tracking-tight sm:text-3xl!"
         )}
       />
       <div className="flex shrink-0 items-center gap-2">
@@ -458,7 +458,7 @@ function CollectionPage({ id }) {
               onCancel={stopRenaming}
             />
           ) : (
-            <h1 className="text-balance text-3xl font-semibold tracking-tight text-fg [overflow-wrap:anywhere] sm:text-4xl">
+            <h1 className="text-balance text-3xl font-semibold tracking-tight text-fg wrap-anywhere sm:text-4xl">
               {title || "Untitled collection"}
             </h1>
           )}

@@ -42,7 +42,7 @@ function RowCheckbox({ id, checked, indeterminate, onChange }) {
       type="checkbox"
       checked={checked}
       onChange={onChange}
-      className="mt-3 h-4 w-4 shrink-0 rounded border-hairline-strong bg-control text-accent focus:ring-2 focus:ring-accent/40 focus:ring-offset-0"
+      className="mt-3 h-4 w-4 shrink-0 rounded-sm border-hairline-strong bg-control text-accent focus:ring-2 focus:ring-accent/40 focus:ring-offset-0"
     />
   );
 }
@@ -196,7 +196,7 @@ export default function SuggestDetailsDialog({ groupId, isOpen, onClose }) {
                       wide={Boolean(safeHref(preview.imageUrl))}
                     />
                     <span className="block min-w-0 flex-1">
-                      <span className="line-clamp-1 text-sm font-medium leading-5 text-fg [overflow-wrap:anywhere]">
+                      <span className="line-clamp-1 text-sm font-medium leading-5 text-fg wrap-anywhere">
                         {itemLabel(preview)}
                       </span>
                       {replaced("title") && (

@@ -84,7 +84,7 @@ export function ItemSnippetView({
 
       <Title
         id={ids.title}
-        className="mt-1 line-clamp-2 text-[15px] font-semibold leading-snug text-fg [overflow-wrap:anywhere]"
+        className="mt-1 line-clamp-2 text-[15px] font-semibold leading-snug text-fg wrap-anywhere"
       >
         {itemLabel(data)}
       </Title>

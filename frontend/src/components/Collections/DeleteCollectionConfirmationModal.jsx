@@ -59,7 +59,7 @@ export default function DeleteCollectionConfirmationModal({
       initialFocus={inputRef}
     >
       <form onSubmit={onDelete}>
-        <p className="text-sm leading-6 text-fg-muted [overflow-wrap:anywhere]">
+        <p className="text-sm leading-6 text-fg-muted wrap-anywhere">
           <span className="font-medium text-fg">{group?.title}</span> and its{" "}
           <span className="tabular-nums">{itemIds.length}</span> link
           {itemIds.length === 1 ? "" : "s"} will be permanently deleted, and{" "}

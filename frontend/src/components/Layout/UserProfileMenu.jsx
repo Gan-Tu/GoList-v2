@@ -54,7 +54,7 @@ function MyListsLink() {
       // Full-strength text, not the ghost variant's muted gray: the header is
       // translucent, and muted text over whatever scrolls beneath it can fall
       // below 4.5:1.
-      className={classNames("!text-fg aria-[current=page]:bg-subtle", TALL_HIT_AREA)}
+      className={classNames("text-fg! aria-[current=page]:bg-subtle", TALL_HIT_AREA)}
       {...prefetchMyListsProps}
     >
       My Lists
@@ -114,7 +114,7 @@ function AccountMenu({ user }) {
       >
         <span className="sr-only">Open user menu</span>
         <Avatar user={user} label={label} />
-        <span className="hidden max-w-[12rem] truncate text-sm font-medium lg:block">
+        <span className="hidden max-w-48 truncate text-sm font-medium lg:block">
           {label}
         </span>
         <ChevronDownIcon
@@ -133,7 +133,7 @@ function AccountMenu({ user }) {
         leaveFrom="scale-100 opacity-100"
         leaveTo="scale-95 opacity-0"
       >
-        <Menu.Items className="absolute right-0 z-50 mt-2 w-60 origin-top-right rounded-2xl bg-elevated p-1.5 shadow-popover ring-1 ring-black/5 focus:outline-none dark:ring-white/10">
+        <Menu.Items className="absolute right-0 z-50 mt-2 w-60 origin-top-right rounded-2xl bg-elevated p-1.5 shadow-popover ring-1 ring-black/5 focus:outline-hidden dark:ring-white/10">
           <div className="px-3 pb-2.5 pt-2">
             <p className="truncate text-sm font-medium text-fg">
               {user?.displayName || "Signed in"}

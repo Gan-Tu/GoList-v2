@@ -35,7 +35,7 @@ export default [
     languageOptions: { globals: { ...globals.node } }
   },
   {
-    files: ["vite.config.js", "tailwind.config.js", "postcss.config.js"],
+    files: ["vite.config.js", "postcss.config.js"],
     languageOptions: { globals: { ...globals.node } }
   }
 ];

@@ -18,7 +18,7 @@ npm run install:all && npm run demo
 ```
 
 That starts the emulators, seeds a few collections, and opens the app on
-http://localhost:3000. Requires Node 20+, a JRE (for the Firestore emulator),
+http://localhost:3000. Requires Node 22+, Java 21 (for the Firestore emulator),
 and `npm install -g firebase-tools`.
 
 Seeded routes worth clicking: `/web-mobile` (populated), `/empty-list` (empty
@@ -69,6 +69,7 @@ Short URLs are claim-once. Creation runs in a transaction and the rules allow
 npm run demo            # full local stack with seed data
 npm test                # rules + frontend tests
 npm run test:rules      # security rules only (starts its own emulator)
+npm run build && npm run test:api # callable/SSR/mirror tests in disposable emulators
 npm run lint            # frontend + functions
 npm run build           # production build + sync the SSR shell
 ```
@@ -108,3 +109,11 @@ Callables enforce App Check in production. Enforcement is behind the
 design — they identify the project and authorize nothing; access control lives
 in `firestore.rules` and App Check. Override them in `frontend/.env.local`
 (git-ignored) to point at a different project.
+
+### Dependency maintenance
+
+The root and frontend overrides keep Firebase's pinned `@grpc/grpc-js` dependency
+on a patched 1.x release. Remove them when Firebase ships version 1.13.6 or later.
+All three packages use Vitest 4 and a patched Vite 6 release. Tailwind 4 removes
+the unpatched `braces` build dependency; its tokens now live in `src/index.css`
+inside the frontend, and the app requires Safari 16.4+, Chrome 111+, or Firefox 128+.
